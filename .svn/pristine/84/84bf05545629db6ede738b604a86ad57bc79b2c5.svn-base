@@ -1,0 +1,68 @@
+package com.xryb.zhtc.advice;
+
+import java.util.List;
+
+import com.xryb.cache.service.IJedisClient;
+import com.xryb.cache.service.impl.JedisClientFastMap;
+import com.xryb.zhtc.entity.Order;
+import com.xryb.zhtc.entity.OrderItem;
+import com.xryb.zhtc.service.ISupplyOrderService;
+import com.xryb.zhtc.service.impl.SupplyOrderServiceImpl;
+
+import spark.annotation.Auto;
+
+public class SupplyOrderAdvice implements IOrderAdvice{
+	@Auto(name=JedisClientFastMap.class)
+	private IJedisClient jedisClient;
+	@Auto(name=SupplyOrderServiceImpl.class)
+	private ISupplyOrderService supplyOrderService ;
+	
+	/**
+	 * 通知订单生成
+	 */
+	@Override
+	public boolean genAdvice(String sourceId, boolean closeConn, Order order, List<OrderItem> itemList) throws Exception {
+		return true;
+	}
+
+	/**
+	 * 通知订单支付成功
+	 */
+	@Override
+	public boolean payAdvice(String sourceId, boolean closeConn, List<Order> orderList, List<OrderItem> itemList) throws Exception {
+		//修改供需订单的支付状态
+		System.out.println("订单支付成功，修改供需订单支付状态...");
+		for (Order order : orderList) {
+			String orderUUID = order.getOrderUUID();
+			if(!supplyOrderService.updateSupplyOrderIspay(sourceId, closeConn, orderUUID)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	/**
+	 * 通知订单取消
+	 */
+	@Override
+	public boolean abolishAdvice(String sourceId, boolean closeConn, Order order) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	/**
+	 * 通知订单超时
+	 */
+	@Override
+	public boolean timeoutAdvice(String sourceId, boolean closeConn, Order order) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	/**
+	 * 通知订单删除
+	 */
+	@Override
+	public boolean delAdvice(String sourceId, boolean closeConn, Order order) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

@@ -1,0 +1,112 @@
+package com.xryb.zhtc.dto;
+
+import java.io.Serializable;
+/**
+ * 转账协议数据传输对象
+ * @author wf
+ */
+public class TransferAmountDto implements Serializable {
+
+	private static final long serialVersionUID = -4709759650647981185L;
+	
+	private String fromUUID;//付款方UUID
+	
+	private String fromName;//付款方名称
+	
+	private String fromLogo;//付款方logo
+	                        	
+	private String toUUID;//收款方UUID
+	
+	private String toName;//收款方名称
+	
+	private String toLogo;//收款方logo
+	                         
+	private Integer payment;//支付金额(单位为分的正整数)
+	
+	private String payPwd;//支付密码  
+	
+	private String payChannel;//支付渠道，"app"代表是移动端，"native"代表是pc端
+	
+	private String sign;//支付签名
+
+	public String getFromUUID() {
+		return fromUUID;
+	}
+
+	public void setFromUUID(String fromUUID) {
+		this.fromUUID = fromUUID;
+	}
+
+	public String getFromName() {
+		return fromName;
+	}
+
+	public void setFromName(String fromName) {
+		this.fromName = fromName;
+	}
+
+	public String getFromLogo() {
+		return fromLogo;
+	}
+
+	public void setFromLogo(String fromLogo) {
+		this.fromLogo = fromLogo;
+	}
+
+	public String getToUUID() {
+		return toUUID;
+	}
+
+	public void setToUUID(String toUUID) {
+		this.toUUID = toUUID;
+	}
+
+	public String getToName() {
+		return toName;
+	}
+
+	public void setToName(String toName) {
+		this.toName = toName;
+	}
+
+	public String getToLogo() {
+		return toLogo;
+	}
+
+	public void setToLogo(String toLogo) {
+		this.toLogo = toLogo;
+	}
+
+	public Integer getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Integer payment) {
+		this.payment = payment;
+	}
+
+	public String getPayPwd() {
+		return payPwd;
+	}
+
+	public void setPayPwd(String payPwd) {
+		this.payPwd = payPwd;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+}

@@ -1,0 +1,127 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 页面内容信息
+ * @author wf
+ */
+@Table(tableName="content")
+public class Content implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = -771579247689257977L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="全局唯一编号，手动生成")
+	private String contentUUID;
+	
+	@TableField(fieldSize=50,comment="模块名称")
+	private String moduleName;
+	
+	@TableField(fieldSize=50,comment="页面编号")
+	private String pageCode;
+	
+	@TableField(fieldSize=50,comment="页面名称")
+	private String pageName;
+	
+	@TableField(fieldSize=50,comment="内容编号")
+	private String contentCode;
+	
+	@TableField(fieldSize=50,comment="内容标题")
+	private String title;
+	
+	@TableField(fieldSize=8000,comment="详细信息")
+	private String descData;
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getContentUUID() {
+		return contentUUID;
+	}
+
+	public void setContentUUID(String contentUUID) {
+		this.contentUUID = contentUUID;
+	}
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public String getPageCode() {
+		return pageCode;
+	}
+
+	public void setPageCode(String pageCode) {
+		this.pageCode = pageCode;
+	}
+
+	public String getPageName() {
+		return pageName;
+	}
+
+	public void setPageName(String pageName) {
+		this.pageName = pageName;
+	}
+
+	public String getContentCode() {
+		return contentCode;
+	}
+
+	public void setContentCode(String contentCode) {
+		this.contentCode = contentCode;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescData() {
+		return descData;
+	}
+
+	public void setDescData(String descData) {
+		this.descData = descData;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+}

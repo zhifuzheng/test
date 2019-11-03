@@ -1,0 +1,267 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 一般通用信息,如 新闻、通知、公司介绍，等等
+ * @author hshzh
+ *
+ */
+@Table(tableName = "common_info")
+public class CommonInfo {
+	
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="全局唯一编号,UUID自动生成")
+	private String uuid;
+	
+	@TableField(isNotNull=true,comment="信息类型编码，01通知，02新闻",fieldSize=36)
+	private String comTypeCode;
+	
+	@TableField(isNotNull=true,comment="信息类型名称",fieldSize=36)
+	private String comTypeName;
+	
+	@TableField(isNotNull=false,fieldSize=200,comment="信息摘要")
+	private String commonDigest;
+	
+	@TableField(isNotNull=true,fieldSize=200,comment="信息标题")
+	private String commonTitle;
+	
+	@TableField(isNotNull=false,fieldSize=200,comment="信息来源")
+	private String commonSource;
+	
+	@TableField(isNotNull=false,fieldSize=200,comment="信息作者")
+	private String commonAauthor;
+	
+	@TableField(isNotNull=false,fieldSize=200,comment="信息关键字")
+	private String commonKeys;
+	
+	@TableField(isNotNull=true,fieldSize=59000,comment="信息内容")
+	private String commonContent;
+	
+	@TableField(isNotNull=false,fieldSize=20,comment="信息浏览次数")
+	private Long clickNum = 0L;
+	
+	@TableField(isNotNull=false,fieldSize=10, comment="信息排序号")
+	private int orderNum = 1;
+	
+	@TableField(isNotNull=false, fieldSize=2,comment="信息状态，1:启动，2，禁用")
+	private String status = "1";
+	
+	@TableField(isNotNull=false,fieldSize=200,comment="信息封面，图片URL")
+	private String imageURL;
+	
+	@TableField(fieldSize = 20, comment = "发布时间")
+	private String publishTime;
+	
+	@TableField(isNotNull=false,fieldSize=20,comment="创建时间")
+	private String createTime;
+	
+	@TableField(isNotNull=false,fieldSize=32,comment="创建人uuid")
+	private String createUserUUID;
+	
+	@TableField(isNotNull=false,fieldSize=50,comment="创建人姓名")
+	private String createUserName;
+	
+	@TableField(fieldSize = 32, comment = "修改人uuid")
+	private String updateUserUUID;
+	
+	@TableField(fieldSize = 32, comment = "修改人姓名")
+	private String updateUserName;
+	
+	@TableField(fieldSize = 20, comment = "修改时间")
+	private String updateTime;
+	
+	@TableField(fieldSize = 200, comment = "备注")
+	private String commonMark;
+	
+	@TableField(fieldSize = 200)
+	private String buyUrl;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getComTypeCode() {
+		return comTypeCode;
+	}
+
+	public void setComTypeCode(String comTypeCode) {
+		this.comTypeCode = comTypeCode;
+	}
+
+	public String getComTypeName() {
+		return comTypeName;
+	}
+
+	public void setComTypeName(String comTypeName) {
+		this.comTypeName = comTypeName;
+	}
+
+	public String getCommonDigest() {
+		return commonDigest;
+	}
+
+	public void setCommonDigest(String commonDigest) {
+		this.commonDigest = commonDigest;
+	}
+
+	public String getCommonTitle() {
+		return commonTitle;
+	}
+
+	public void setCommonTitle(String commonTitle) {
+		this.commonTitle = commonTitle;
+	}
+
+	public String getCommonSource() {
+		return commonSource;
+	}
+
+	public void setCommonSource(String commonSource) {
+		this.commonSource = commonSource;
+	}
+
+	public String getCommonAauthor() {
+		return commonAauthor;
+	}
+
+	public void setCommonAauthor(String commonAauthor) {
+		this.commonAauthor = commonAauthor;
+	}
+
+	public String getCommonKeys() {
+		return commonKeys;
+	}
+
+	public void setCommonKeys(String commonKeys) {
+		this.commonKeys = commonKeys;
+	}
+
+	public String getCommonContent() {
+		return commonContent;
+	}
+
+	public void setCommonContent(String commonContent) {
+		this.commonContent = commonContent;
+	}
+
+	public Long getClickNum() {
+		return clickNum;
+	}
+
+	public void setClickNum(Long clickNum) {
+		this.clickNum = clickNum;
+	}
+
+	public int getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(int orderNum) {
+		this.orderNum = orderNum;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
+	}
+
+	public String getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(String publishTime) {
+		this.publishTime = publishTime;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getCreateUserUUID() {
+		return createUserUUID;
+	}
+
+	public void setCreateUserUUID(String createUserUUID) {
+		this.createUserUUID = createUserUUID;
+	}
+
+	public String getCreateUserName() {
+		return createUserName;
+	}
+
+	public void setCreateUserName(String createUserName) {
+		this.createUserName = createUserName;
+	}
+
+	public String getUpdateUserUUID() {
+		return updateUserUUID;
+	}
+
+	public void setUpdateUserUUID(String updateUserUUID) {
+		this.updateUserUUID = updateUserUUID;
+	}
+
+	public String getUpdateUserName() {
+		return updateUserName;
+	}
+
+	public void setUpdateUserName(String updateUserName) {
+		this.updateUserName = updateUserName;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public String getCommonMark() {
+		return commonMark;
+	}
+
+	public void setCommonMark(String commonMark) {
+		this.commonMark = commonMark;
+	}
+
+	public String getBuyUrl() {
+		return buyUrl;
+	}
+
+	public void setBuyUrl(String buyUrl) {
+		this.buyUrl = buyUrl;
+	}
+	
+}

@@ -1,0 +1,114 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.GxCollection;
+import com.xryb.zhtc.entity.GxCommodity;
+import com.xryb.zhtc.entity.GxDemand;
+import com.xryb.zhtc.entity.GxDemandComment;
+import com.xryb.zhtc.entity.GxReport;
+
+import dbengine.util.Page;
+
+/**
+ * 供需管理
+ * @author Administrator
+ *
+ */
+
+public interface IGxCommodityService {
+	
+	/**
+	 * 新增或修改商品
+	 */
+	boolean commoditySave(String sourceId,boolean closeConn,GxCommodity commodity);
+	
+	/**
+	 * 新增或修改需求
+	 */
+	boolean demandSave(String sourceId,boolean closeConn,GxDemand gxDemand);
+	
+	/**
+	 * 查询供需商品
+	 */
+	List<GxCommodity> commodityAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);
+	
+	/**
+	 * 查询供需需求
+	 */
+	List<GxDemand> demandAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);
+	
+	/**
+	 * 根据ID查询供需商品
+	 */
+	GxCommodity commodityId(String sourceId,boolean closeConn,String commodityUUID);//根据UUID查询供需商品
+	
+	/**
+	 * 根据ID查询供需需求
+	 */
+	GxDemand gxDemandId(String sourceId,boolean closeConn,String demandUUID);//根据UUID查询供需需求
+	
+	/**
+	 * 删除供需商品
+	 */
+	boolean commodityDel(String sourceId,boolean closeConn,String commodityUUID);
+	
+	/**
+	 * 删除供需需求
+	 */
+	boolean demandDel(String sourceId,boolean closeConn,String demandUUID);
+	
+	/**
+	 * 商品跟需求浏览量
+	 */
+	boolean commodityBrowse(String sourceId,boolean closeConn,Object commodityUUID);
+	boolean demandBrowse(String sourceId,boolean closeConn,Object demandUUID);
+	
+	/**
+	 * 举报
+	 */
+	boolean reportSave(String sourceId,boolean closeConn,GxReport gxReport);
+	List<GxReport> gxReportsAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);
+	boolean reportDel(String sourceId,boolean closeConn,String reportUUID);
+	
+	/**
+	 * 修改供需状态
+	 */
+	boolean commodityStateUp(String sourceId,boolean closeConn,String commodityUUID,String state);//商品
+	boolean demandStateUp(String sourceId,boolean closeConn,String demandUUID,String state);//需求
+	
+	/**
+	 * 供需停用或启用
+	 */
+	boolean commodityStop(String sourceId,boolean closeConn,String commodityUUID,String stop);//商品
+	boolean demandStop(String sourceId,boolean closeConn,String demandUUID,String stop);//需求
+	
+	/**
+	 * 供需收藏
+	 */
+	boolean collectionSave(String sourceId,boolean closeConn,GxCollection gxCollection);
+	GxCollection gxCollectionId(String sourceId,boolean closeConn,Map<String, String> findMap);//根据条件查询单条数据
+	List<GxCollection> collectionsAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);//查询
+	boolean commodityCollection(String sourceId,boolean closeConn,String commodityUUID);//商品收藏量
+	boolean demandCollection(String sourceId,boolean closeConn,String demandUUID);//需求收藏量
+	
+	/**
+	 * 供需点赞
+	 */
+	boolean demandGive(String sourceId,boolean closeConn,Object demandUUID);//需求点赞
+	
+	/**
+	 * 供需评论
+	 */
+	boolean demandCommentSave(String sourceId,boolean closeConn,GxDemandComment gxDemandComment);//新增或修改
+	List<GxDemandComment> commentsAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);//查询
+	boolean commentGive(String sourceId,boolean closeConn,Object commentUUID);//点赞数量
+	
+	/**
+	 * 供需分享
+	 */
+	boolean commodityShare(String sourceId,boolean closeConn,String commodityUUID);//商品
+	boolean demandShare(String sourceId,boolean closeConn,String demandUUID);//需求
+	
+}

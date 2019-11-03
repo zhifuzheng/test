@@ -1,0 +1,112 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>信息管理</title>
+<!--end-->
+<base href="http://localhost:8080/yzpx/" />
+</head>
+<body>
+	<table id="smsMsg_table" class="easyui-datagrid">
+		<thead>
+			<tr>
+				<!-- <th data-options="field:'ck',checkbox:true"></th> -->
+				<th data-options="field:'id',align:'center',width:50,hidden:true">id</th>
+				<th data-options="field:'uuid',align:'center',width:50,hidden:true">uuid</th>
+				<th data-options="field:'userMobile',align:'center',width:100">手机号</th>
+				<th data-options="field:'userName',align:'center',width:100">客户名称</th>
+				<th data-options="field:'userAge',align:'center',width:100">年龄</th>
+				<th data-options="field:'typeName',align:'center',width:100">类型</th>				
+				<th data-options="field:'status',align:'center',width:100,formatter:smsMsgStatusF">状态</th>
+				<th data-options="field:'createTime',align:'center',width:200">创建时间</th>
+				<th data-options="field:'CZ',width:200,align:'center',formatter:smsMsgListF">操作</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="smsMsg_tb" style="padding:2px 5px;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-mini-add-h" plain="true" onclick="addOrUpCommon('', '0')">新增</a>
+	</div>
+	<div id="smsMsgList_window_div">
+		<div id="smsMsgList_addCommon_div"></div>
+	</div>
+	<script type="text/javascript">
+    var selectRow = null;
+	$(function(){
+		$('#smsMsg_table').datagrid({
+			iconCls: 'icon-play-group',
+			title: '&nbsp;&nbsp;短信信息处理', 
+			url: baseURL + 'front/sms/findSmsMsgList',
+	        rownumbers: true,
+	        pagination: true,
+	        singleSelect: true,
+	        toolbar: '#smsMsg_tb',
+	        onUnselect: function(index, row) {
+	        	//$('#equipmentIdHidden').val('');
+	        }
+		});
+	});
+
+	//修改短信消息状态
+	function upSmsMsg(uuid,status){//新增/修改视频信息
+    	$.messager.confirm("操作提醒","确认短信信息已处理了吗？",function(c){
+    		if(c){
+    			var url="<%=path%>/front/sms/upSmsMsgStatus?uuid="+uuid+"&status="+status;
+    			$.post(url,"",function(data){
+    				if(data.status == '1'){
+    					 $.messager.alert('提示','操作成功!','info');
+    					//刷新
+    					$('#smsMsg_table').datagrid('reload');
+    				}else{
+    					$.messager.alert('提示','操作失败!','arrer');
+    				}
+    			},'json');
+    		}
+    	});
+	}
+    //删除通用信息
+	function deleteSmsMsg(uuid){
+    	$.messager.confirm("操作提醒","确定删除短信信息吗？",function(c){
+    		if(c){
+    			var url="<%=path%>/front/sms/deleteSmsMsg?uuid="+uuid;
+    			$.post(url,"",function(data){
+    				if(data.status == '1'){
+    					 $.messager.alert('提示','操作成功!','info');
+    					//刷新
+    					$('#smsMsg_table').datagrid('reload');
+    				}else{
+    					$.messager.alert('提示','操作失败!','arrer');
+    				}
+    			},'json');
+    		}
+    	});
+	}
+    //格式化状态
+	function smsMsgStatusF(value, row, index) {
+		var statusHtml = '未处理';
+		if(row.status == "1"){
+			statusHtml = "已处理";
+		}
+		return statusHtml;
+	}
+	//格式化操作
+	function smsMsgListF(value, row, index) {
+		var statusHtml = '';
+
+		var editHtml = '<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true" onclick="upSmsMsg(\'' + row.uuid + '\',\'1\');">&nbsp;确认已处理&nbsp;</a>';
+		if(row.status=="1"){
+			editHtml = "";
+		}
+		var deleteHtml = '<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="deleteSmsMsg(\'' + row.uuid + '\');">&nbsp;删除&nbsp;</a>';
+		return statusHtml + "&nbsp;" + editHtml + "&nbsp;" + deleteHtml;
+	}
+	</script>
+</body>
+</html>

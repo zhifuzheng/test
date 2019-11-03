@@ -1,0 +1,44 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.CommonType;
+
+import dbengine.util.Page;
+
+/**
+ * 一般信息类型service
+ * @author hshzh
+ *
+ */
+public interface ICommonTypeService {
+	/**
+	 * 保存或修改一般信息类型
+	 * @param ct
+	 * @return
+	 */
+	boolean saveOrUpCommonType(String sourceId,boolean closeConn,CommonType ct);
+	
+	/**
+	 * 删除一般信息类型
+	 * @param uuid
+	 * @return
+	 */
+	boolean deleteCommonType(String sourceId,boolean closeConn,String uuid);
+	
+	/**
+	 * 查询一般信息类型
+	 * @param uuid
+	 * @return
+	 */
+	CommonType findCommonType(String sourceId,boolean closeConn,String uuid);
+	
+	/**
+	 * 查询一般信息类型
+	 * @param findMap
+	 * @return
+	 */
+	List<CommonType> findCommonTypeList(String sourceId,boolean closeConn,Page page,Map findMap);
+	
+}

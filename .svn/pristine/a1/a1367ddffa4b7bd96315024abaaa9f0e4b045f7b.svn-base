@@ -1,0 +1,468 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<base href="<%=basePath%>">
+		<meta http-equiv="x-ua-compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<title>云众少儿培训 - 官方网站</title>
+		<meta name="keywords" content="云众少儿培训
+		  少儿编程  儿童编程  创意编程比赛   scratch教程 Scratch视频教程">
+		<meta name="description" content="小黑码专注于青少年创客教育，致力于创客教育产品、课程、在线学习的开发。">
+		<link rel="shortcut icon" href="/Public/Home/maker2.0/common/images/tittleImg.ico">
+		<link rel="stylesheet" href="static/css/personal/css/amazeui.min.css" />
+		<link rel="stylesheet" href="static/css/index/com.css" />
+		<link rel="stylesheet" href="static/css/index/head.css" />
+		<link rel="stylesheet" type="text/css" href="static/third/font-awesome-4.7.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="static/css/personal/personal.css" />
+
+		<!-- jquery -->
+		<script type="text/javascript" src="static/js/front/jquery-1.11.0.min.js"></script>
+		<script src="http://cdn.amazeui.org/amazeui/2.7.2/js/amazeui.min.js" type="text/javascript" charset="utf-8"></script>
+		<!--描述：导航下拉. -->
+		<script type="text/javascript" src="static/js/front/menu.js"></script>
+		<script type="text/javascript" src="static/js/common.js"></script>
+		<!-- vue.js  -->
+		<script src="static/js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+
+		<style type="text/css">
+			.am-container-1 {
+				position: relative;
+				width: 90%;
+				max-width: 1120px;
+				margin: 0 auto;
+			}
+			/*案例展示*/
+			
+			.m-case-list li {
+				margin-top: 0;
+				margin-bottom: 0;
+				padding-bottom: 5px;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			
+			.m-case-list li figure {
+				margin-bottom: 0;
+				position: relative;
+				z-index: 1;
+				display: inline-block;
+				overflow: hidden;
+				background: #000;
+				text-align: center;
+				cursor: pointer;
+			}
+			
+			.m-case-list li figure img {
+				position: relative;
+				display: block;
+			}
+			
+			.m-case-list li figure figcaption {
+				padding: 2em;
+				color: #333;
+				text-transform: uppercase;
+				font-size: 1.25em;
+				-webkit-backface-visibility: hidden;
+				backface-visibility: hidden;
+				margin-top: 80px;
+				text-overflow: ellipsis;
+			}
+			
+			.m-case-list li figure figcaption h3 .am-badge {
+				color: #333;
+			}
+			
+			.m-case-list li figure figcaption::before,
+			.m-case-list li figure figcaption::after {
+				pointer-events: none;
+			}
+			
+			.m-case-list li figure figcaption,
+			.m-case-list li figure a {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+			
+			.m-case-list li figure a {
+				z-index: 1000;
+				text-indent: 200%;
+				white-space: nowrap;
+				font-size: 0;
+				opacity: 0;
+			}
+			
+			.m-case-list li figure h3 {
+				word-spacing: -0.15em;
+				font-weight: 300;
+			}
+			
+			.m-case-list li figure h3 span {
+				font-weight: 800;
+			}
+			
+			.m-case-list li figure h3,
+			.m-case-list li figure p {
+				margin: 0;
+			}
+			
+			.m-case-list li figure p {
+				letter-spacing: 1px;
+				font-size: 68.5% !important;
+				margin-bottom: 0;
+				text-overflow: ellipsis;
+			}
+			
+			figure.effect-lily img {
+				width: -webkit-calc(100% + 50px);
+				width: calc(100% + 50px);
+				-webkit-transition: opacity 0.35s, -webkit-transform 0.35s;
+				transition: opacity 0.35s, transform 0.35s;
+				/* background: url('../images/loading.gif?1440224064') 50% 50% no-repeat; */
+			}
+			
+			figure.effect-lily figcaption {
+				top: auto;
+				bottom: 0;
+				text-align: left;
+			}
+			
+			figure.effect-lily h3,
+			figure.effect-lily p {
+				-webkit-transform: translate3d(0, 40px, 0);
+				transform: translate3d(0, 40px, 0);
+			}
+			
+			figure.effect-lily h3 {
+				-webkit-transition: -webkit-transform 0.35s;
+				transition: transform 0.35s;
+			}
+			
+			figure.effect-lily p {
+				color: rgba(255, 255, 255, 0.6);
+				opacity: 0;
+				-webkit-transition: opacity 0.2s, -webkit-transform 0.35s;
+				transition: opacity 0.2s, transform 0.35s;
+			}
+			
+			figure.effect-lily:hover img,
+			figure.effect-lily:hover p {
+				opacity: 1;
+			}
+			
+			figure.effect-lily:hover img,
+			figure.effect-lily:hover h3,
+			figure.effect-lily:hover p,
+			figure.effect-lily:hover .am-badge {
+				-webkit-transform: translate3d(0, 0, 0);
+				transform: translate3d(0, 0, 0);
+				color: #fff;
+			}
+			
+			figure.effect-lily:hover img {
+				opacity: .4;
+			}
+			
+			figure.effect-lily:hover p {
+				-webkit-transition-delay: 0.05s;
+				transition-delay: 0.05s;
+				-webkit-transition-duration: 0.35s;
+				transition-duration: 0.35s;
+			}
+			
+			.m-home-box {
+				padding-bottom: 50px;
+			}
+			
+			.m-home-box h2 {
+				margin: 40px 0 0 0;
+			}
+			
+			.m-home-box p {
+				margin: 0 0 20px 0;
+				font-size: 14px;
+				color: #737b8a;
+			}
+			
+			.m-home-box ul h2 {
+				padding: 0;
+				margin: 0;
+			}
+			
+			.am-pagination>li>a {
+				position: relative;
+				display: block;
+				padding: 0.5em 1em;
+				text-decoration: none;
+				line-height: 1.2;
+				color: #ddd;
+				background-color: #fff;
+				border: 1px solid #ddd;
+				border-radius: 0;
+				margin-bottom: 5px;
+				margin-right: 5px;
+			}
+			
+			.am-pagination>.am-active>a,
+			.am-pagination>.am-active>a:hover,
+			.am-pagination>.am-active>a:focus {
+				z-index: 2;
+				color: #FFF;
+				background-color: #0e90d2 !important;
+				border-color: #0e90d2;
+				cursor: default;
+			}
+			
+			.hidden-bottom {
+				display: none;
+			}
+			
+			.am-g {
+				padding-top: 0;
+				padding-left: 0;
+				padding-right: 0;
+				padding-bottom: 0;
+				margin-left: 0;
+				margin-right: 0;
+				margin-bottom: 0;
+			}
+			
+			.am-u-sm-12,
+			.am-u-md-12,
+			.am-u-lg-12 {
+				padding-top: 0;
+				padding-left: 0;
+				padding-right: 0;
+				padding-bottom: 0;
+				margin-left: 0;
+				margin-right: 0;
+				margin-bottom: 0;
+			}
+			
+			.am-badge {
+				background: transparent;
+			}
+			
+			li,
+			li:before,
+			li:after {
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+			
+			P,
+			P:before,
+			P:after {
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+			.am-disabled a {
+				background-color: #DDDDDD;
+			}
+			
+			ol>li>ol, ol>li>ul, ul>li>ol, ul>li>ul {
+			    margin: 0 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="header-up">
+			<jsp:include page="header.jsp" />
+		</header>
+		<div class="am-g">
+			<div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
+				<img src="static/images/zuop.jpg" style="width: 100%;height: 100%;" />
+			</div>
+		</div>
+		<div class="am-container-1" style="margin-top: 90px;">
+			<div data-am-widget="tabs" class="am-tabs am-tabs-d2">
+				<ul class="am-tabs-nav am-cf">
+					<li class="am-active">
+						<a href="javascript:void(0);" data-value="scratch">Scratch</a>
+					</li>
+					<li class="">
+						<a href="javascript:void(0);" data-value="arduino">Arduino</a>
+					</li>
+				</ul>
+				<div class="am-tabs-bd" id="works">
+					<div data-tab-panel-0 class="am-tab-panel am-active">
+						<ul class="am-gallery am-avg-sm-1 am-avg-md-3 am-avg-lg-4 am-gallery-bordered m-case-list">
+							<li v-for="item in items">
+								<figure class="effect-lily" :data-uuid="item.uuid" v-on:click="toSDetail($event)">
+									<div class="customer-case-img" v-html="item.worksShowImg">
+
+									</div>
+									<figcaption>
+										<h3>{{item.worksName}}<br /><span class="am-badge">{{item.createUserName}}创作</span> </h3>
+										<p>{{item.worksDescribe}}</p>
+									</figcaption>
+								</figure>
+							</li>
+						</ul>
+					</div>
+					<div data-tab-panel-1 class="am-tab-panel ">
+						<ul class="am-gallery am-avg-sm-1 am-avg-md-3 am-avg-lg-4 am-gallery-bordered m-case-list">
+							<li v-for="item in items">
+								<figure class="effect-lily" :data-uuid="item.uuid" v-on:click="toADetail($event)">
+									<div class="customer-case-img" v-html="item.worksShowImg">
+
+									</div>
+									<figcaption>
+										<h3>{{item.worksName}}<br /><span class="am-badge">{{item.createUserName}}创作</span> </h3>
+										<p>{{item.worksDescribe}}</p>
+									</figcaption>
+								</figure>
+							</li>
+						</ul>
+					</div>
+					<ul class="am-pagination am-pagination-centered" v-html="pages">
+					  
+					</ul>
+				</div>
+
+			</div>
+
+		</div>
+		<footer style="" class="footer-down">
+			<jsp:include page="footer.jsp" />
+		</footer>
+		<script type="text/javascript" src="static/third/layer/layer.js"></script>
+		<script type="text/javascript">
+			var page = 1;
+			var currentPage = 1;
+			var total = 1
+			var rows = 8;
+			var worksType = 2;
+
+			var works = new Vue({
+				el: '#works',
+				data: {
+					items: [], //列表信息流数据
+					pages: ''//分页数据
+				}
+			});
+			$(function() {
+				
+				loadWorks();
+				
+				$(".am-container-1 .am-tabs-d2 .am-tabs-nav li a").click(function(){
+					if (this.getAttribute("data-value") == "scratch") {
+						worksType = 2;
+						loadWorks();
+					} else {
+						worksType = 3;
+						loadWorks();
+					}
+				})
+			});
+
+			function loadWorks() { ///front/childWorks/selectChildWorksListByMap
+				$.post("<%=path%>/front/childWorks/selectChildWorksListByMap", {
+					page: page,
+					rows: rows,
+					type: 2,
+					isShowFront: 1,
+					worksType : worksType
+				}, function(data) {
+					works.items = convert(data.rows);
+					
+					works.pages = convertPage(data.totalPage);
+					
+					initAction();
+				}, "json");
+			} //
+
+			function initAction() {
+				setTimeout(function() {
+					$(".am-pagination li").click(function() {
+						var self = this;
+						if(self.getAttribute("data-value") == "prve") {
+							var tmp = currentPage - parseInt(1);;
+							if (tmp == 0) {
+								layer.msg("已是第一页！");
+								return false;
+							}
+							page = parseInt(tmp);
+							currentPage = page;
+							loadWorks()
+						} else if(self.getAttribute("data-value") == "next") {
+							var tmp = currentPage + parseInt(1);;
+							if (tmp> total) {
+								layer.msg("已是最后一页！");
+								return false;
+							}
+							page = parseInt(tmp);
+							currentPage = page;
+							loadWorks()
+						} else {
+							page = self.getAttribute("data-value");
+							currentPage = page;
+						}
+					});
+				}, 200)
+			}
+
+			function toSDetail(e){
+				var self = e.currentTarget;
+				top.location = 'front/scratchdetail.jsp?uuid=' + self.getAttribute("data-uuid") + '&m=mycode_lists';
+			}
+			
+			function toADetail(e){
+				var self = e.currentTarget;
+				top.location = 'front/arduinodetail.jsp?uuid=' + self.getAttribute("data-uuid")+ '&m=mycode_lists';
+			}
+
+			/**
+			 * 1、将服务端返回数据，转换成前端需要的格式
+			 * 2、若服务端返回格式和前端所需格式相同，则不需要改功能
+			 * 
+			 * @param {Array} items 
+			 */
+			function convert(items) {
+				items.forEach(function(item) {
+					item.worksShowImg = '<img src="front/img/getImg?imgName=' + item.worksShowImg + '" style="height:259.3px;"/>';
+				});
+				return items;
+			}
+			
+			function convertPage(totalPage) {
+				total = totalPage;
+				var pages = '';
+				for (var i = 1; i <= totalPage; i++){
+					//上一页
+					if (i == 1 && currentPage == 1){
+						pages += '<li class="am-disabled" data-value= "prve"><a href="javascript:void(0);" >&laquo;</a></li>';
+					}else if (i == 1) {
+						pages += '<li data-value= "prve"><a href="javascript:void(0);" >&laquo;</a></li>';
+					}
+					//当前页或者其他页
+					if (i == currentPage) {
+						pages+= '<li class="am-active" data-value="'+i+'"><a href="javascript:void(0);">'+i+'</a></li>';
+					} else {
+						pages+= '<li data-value="'+i+'"><a href="javascript:void(0);">'+i+'</a></li>';
+					}
+					//下一页
+					if (i == totalPage && currentPage == totalPage){
+						pages += '<li class="am-disabled" data-value="next"><a href="javascript:void(0);" >&raquo;</a></li>';
+					}else if (i == totalPage) {
+						pages += '<li  data-value="next"><a href="javascript:void(0);" >&raquo;</a></li>';
+					}
+				}
+				return pages;
+			}
+		</script>
+	</body>
+
+</html>

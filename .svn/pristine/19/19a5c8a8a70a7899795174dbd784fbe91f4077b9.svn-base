@@ -1,0 +1,350 @@
+package spark.websoket;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+
+import com.xryb.zhtc.entity.MessageBean;
+import com.xryb.zhtc.entity.VipInfo;
+import com.xryb.zhtc.service.IVipService;
+import com.xryb.zhtc.service.impl.VipServiceImpl;
+import com.xryb.zhtc.util.JsonUtil;
+
+import spark.annotation.Auto;
+
+/*import javax.websocket.OnOpen;
+import javax.websocket.server.ServerEndpoint;
+*/
+/**
+ * writer: holien
+ * Time: 2017-08-01 13:00
+ * Intent: webSocket服务器
+ */
+public class WsServer {
+	
+	@Auto(name=VipServiceImpl.class)
+	private IVipService vipService;
+
+
+    private static int onlineCount = 0; // 记录连接数目
+    // Map<用户id，用户信息>
+    private static Map<String, VipInfo> onlineUserMap = new ConcurrentHashMap<String, VipInfo>(); //在线用户
+    
+    private static Map<String,List<VipInfo>> ongroupvipMap = new HashMap();//某个群的在线用户
+    				    /*群号*/ /*内容发送人实体(不对数据库进行操作)*/ 
+    private static Map<String,List<MessageBean>> newsMap = new HashMap();//获得某群的聊天记录
+    					/*群号*//*第几条*/
+    private static Map<String,String> numberMap = new HashMap();//每个群每个条数的信息
+    
+
+	int numbers = 0;//获得最后一条的权限id
+    //后台 无批次 返回数据
+    public Object xxlist(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		String  groupuuid = request.getParameter("groupuuid");//获得
+		
+		String  number = request.getParameter("number");//获得前段穿过来的排序id
+		
+		List<MessageBean> mess = newsMap.get(groupuuid);//获得群聊天的记录
+		
+		String uuid = request.getParameter("uuid");//获得用户uuid判断是否被群主移除
+		
+		List<MessageBean> mas  = new ArrayList<MessageBean>();
+		
+		Map map = new HashMap();//返回值
+		
+		List<VipInfo>  vipinfo = ongroupvipMap.get(groupuuid);
+		int i = 0;
+		if (vipinfo==null || vipinfo.size()<=0) {
+			map.put("i", false);
+		}else {
+			for (VipInfo vipIn : vipinfo) {
+				if (vipIn.getVipUUID().equals(uuid)) {
+					i +=1;
+				}
+			}
+			if (i==0) {
+				map.put("i", false);
+			}else {
+				map.put("i", true);
+			}
+		}
+		
+		
+		if ("0".equals(number) || number == "0") {
+			number = numberMap.get(groupuuid);
+			if (number == "" || number==null) {
+				number = "0";
+				numbers= 0;
+			}else {
+				numbers = Integer.parseInt(numberMap.get(groupuuid));
+			}
+		}
+		
+		if (mess ==null || mess.size()<=0) {
+			
+			map.put("number", numbers);
+			
+			map.put("list", mas);
+			
+			return JsonUtil.ObjToJson(map);	
+		}
+		for (MessageBean messageBean : mess) {
+			if (messageBean.getPxid()>Integer.parseInt(number)) {
+					mas.add(messageBean);
+					numbers = messageBean.getPxid();
+			}
+		}
+		
+		
+		map.put("number", numbers);
+		
+		map.put("list", mas);
+		
+		return JsonUtil.ObjToJson(map);	
+    }
+
+	//进入该群进入缓存
+	public Object open(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws JSONException {
+        // 增加用户数量  
+        addOnlineCount();
+        
+        String uuid = request.getParameter("uuid");//获得用户缓存
+        
+        String groupuuid = request.getParameter("groupuuid");//当前群用户的
+        
+       /* List<UserandGroup> groupfindlist = imuserangroup.findgrouplist(sourceId, closeConn, uuid, null);//查询当前人所拥有的群*/  
+        
+        
+        VipInfo vipInfo = null; //= vipService.findVipInfoByUUID(sourceId, closeConn, uuid);
+        
+        	 List<VipInfo> viplists  = null;
+    		if (ongroupvipMap.containsKey(groupuuid)) {
+    			viplists = ongroupvipMap.get(groupuuid);
+    			if (viplists==null || viplists.size()<=0) {
+    				viplists = new ArrayList();
+    				viplists.add(vipInfo);
+    			}else {
+    				viplists.add(vipInfo);
+    			}
+			}else {
+            if (viplists==null || viplists.size()<=0) {
+				viplists = new ArrayList();
+				viplists.add(vipInfo);
+				}
+			}
+    		ongroupvipMap.put(groupuuid, viplists);
+        
+    		onlineUserMap.put(uuid,vipInfo);
+        
+        
+    		Map map = new HashMap();
+        
+    		map.put("i", true);
+        
+  /*      Date date = new Date(); 
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddhh:mm:ss");
+        
+        String content = "[" + sdf.format(date) + " : " + vipInfo.getVipName() + "加入聊天室，当前在线人数为 " + getOnlineCount() + "位" + "]";
+        
+        JSONObject msg = new JSONObject();
+        
+        msg.put("content",content);
+        
+        String message = Message.getMessage(msg.toString(),Message.NOTICE,onlineUserMap.values());
+        
+		return message;*/
+        
+		return JsonUtil.ObjToJson(map);
+	}
+	
+	  //退出群清除当前用户群的缓存
+	  public Object onClose(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws JSONException{
+
+	        // 减少当前用户
+	        subOnlienCount();
+	        
+	        String uuid = request.getParameter("uuid");
+	        
+	        VipInfo vipInfo = null; //= vipService.findVipInfoByUUID(sourceId, closeConn, uuid);
+	        
+	        String groupuuid = request.getParameter("groupuuid");//当前群用户的
+	        
+	       /* List<UserandGroup> groupfindlist = imuserangroup.findgrouplist(sourceId, closeConn, uuid, null);//查询当前人所拥有的群*/	
+	        
+	        /*for (UserandGroup userandgroup : groupfindlist) {*/
+	        	 List<VipInfo> viplists  = null;
+	        	 
+	    		if (ongroupvipMap.containsKey(groupuuid)) {
+	    			viplists = ongroupvipMap.get(groupuuid);
+	    				for (int i = 0; i < viplists.size(); i++) {
+	    						if (viplists.get(i).getVipUUID().equals(vipInfo.getVipUUID())) {
+									viplists.remove(i);
+								}
+	    				}
+				}
+	    		if (viplists==null || viplists.size()<=0) {
+					
+	    			ongroupvipMap.remove(groupuuid);
+	    			
+				}else {
+					
+					ongroupvipMap.put(groupuuid, viplists);
+				
+				}
+	    		
+
+	    		onlineUserMap.remove(uuid);
+
+	        
+	        Map map = new HashMap();
+	        
+	        map.put("i", true);
+	        
+	        /* Date date = new Date(); 
+	        
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddhh:mm:ss");
+	        
+	        // 通知所有在线用户，当前用户下线
+	        String content = "["+ sdf.format(date) + " : " + vipInfo.getVipName() + " 离开聊天室，当前在线人数为 " + getOnlineCount() + "位" + "]";
+	        JSONObject msg = new JSONObject();
+	        msg.put("content",content);
+	        if(onlineUserMap.size() > 0){
+	            String message = Message.getMessage(msg.toString(), Message.NOTICE, onlineUserMap.values());
+	            Message.broadcast(message,onlineUserMap.values());
+	        }*/
+	        
+	        return JsonUtil.ObjToJson(map);
+	    }
+
+	
+
+		public static int getOnlineCount() {
+	        return onlineCount;
+	    }
+
+	    public synchronized void addOnlineCount(){
+	        onlineCount++;
+	    }
+
+	    public synchronized void subOnlienCount(){
+	        onlineCount--;
+	    }
+    
+    
+	    /**
+	     * 接收客户端的message，判断是否有接收人而选择进行广播还是指定发送
+	     * @param data 客户端发来的消息
+	     * @return 
+	     * @throws JSONException 
+	     */
+	    public Object onMessage(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws JSONException{
+
+	    	String uuid = request.getParameter("uuid");//手机传过来的uuid
+	    	
+	    	String context  = request.getParameter("context");//手机穿过来的
+	    	
+	    	String time = request.getParameter("time");//手机传过来的时间
+	    	
+	    	String type = request.getParameter("type");//通知还是消息notice-通知 message-消息
+	    	
+	    	String groupuuid = request.getParameter("groupuuid");
+	    	
+	    /*	List<UserandGroup> groupfindlist = imuserangroup.findUserlist(sourceId, closeConn, groupuuid,null);//获得这个群下面的所有人不管是否在线
+	    		
+	    	List<VipInfo> vipinfolist = new ArrayList<VipInfo>();
+		    	for (UserandGroup userangroup : groupfindlist) {
+		    		if (onlineUserMap.containsKey(userangroup.getUserUUID())) {
+		    			vipinfolist.add(onlineUserMap.get(userangroup.getUserUUID()));
+					}
+				}*/
+	    	
+	        /*// 将用户id转换为名称
+	    	String to = this.userIdCastNickName(uuid);*/
+	    	
+	    	MessageBean mess  = new MessageBean();
+	    	
+	    	String number = numberMap.get(groupuuid);
+	    	if (number==null || number=="") {
+				number = "0";
+			}
+	    	
+	    	mess.setGroupbeanUUID(groupuuid);//获得群id
+	    	mess.setChatStyle(1);//群消息
+	    	mess.setChatType(1);//发送的消息
+	    	mess.setContent(context);//发布的消息
+	    	mess.setUserUUID(uuid);//用户uuid
+	    	mess.setTime(time);//发布时间
+	    	mess.setPxid(Integer.parseInt(number)+1);
+	    	
+	    	List<MessageBean> mas = newsMap.get(groupuuid);
+	    	
+	    	if (mas==null) {
+	    		mas = new ArrayList();
+	    		mas.add(mess);
+			}else {
+				mas.add(mess);
+			}
+	    		
+	    	numberMap.put(groupuuid,Integer.toString(Integer.parseInt(number)+1));
+	    	
+	    	newsMap.put(groupuuid, mas);
+
+	    	   
+	        Map map = new HashMap();
+	        
+	        map.put("i", true);
+	        
+	        
+	        return JsonUtil.ObjToJson(map); 
+	    }
+
+	    private String userIdCastNickName(String userIds){
+	        String niceNames = "";
+	        if(userIds != null && !userIds.equals("")){
+	            String[] useridList = userIds.split(",");
+	            String toName = "";
+	            for (String id : useridList){
+	                toName = toName + onlineUserMap.get(id).getVipName() + ",";
+	            }
+	            niceNames = toName.substring(0,toName.length() - 1);
+	        }
+	        return niceNames;
+	    }
+		
+	    /**
+	     * 
+	     * 群主突然删除该群（根据群号）
+	     * 
+	     * */
+	    public void delectnewsMap(String groupuuid) {
+	    		
+	    	ongroupvipMap.remove(groupuuid);
+	    }
+	    
+	     /*   VipInfo  fromUser = onlineUserMap.get(uuid);
+        
+        String sendMessage = Message.getContent(fromUser,vipinfolist,context,time);
+        
+        String returnData = Message.getMessage(sendMessage,type,null);
+
+        if(vipinfolist == null || vipinfolist.equals("")){ // 进行广播
+            Message.broadcast(returnData.toString(),onlineUserMap.values());
+        }else{
+            Message.singleSend(returnData.toString(), onlineUserMap.get(uuid));   // 发送给自己
+            String[] useridList = to.split(",");
+            for(VipInfo id : vipinfolist){
+                if(!id.getVipUUID().equals(uuid)){
+                    Message.singleSend(returnData.toString(), onlineUserMap.get(id)); // 分别发送给指定的用户
+                }
+            }
+        }*/
+
+}

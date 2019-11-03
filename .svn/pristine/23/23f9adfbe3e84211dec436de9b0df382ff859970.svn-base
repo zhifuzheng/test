@@ -1,0 +1,4 @@
+/*jeasyui.extensions.panel.js*/
+.panel-container { position: relative; }
+.panel-iframe { margin: 0; padding: 0; width: 100%; height: 100%; border-width: 0; overflow: auto; }
+.panel-body-withframe { overflow: hidden; }

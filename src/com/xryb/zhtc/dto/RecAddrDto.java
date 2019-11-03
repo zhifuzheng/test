@@ -1,0 +1,66 @@
+package com.xryb.zhtc.dto;
+
+import java.io.Serializable;
+/**
+ * 收货人信息数据传输对象
+ * @author wf
+ */
+public class RecAddrDto implements Serializable {
+	
+	private static final long serialVersionUID = -1146144984209035837L;
+
+	private String receiverName;//收货人姓名
+	
+	private String receiverMobile;//收货人手机号码
+	
+	private String provCityDist;//收货人省市区
+	
+	private String postCode;//收货人邮编
+	
+	private String detailAddr;//收货人街道地址
+
+	public String getReceiverName() {
+		return receiverName;
+	}
+
+	public void setReceiverName(String receiverName) {
+		this.receiverName = receiverName;
+	}
+
+	public String getReceiverMobile() {
+		return receiverMobile;
+	}
+
+	public void setReceiverMobile(String receiverMobile) {
+		this.receiverMobile = receiverMobile;
+	}
+
+	public String getProvCityDist() {
+		return provCityDist;
+	}
+
+	public void setProvCityDist(String provCityDist) {
+		this.provCityDist = provCityDist;
+	}
+
+	public String getPostCode() {
+		return postCode;
+	}
+
+	public void setPostCode(String postCode) {
+		this.postCode = postCode;
+	}
+
+	public String getDetailAddr() {
+		return detailAddr;
+	}
+
+	public void setDetailAddr(String detailAddr) {
+		this.detailAddr = detailAddr;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+}

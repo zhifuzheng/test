@@ -1,0 +1,215 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 专场俱乐部资质认证实体
+ * @author Administrator
+ *
+ */
+
+@Table(tableName = "certification")
+public class Certification {
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="全局唯一编号,UUID自动生成")
+	private String rzUUID;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="申请人UUID")
+	private String applicantUUID;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="申请人姓名")
+	private String applicantName;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="企业名称")
+	private String enterpriseName;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="营业执照号")
+	private String businessNumber;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="营业执照图片")
+	private String businessImg;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="管理员姓名")
+	private String adminName;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="管理员身份证号")
+	private String idNumber;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="身份证正面照")
+	private String positiveImg;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="身份证反面面照")
+	private String oppositeImg;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="管理员手机号码")
+	private String adminPhone;
+	
+	@TableField(isNotNull=true,fieldSize=36,comment="申请时间")
+	private String applicationTime;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="审核状态：0：未审核，1：审核通过，2：审核不通过")
+	private String auditStatus;
+	
+	@TableField(isNotNull=false,fieldSize=100,comment="审批意见")
+	private String approvalOpinion;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="1：有资质申请")
+	private String yesQualification;
+	
+	@TableField(isNotNull=false,fieldSize=10,comment="消息通知是否阅读(0:未阅读，1：已阅读)")
+	private String whetherRead;
+	
+	@TableField(isNotNull=false,fieldSize=100,comment="审批时间")
+	private String approvalTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getRzUUID() {
+		return rzUUID;
+	}
+
+	public void setRzUUID(String rzUUID) {
+		this.rzUUID = rzUUID;
+	}
+
+	public String getApplicantUUID() {
+		return applicantUUID;
+	}
+
+	public void setApplicantUUID(String applicantUUID) {
+		this.applicantUUID = applicantUUID;
+	}
+
+	public String getApplicantName() {
+		return applicantName;
+	}
+
+	public void setApplicantName(String applicantName) {
+		this.applicantName = applicantName;
+	}
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+	public String getBusinessNumber() {
+		return businessNumber;
+	}
+
+	public void setBusinessNumber(String businessNumber) {
+		this.businessNumber = businessNumber;
+	}
+
+	public String getBusinessImg() {
+		return businessImg;
+	}
+
+	public void setBusinessImg(String businessImg) {
+		this.businessImg = businessImg;
+	}
+
+	public String getAdminName() {
+		return adminName;
+	}
+
+	public void setAdminName(String adminName) {
+		this.adminName = adminName;
+	}
+
+	public String getIdNumber() {
+		return idNumber;
+	}
+
+	public void setIdNumber(String idNumber) {
+		this.idNumber = idNumber;
+	}
+
+	public String getPositiveImg() {
+		return positiveImg;
+	}
+
+	public void setPositiveImg(String positiveImg) {
+		this.positiveImg = positiveImg;
+	}
+
+	public String getOppositeImg() {
+		return oppositeImg;
+	}
+
+	public void setOppositeImg(String oppositeImg) {
+		this.oppositeImg = oppositeImg;
+	}
+
+	public String getAdminPhone() {
+		return adminPhone;
+	}
+
+	public void setAdminPhone(String adminPhone) {
+		this.adminPhone = adminPhone;
+	}
+
+	public String getApplicationTime() {
+		return applicationTime;
+	}
+
+	public void setApplicationTime(String applicationTime) {
+		this.applicationTime = applicationTime;
+	}
+
+	public String getAuditStatus() {
+		return auditStatus;
+	}
+
+	public void setAuditStatus(String auditStatus) {
+		this.auditStatus = auditStatus;
+	}
+
+	public String getApprovalOpinion() {
+		return approvalOpinion;
+	}
+
+	public void setApprovalOpinion(String approvalOpinion) {
+		this.approvalOpinion = approvalOpinion;
+	}
+
+	public String getYesQualification() {
+		return yesQualification;
+	}
+
+	public void setYesQualification(String yesQualification) {
+		this.yesQualification = yesQualification;
+	}
+
+	public String getWhetherRead() {
+		return whetherRead;
+	}
+
+	public void setWhetherRead(String whetherRead) {
+		this.whetherRead = whetherRead;
+	}
+
+	public String getApprovalTime() {
+		return approvalTime;
+	}
+
+	public void setApprovalTime(String approvalTime) {
+		this.approvalTime = approvalTime;
+	}
+	
+	
+	
+
+}

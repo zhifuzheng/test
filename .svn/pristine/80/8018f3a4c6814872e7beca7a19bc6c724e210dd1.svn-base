@@ -1,0 +1,112 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>信息类型管理</title>
+<!--end-->
+<base href="http://localhost:8080/yzpx/" />
+</head>
+<body>
+	<table id="commonType_table" class="easyui-datagrid">
+		<thead>
+			<tr>
+				<!-- <th data-options="field:'ck',checkbox:true"></th> -->
+				<th data-options="field:'id',align:'center',width:50,hidden:true">id</th>
+				<th data-options="field:'uuid',align:'center',width:50,hidden:true">uuid</th>
+				<th data-options="field:'commonTypeCode',align:'center',width:200">信息类别编码</th>
+				<th data-options="field:'commonTypeName',align:'center',width:200">信息类别</th>
+				<th data-options="field:'createUserName',align:'center',width:200">创建人</th>
+				<th data-options="field:'createTime',align:'center',width:200">创建时间</th>
+				<th data-options="field:'CZ',width:100,align:'center',formatter:commonTypeListF">操作</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="commonType_tb" style="padding:2px 5px;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-mini-add-h" plain="true" onclick="addOrUpCommonType('', '0')">新增</a>
+	</div>
+	<div id="commonTypeList_window_div">
+		<div id="commonTypeList_addCommonType_div"></div>
+	</div>
+	<script type="text/javascript">
+    var selectRow = null;
+	$(function(){
+		$('#commonType_table').datagrid({
+			iconCls: 'icon-common-info',
+			title: '&nbsp;&nbsp;信息类型管理',
+			url: baseURL + 'system/commontype/findCommonTypeList',
+	        rownumbers: true,
+	        pagination: true,
+	        singleSelect: true,
+	        toolbar: '#commonType_tb',
+	        onUnselect: function(index, row) {
+	        	//$('#equipmentIdHidden').val('');
+	        }
+		});
+	});
+
+	//新增或修改信息类型
+	function addOrUpCommonType(uuid,type){//新增/修改视频分组
+		$("#commonTypeList_addCommonType_div").remove();
+		$("#commonTypeList_window_div").append("<div id='commonTypeList_addCommonType_div'></div>");
+		var url = "../admin/common/addCommonType.jsp?uuid="+uuid+"&isEdit="+type;
+		var title = '新信息类型';
+		if("1"==type){
+			title = '修改信息类型';
+		}
+		$("#commonTypeList_addCommonType_div").dialog({
+			title : title,
+			width : 700,
+			height : 300,
+			closed : false,
+			eache : false,
+			href : url,
+			modal : true,
+			buttons:[{
+				text:'保存',
+				iconCls: 'icon-mini-tick',
+				handler:function(){saveCommonType();}
+			},{
+				text:'取消',
+				iconCls: 'icon-cancel',
+				handler:function(){
+					$("#commonTypeList_addCommonType_div").dialog("close");
+					$("#commonTypeList_addCommonType_div").remove();
+			    }
+			}]
+		});
+	}
+    //删除视频分组信息
+	function deleteCommonType(uuid){
+    	$.messager.confirm("提示","您确定要删除分组信息吗？",function(c){
+    		if(c){
+    			var url="<%=path%>/system/commontype/deleteCommonType?uuid="+uuid;
+    			$.post(url,"",function(data){
+    				if(data.status == '1'){
+    					 $.messager.alert('提示','操作成功!','info');
+    					//刷新
+    					$('#commonType_table').datagrid('reload');
+    				}else{
+    					$.messager.alert('提示','操作失败!','arrer');
+    				}
+    			},'json');
+    		}
+    	});
+	}
+	//格式化操作
+	function commonTypeListF(value, row, index) {
+		var statusHtml = '';
+		var editHtml = '<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true" onclick="addOrUpCommonType(\'' + row.uuid + '\',\'1\');">&nbsp;修改&nbsp;</a>';
+		var deleteHtml = '<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="deleteCommonType(\'' + row.uuid + '\');">&nbsp;删除&nbsp;</a>';
+		return statusHtml + "&nbsp;" + editHtml + "&nbsp;" + deleteHtml;
+	}
+	</script>
+</body>
+</html>

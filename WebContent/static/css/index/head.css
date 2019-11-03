@@ -1,0 +1,166 @@
+header {
+	height: 105px;
+	width: 100%;
+	background: #FFF;
+	position: fixed!important;
+	top: 0px;
+	z-index: 299999;
+	position: absolute;
+	right: expression(eval(document.documentElement.scrollright+0));
+	top: expression(eval(document.documentElement.scrollTop+0))
+}
+
+#iframe {
+	width: 530px;
+	left: 385px;
+	background-color: transparent;
+	height: 80px;
+	top: 0px;
+	position: absolute;
+	z-index: -1;
+}
+
+#head {
+	height: 80px;
+	width: 1180px;
+	margin: 0 auto;
+	line-height: 80px;
+	vertical-align: middle;
+	z-index: 99999;
+}
+
+#head .pic {
+	display: block;
+	float: left;
+	width: 134px;
+	height: 56px;
+	margin-top: 12px;
+}
+
+.pic {
+	background: url(../../img/login/logo.png) no-repeat;
+	background-size: cover;
+	_behavior: url(/Public/Home/maker2.0/common/libs/iepngfix/iepngfix.htc);
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/Public/Home/maker2.0/common/images/headlogo.png', sizingMethod='scale');
+}
+
+#head .rightPort {
+	font-size: 18px;
+	color: #333333;
+	min-width: 100px;
+	height: 80px;
+	width: 120px;
+	float: right;
+}
+
+#head .rightPort li {
+	float: left;
+	font-family: "微软雅黑";
+	width: 45%;
+	height: 80px;
+	line-height: 80px;
+	text-align: center;
+}
+
+#head .rightPort .division {
+	color: #333;
+	display: inline-block;
+	width: 10px;
+	text-align: center;
+}
+
+.nav {
+	height: 80px;
+	margin-left: 6.1%;
+	/* background: #FFF; */
+	float: left;
+}
+
+.nav li {
+	float: left;
+	text-align: left;
+	line-height: 80px;
+	font-family: "微软雅黑";
+	font-size: 18px;
+	height: 80px;
+	width: auto;
+	margin-right: 40px;
+}
+
+.nav li>a {
+	padding-bottom: 10%;
+	border-bottom: 1px solid transparent;
+}
+
+.nav li.com .navtitle {
+	border-bottom: 2px solid #337ab7;
+}
+
+#mycode_index {
+	position: relative;
+}
+
+.nav .second-nav {
+	position: absolute;
+	top: 80px;
+	z-index: 10;
+	min-height: 36px;
+	display: none;
+	width: 350px;
+}
+
+.nav .second-nav li {
+	height: 36px;
+	padding: 0;
+	line-height: 36px;
+	margin: 0;
+	background: #fff;
+	width: 90%;
+}
+
+.nav .second-nav li a {
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+}
+
+.nav .second-nav li:hover {
+	background: #ddd!important;
+}
+
+.nav .second-nav li:hover a {
+	color: #fff;
+}
+
+.nav .second-nav li:first-child {
+	border: none;
+}
+
+.nav .second-nav li a {
+	padding: 0 10px;
+	color: #333;
+}
+
+.nav .second-nav .third-nav {
+	position: absolute;
+	left: -20px;
+	top: 40px;
+	width: 158px;
+	height: 200px;
+	display: none;
+	margin-left: 100%;
+	margin-top: -40px;
+}
+
+.nav .second-nav .third-nav li {
+	width: 158px;
+	padding: 0;
+}
+
+.nav .second-nav .third-nav li:first-child {
+	border: none;
+}
+
+.nav .second-nav .third-nav li a {
+	color: #fff;
+}

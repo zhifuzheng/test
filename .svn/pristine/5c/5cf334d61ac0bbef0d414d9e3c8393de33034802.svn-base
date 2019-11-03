@@ -1,0 +1,549 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+	
+	<style>
+		.l-btn-plain {
+			background: transparent;
+			border: 1px solid #00000038 !important;
+			filter: none;
+		}
+	</style>
+
+	<table id="vip_table"></table>
+	<div id="vip_tb" style="padding:2px 5px;">
+		<a class="easyui-menubutton" data-options="menu:'#vipStatus_controll-panel',iconCls:'icon-help'" style="width:130px;"><span id="vipStatus">会员状态</span></a>
+		<a class="easyui-menubutton" data-options="menu:'#vipType_controll-panel',iconCls:'icon-help'" style="width:130px;"><span id="vipType">会员级别</span></a>		
+		<input id="vipId" name="vipId" class="easyui-textbox" data-options="'prompt':'请输入会员ID'" style="width:200px;">	
+		<input id="vipCondition" name="vipCondition" class="easyui-textbox" data-options="'prompt':'请输入会员昵称/姓名/手机号'" style="width:280px;">				
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="query()" data-options="'plain':true">&nbsp;搜索</a>
+  		<a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="initQuery()" data-options="'plain':true">&nbsp;清除</a>
+	</div>
+	<div id="vipStatus_controll-panel" style="width: 130px; display: none;">
+		<div onclick="queryStatus({'status':'1','statusText':'正常'});">正常</div>
+		<div onclick="queryStatus({'status':'0','statusText':'停用'});">停用</div>
+		<div class="menu-sep"></div>
+		<div onclick="queryStatus({'status':'','statusText':'全部'});">全部</div>
+	</div>
+	<div id="vipType_controll-panel" style="width: 130px; display: none;">
+		<div onclick="queryType({'type':'1','statusText':'普通会员'});">普通会员</div>
+		<div onclick="queryType({'type':'2','statusText':'付费会员'});">付费会员</div>
+		<div onclick="queryType({'type':'3','statusText':'平台管理员'});">平台管理员</div>
+		<div class="menu-sep"></div>
+		<div onclick="queryType({'type':'','statusText':'全部'});">全部</div>
+	</div>
+	
+	<script type="text/javascript">
+	//默认会员状态
+	var vipStatus = "1";
+	var vipType = "";
+	
+ 	// 定义列
+	var columns = [ [ {
+		field : 'avatarUrl',
+		title : '会员头像',
+		width : 50,
+		formatter : function(data,row,index){
+			var index = data.indexOf('static');
+			if(index != -1){
+				data = '<%=basePath %>'+data.substr(index);
+			}
+			return '<img style="width:100px;height:100px;margin-left:-15px;" src="'+data+'"/>';
+		}
+	},{
+		field : 'nickName',
+		title : '昵称',
+		width : 80,
+		align : 'center'
+	},{
+		field : 'vipName',
+		title : '姓名',
+		width : 80,
+		align : 'center'
+	},{
+		field : 'vipMobile',
+		title : '手机号码',
+		width : 80,
+		align : 'center'
+	},{
+		field : 'wxNumber',
+		title : '微信号',
+		width : 80,
+		align : 'center'
+	},{
+		field : 'birthday',
+		title : '生日',
+		width : 50,
+		align : 'center'
+	},{
+		field : 'gender',
+		title : '性别',
+		width : 30,
+		align : 'center',
+		formatter : function(data,row,index){
+			return data == 1?"男":"女";
+		}
+	},{
+		field : 'vipType',
+		title : '会员级别',
+		width : 50,
+		align : 'center',
+		formatter : function(data,row,index){
+			return data == 1?"普通会员":data == 2?"付费会员":"平台管理员";
+		}
+	},{
+		field : 'vipStatus',
+		title : '状态',
+		width : 30,
+		align : 'center',
+		formatter : function(data,row,index){
+			return data == 1?"正常":"停用";
+		}
+	},{
+		field : 'operation',
+		title : '操作',
+		width : 110,
+		align : 'center',
+		formatter : function(data,row,index){
+			var html = "";
+			html = '<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delVip(\''+index+'\');">&nbsp;注销&nbsp;</a>';
+			if(row.vipStatus == "1"){
+				//info primary warning success danger
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-warning button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="upStatus({\'index\':\''+index+'\',\'status\':\'0\'});">&nbsp;停用&nbsp;</a>';
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-info button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="editVip('+index+');">&nbsp;编辑&nbsp;</a>';
+				if(row.vipType == 3){
+					html += '<br/></br><a class="easyui-linkbutton button-info button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="upStatus({\'index\':\''+index+'\',\'type\':\'-1\'});">&nbsp;撤销管理&nbsp;</a>';
+				}else{
+					html += '<br/></br><a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="upStatus({\'index\':\''+index+'\',\'type\':\'3\'});">&nbsp;授权管理&nbsp;</a>';
+				}
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="apply('+index+');">&nbsp;申请开店&nbsp;</a>';
+			}
+			if(row.vipStatus == "0"){
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="upStatus({\'index\':\''+index+'\',\'status\':\'1\'});">&nbsp;恢复&nbsp;</a>';
+			}
+			return html;
+		}
+	} ] ];
+	$(function(){
+		$('#vip_table').datagrid({
+			url: '<%=path %>/system/vip/findVipPage',
+			iconCls: 'icon-man',
+			title: '&nbsp;&nbsp;会员管理', 
+			columns : columns,
+			toolbar: '#vip_tb',
+	        rownumbers: true,
+	        pagination: true,
+	        pageList : [10,20,30,40],
+			pageSize : 10,
+			fit : true,
+			fitColumns : true,
+			nowrap : false,
+	        singleSelect: true,
+	        emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到会员信息哦</span>"
+		});
+	});
+
+    //删除会员信息
+	function delVip(rowIndex){
+		$('#vip_table').datagrid('selectRow',rowIndex);
+		var row = $('#vip_table').datagrid('getSelected'); 
+    	var msg = "确定注销会员信息吗？不可恢复，建议停用！";
+    	$.messager.confirm("操作提醒",msg,function(c){
+    		if(c){
+    			$.ajax({
+					type:"post",
+					url:'<%=basePath %>system/vip/delVip',
+					data:{'openId':row.openId},
+					dataType:'json',
+					success:function(data){
+						if(data.status == "1"){
+							$('#vip_table').datagrid('reload',{'vipStatus':vipStatus,'vipType':vipType});
+						}else{
+							$.messager.alert("提示", data.msg, "warning");
+						}
+					}
+				});
+    		}
+    	});
+	}
+    
+	 //更新会员状态
+	function upStatus(data){
+		var rowIndex = data.index;
+		var status = data.status;
+		var type = data.type;
+		$('#vip_table').datagrid('selectRow',rowIndex);
+		var row = $('#vip_table').datagrid('getSelected'); 
+		if(type == -1){
+			var t = row.expireTime;
+			if(t){
+				var y = t.substr(0,4);
+				var m = t.substr(5,2);
+				var d = t.substr(8,2);
+				var h = t.substr(11,2);
+				var mm = t.substr(14,2);
+				var s = t.substr(17,2);
+				var expire = new Date(y,m,d,h,mm,s);
+				var now = new Date();
+				if(now > expire){
+					type = 1;
+				}else{
+					type = 2;
+				}
+			}else{
+				type = 1;
+			}
+			
+		}
+    	var msg = "确定要启用该用户？";
+    	if (status == 0) {
+    		msg = "确定要停用该用户？";
+    	}
+		if(type){
+			if(type == 3){
+				msg = "确定将该用户设置为平台管理员？"
+			}else{
+				msg = "确定要撤销该用户的管理员权限？"
+			}
+    	}
+    	$.messager.confirm("操作提醒",msg,function(c){
+    		if(c){
+    			$.ajax({
+					type:"post",
+					url:'<%=basePath %>system/vip/upStatus',
+					data:{'openId':row.openId,'vipStatus':status,'vipType':type},
+					dataType:'json',
+					success:function(data){
+						if(data.status == "1"){
+							if(type){
+								$('#vip_table').datagrid('updateRow',{
+								    index: rowIndex,
+								    row: {
+								        'vipType' : type
+								    }
+								});
+							}else{
+								$('#vip_table').datagrid('updateRow',{
+								    index: rowIndex,
+								    row: {
+								        'vipStatus' : status
+								    }
+								});
+							}
+						}else{
+							$.messager.alert("提示", data.msg, "warning");
+						}
+					}
+				});
+    		}
+    	});
+	}
+	 
+	function editVip(rowIndex){
+		$('#vip_table').datagrid('selectRow',rowIndex);
+		var row = $('#vip_table').datagrid('getSelected'); 
+		
+		$('<div id="vip_edit_dialog">\
+			<form>\
+				<input type="hidden" name="entityUUID"></input>\
+				<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+					<tr>\
+						<td align="right">\
+							<label>昵称:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-textbox" type="text" name="nickName" style="width:300px"  data-options="required:true" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>微信号:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-textbox" type="text" name="wxNumber" style="width:300px" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>姓名:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-textbox" type="text" name="vipName" style="width:300px" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>性别:</label>\
+						</td>\
+						<td>\
+							<input id="gender" class="easyui-combobox" type="text" name="gender" style="width:300px"  data-options="editable:false,required:true,valueField:\'value\',textField:\'text\',data:[{text:\'男\',value:\'1\'},{text:\'女\',value:\'2\'}]" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>生日:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-datebox" type="text" name="birthday" style="width:300px"  data-options="editable:false" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>手机号:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-numberbox" type="text" name="vipMobile" style="width:300px" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>会员级别:</label>\
+						</td>\
+						<td>\
+							<input id="vipType" class="easyui-combobox" type="text" name="vipType" style="width:300px"  data-options="required:true,valueField:\'value\',textField:\'text\',data:[{text:\'普通会员\',value:\'1\'},{text:\'付费会员\',value:\'2\'},{text:\'平台管理员\',value:\'3\'}]" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>会员过期时间:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-datetimebox" type="text" name="expireTime" style="width:300px"  data-options="editable:false" />\
+						</td>\
+					</tr>\
+					<tr>\
+						<td align="right">\
+							<label>地址:</label>\
+						</td>\
+						<td>\
+							<input class="easyui-textbox" type="text" name="address" style="width:300px" />\
+						</td>\
+					</tr>\
+				</table>\
+				<input type="hidden" name="openId"></input>\
+			</form>\
+		</div>').css({padding:"5px"}).dialog({
+			id : "vip_edit_dialog",
+    		width : "500px",
+    		height : "450px",
+    		closable: false,
+    		modal: true,
+    		title : "编辑会员信息",
+    		onOpen : function(){
+    			var _dialog = $(this);
+    			$.parser.parse(_dialog);
+    			var form = $('#vip_edit_dialog').find('form');
+				form.find('[name=openId]').val(row.openId);
+				form.find("[textboxname=nickName]").textbox("setValue",row.nickName);
+				form.find("[textboxname=wxNumber]").textbox("setValue",row.wxNumber);
+				form.find("[textboxname=vipName]").textbox("setValue",row.vipName);
+				form.find("[comboname=gender]").combobox("setValue",row.gender);
+				form.find("[comboname=birthday]").textbox("setValue",row.birthday);
+				form.find("[textboxname=vipMobile]").textbox("setValue",row.vipMobile);
+				form.find("[comboname=vipType]").combobox("setValue",row.vipType);
+				form.find("[comboname=expireTime]").textbox("setValue",row.expireTime);
+				form.find("[textboxname=address]").textbox("setValue",row.address);
+    		},
+    		buttons:[{
+				text:'确认',
+				iconCls: 'icon-ok',
+				handler:function(){
+					var form = $('#vip_edit_dialog').find('form');
+					if(!form.form('validate')){
+						$.messager.alert('提示信息','表单还没填完哦，请填完表单后再提交!','warning');
+					}else{
+						$.ajax({
+							type:"post",
+							url:'<%=basePath %>system/vip/vipUpdate',
+							data:form.serialize(),
+							dataType:'json',
+							success:function(data){
+								if(data.status == "1"){
+									row.nickName = form.find('[name=nickName]').val();
+									row.address = form.find('[name=address]').val();
+									row.wxNumber = form.find('[name=wxNumber]').val();
+									row.vipName = form.find('[name=vipName]').val();
+									row.birthday = form.find('[name=birthday]').val();
+									row.vipMobile = form.find('[name=vipMobile]').val();
+									$('#vip_table').datagrid('updateRow',{
+									    index: rowIndex,
+									    row: JSON.stringify(row)
+									});
+									$('#vip_edit_dialog').dialog('destroy');
+								}else{
+									$.messager.alert("提示", data.msg, "warning");
+								}
+							}
+						});
+					}
+				}
+			},{
+				text:'关闭',
+				iconCls: 'icon-cancel',
+				handler:function(){
+					$('#vip_edit_dialog').dialog('destroy');
+			    }
+			}]
+    	});
+	}
+	 
+	function apply(rowIndex){
+		$('#vip_table').datagrid('selectRow',rowIndex);
+		var row = $('#vip_table').datagrid('getSelected'); 
+		if(!row.vipMobile){
+			$.messager.confirm("操作提醒","会员信息不全，现在去完善？",function(c){
+	    		if(c){
+	    			$('<div id="vip_info_dialog">\
+    					<form>\
+    						<input type="hidden" name="entityUUID"></input>\
+    						<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+    							<tr>\
+    								<td align="right">\
+    									<label>昵称:</label>\
+    								</td>\
+    								<td>\
+    									<input class="easyui-textbox" type="text" name="nickName" style="width:300px"  data-options="required:true" />\
+    								</td>\
+    							</tr>\
+    							<tr>\
+    								<td align="right">\
+    									<label>地址:</label>\
+    								</td>\
+    								<td>\
+    									<input class="easyui-textbox" type="text" name="address" style="width:300px"  data-options="required:true" />\
+    								</td>\
+    							</tr>\
+    							<tr>\
+									<td align="right">\
+										<label>微信号:</label>\
+									</td>\
+									<td>\
+										<input class="easyui-textbox" type="text" name="wxNumber" style="width:300px" />\
+									</td>\
+								</tr>\
+								<tr>\
+									<td align="right">\
+										<label>姓名:</label>\
+									</td>\
+									<td>\
+										<input class="easyui-textbox" type="text" name="vipName" style="width:300px"  data-options="required:true" />\
+									</td>\
+								</tr>\
+								<tr>\
+									<td align="right">\
+										<label>生日:</label>\
+									</td>\
+									<td>\
+										<input class="easyui-datebox" type="text" name="birthday" style="width:300px"  data-options="required:true,editable:false" />\
+									</td>\
+								</tr>\
+								<tr>\
+									<td align="right">\
+										<label>手机号:</label>\
+									</td>\
+									<td>\
+										<input class="easyui-numberbox" type="text" name="vipMobile" style="width:300px"  data-options="required:true" />\
+									</td>\
+								</tr>\
+    						</table>\
+    						<input type="hidden" name="openId"></input>\
+    					</form>\
+    				</div>').css({padding:"5px"}).dialog({
+    					id : "vip_info_dialog",
+    		    		width : "400px",
+    		    		height : "350px",
+    		    		closable: false,
+    		    		modal: true,
+    		    		title : "完善会员信息",
+    		    		onOpen : function(){
+    		    			var _dialog = $(this);
+    		    			$.parser.parse(_dialog);
+    		    			var form = $('#vip_info_dialog').find('form');
+							form.find('[name=openId]').val(row.openId);
+							form.find("[textboxname=nickName]").textbox("setValue",row.nickName);
+    		    		},
+    		    		buttons:[{
+    						text:'确认',
+    						iconCls: 'icon-ok',
+    						handler:function(){
+    							var form = $('#vip_info_dialog').find('form');
+    							if(!form.form('validate')){
+    								$.messager.alert('提示信息','表单还没填完哦，请填完表单后再提交!','warning');
+    							}else{
+    								$.ajax({
+    									type:"post",
+    									url:'<%=basePath %>system/vip/vipUpdate',
+    									data:form.serialize(),
+    									dataType:'json',
+    									success:function(data){
+    										if(data.status == "1"){
+    											row.nickName = form.find('[name=nickName]').val();
+    											row.address = form.find('[name=address]').val();
+    											row.wxNumber = form.find('[name=wxNumber]').val();
+    											row.vipName = form.find('[name=vipName]').val();
+    											row.birthday = form.find('[name=birthday]').val();
+    											row.vipMobile = form.find('[name=vipMobile]').val();
+    											$('#vip_table').datagrid('updateRow',{
+    											    index: rowIndex,
+    											    row: JSON.stringify(row)
+    											});
+    											$('#vip_info_dialog').dialog('destroy');
+    										}else{
+    											$.messager.alert("提示", data.msg, "warning");
+    										}
+    									}
+    								});
+    							}
+    						}
+    					},{
+    						text:'关闭',
+    						iconCls: 'icon-cancel',
+    						handler:function(){
+    							$('#vip_info_dialog').dialog('destroy');
+    					    }
+    					}]
+    		    	});
+	    			
+	    		}
+	    	});
+			return;
+		}
+		var pcUrl = "business/business_save.jsp?vipUUID="+row.vipUUID;
+		$('#master-layout').layout('panel', 'center').panel('refresh', pcUrl);
+	}
+	 
+	function queryStatus(data){
+		vipStatus = data.status;
+		$("#vipStatus").html(data.statusText);
+		$('#vip_table').datagrid('reload',{"vipStatus":vipStatus,"vipType":vipType});
+	}
+	
+	function queryType(data){
+		vipType = data.type;
+		$("#vipType").html(data.statusText);
+		$('#vip_table').datagrid('reload',{"vipStatus":vipStatus,"vipType":vipType});
+	}
+	
+	function query(){
+		var condition = $("#vipCondition").val();
+		var vipId = $("#vipId").val();
+		//使用正则表达式判断字符串是否为电话号码
+		var regPos = /\d{11}/;
+		if(regPos.test(condition)){
+			$('#vip_table').datagrid('reload',{'id':vipId,'vipMobile':condition});
+			return;
+		}
+		$('#vip_table').datagrid('reload',{'id':vipId,'vipStatus':vipStatus,'vipType':vipType,'nickName':condition,'vipName':condition});
+	}
+	
+	function initQuery(){
+		$("[textboxname=vipId]").textbox("setValue",'');
+		$("[textboxname=vipCondition]").textbox("setValue",'');
+		$('#vip_table').datagrid('reload',{'vipStatus':vipStatus,'vipType':vipType});
+	}
+	</script>
+

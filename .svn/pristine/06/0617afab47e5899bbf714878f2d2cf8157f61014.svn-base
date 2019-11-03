@@ -1,0 +1,116 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 区域分类
+ * @author Administrator
+ *
+ */
+
+@Table(tableName="regional_classification")
+public class RegionalClassification {
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键ID,自动增长")
+	private Long id;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="UUID")
+	private String regionalUUID;
+	
+	@TableField(fieldSize=100,isNotNull=true,comment="菜单编码(每两位为一组)")
+	private String regionalCode;
+	
+	@TableField(fieldSize=100,isNotNull=true,comment="菜单父节点编码（主要为构建菜单树使用）")
+	private String regionalParentCode;
+	
+	@TableField(fieldSize=100,comment="菜单名称")
+	private String regionalName;
+	
+	@TableField(fieldSize=2,comment="菜单类型（0顶级菜单，1级菜单，2二级菜单,3三级菜单 ）")
+	private String regionalType;
+	
+	@TableField(fieldSize=1,comment="菜单是否显示(0不显示，1显示）")
+	private String isShow;
+	
+	@TableField(fieldSize=1,comment="是否有下级节点(1有,0没有)")
+    private String regionalHaveLowerNode;
+	
+	@TableField(fieldSize=100,comment="备注")
+	private String regionalMark;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getRegionalUUID() {
+		return regionalUUID;
+	}
+
+	public void setRegionalUUID(String regionalUUID) {
+		this.regionalUUID = regionalUUID;
+	}
+
+	public String getRegionalCode() {
+		return regionalCode;
+	}
+
+	public void setRegionalCode(String regionalCode) {
+		this.regionalCode = regionalCode;
+	}
+
+	public String getRegionalParentCode() {
+		return regionalParentCode;
+	}
+
+	public void setRegionalParentCode(String regionalParentCode) {
+		this.regionalParentCode = regionalParentCode;
+	}
+
+	public String getRegionalName() {
+		return regionalName;
+	}
+
+	public void setRegionalName(String regionalName) {
+		this.regionalName = regionalName;
+	}
+
+	public String getRegionalType() {
+		return regionalType;
+	}
+
+	public void setRegionalType(String regionalType) {
+		this.regionalType = regionalType;
+	}
+
+	public String getIsShow() {
+		return isShow;
+	}
+
+	public void setIsShow(String isShow) {
+		this.isShow = isShow;
+	}
+
+	public String getRegionalHaveLowerNode() {
+		return regionalHaveLowerNode;
+	}
+
+	public void setRegionalHaveLowerNode(String regionalHaveLowerNode) {
+		this.regionalHaveLowerNode = regionalHaveLowerNode;
+	}
+
+	public String getRegionalMark() {
+		return regionalMark;
+	}
+
+	public void setRegionalMark(String regionalMark) {
+		this.regionalMark = regionalMark;
+	}
+	
+	
+	
+
+}

@@ -1,0 +1,119 @@
+package com.xryb.zhtc.action;
+
+import com.xryb.zhtc.manage.SupplyOrderMng;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.annotation.Auto;
+import spark.servlet.ISparkApplication;
+
+/**
+ * 供需管理：我卖出的和我买到的
+ * @author zzf
+ */
+public class SupplyOrderAction implements ISparkApplication{
+	@Auto(name=SupplyOrderMng.class)
+	private SupplyOrderMng supplyOrderMng;
+
+	@Override
+	public void run() {
+		
+		
+		/**
+		 * 供需管理生成商品购买订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/createSupplyOrder",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.createSupplyOrder("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		
+		/**
+		 * 我卖出的订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserSellSupplyOrderList",false,"jdbcread") {//jdbcwrite
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserSellSupplyOrderList("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 我买到的订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserBuySupplyOrderList",false,"jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserBuySupplyOrderList("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 取消订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/abolishSupplyOrder",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.abolishSupplyOrder("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 用户提交退款退货申请
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/refundMoneyOrGood",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.refundMoneyOrGood("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 撤销退款退货申请
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/cancelApply",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.cancelApply("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 确认收货
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/confirmReceipt",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.confirmReceipt("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 确认收货后，订单评价
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/SupplyOrderComment",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.SupplyOrderComment("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+
+}

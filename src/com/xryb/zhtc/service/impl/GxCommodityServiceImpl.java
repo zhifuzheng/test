@@ -1,0 +1,420 @@
+package com.xryb.zhtc.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.GxCollection;
+import com.xryb.zhtc.entity.GxCommodity;
+import com.xryb.zhtc.entity.GxDemand;
+import com.xryb.zhtc.entity.GxDemandComment;
+import com.xryb.zhtc.entity.GxMenu;
+import com.xryb.zhtc.entity.GxReport;
+import com.xryb.zhtc.service.IGxCommodityService;
+
+import dbengine.dao.EntityDao;
+import dbengine.dao.SqlDao;
+import dbengine.util.Page;
+import spark.annotation.Auto;
+
+/**
+ * 供需管理
+ * @author Administrator
+ *
+ */
+
+public class GxCommodityServiceImpl implements IGxCommodityService {
+	/**
+	 *  注入dao
+	 */
+	@Auto(name=EntityDao.class)
+	private EntityDao entitydao;
+	
+	@Auto(name=SqlDao.class)
+	private SqlDao sqldao;
+
+	@Override
+	public boolean commoditySave(String sourceId, boolean closeConn, GxCommodity commodity) {
+		if(commodity == null) {
+			return false;
+		}
+		if(commodity.getId()==null) {
+			return entitydao.saveEntity(sourceId, commodity, closeConn);
+		}else {
+			return entitydao.updateEntity(sourceId, commodity, closeConn);
+		}
+	}
+
+	@Override
+	public boolean demandSave(String sourceId, boolean closeConn, GxDemand gxDemand) {
+		if(gxDemand == null) {
+			return false;
+		}
+		if(gxDemand.getId()==null) {
+			return entitydao.saveEntity(sourceId, gxDemand, closeConn);
+		}else {
+			return entitydao.updateEntity(sourceId, gxDemand, closeConn);
+		}
+	}
+
+	@Override
+	public List<GxCommodity> commodityAll(String sourceId, boolean closeConn, Page page, Map<String, String> findMap) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from gx_commodity where 1=1");
+		if(findMap!=null){
+			if(findMap.get("vipUUID") != null && !"".equals(findMap.get("vipUUID")) && !"null".equals(findMap.get("vipUUID"))) {
+				//vipUUID
+				sql.append(" and vipUUID = ?");
+				params.add(findMap.get("vipUUID"));
+			}
+			
+			if(findMap.get("state") != null && !"".equals(findMap.get("state")) && !"null".equals(findMap.get("state"))) {
+				//商品状态（0：上架，1：下架）
+				sql.append(" and state = ?");
+				params.add(findMap.get("state"));
+			}
+			
+			if(findMap.get("stop") != null && !"".equals(findMap.get("stop")) && !"null".equals(findMap.get("stop"))) {
+				//商品管理（0：启用，1：停用）
+				sql.append(" and stop = ?");
+				params.add(findMap.get("stop"));
+			}
+			
+			if(findMap.get("menuCode") != null && !"".equals(findMap.get("menuCode")) && !"null".equals(findMap.get("menuCode"))) {
+				//编码分类
+				sql.append(" and menuCode = ?");
+				params.add(findMap.get("menuCode"));
+			}
+			
+			if(findMap.get("commodityTitle") != null && !"".equals(findMap.get("commodityTitle")) && !"null".equals(findMap.get("commodityTitle"))) {
+				//标题
+				sql.append(" and commodityTitle like '%").append(findMap.get("commodityTitle").replace("'","")).append("%'");
+			}
+		}	
+		sql.append(" order by time desc ");
+		if(page==null){
+			return (List<GxCommodity>)sqldao.findListBySql(sourceId, sql.toString(), GxCommodity.class, closeConn, params);
+		}else{
+			return (List<GxCommodity>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, GxCommodity.class, page, params);
+		}
+	}
+
+	@Override
+	public List<GxDemand> demandAll(String sourceId, boolean closeConn, Page page, Map<String, String> findMap) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from gx_demand where 1=1");
+		if(findMap!=null){
+			if(findMap.get("vipUUID") != null && !"".equals(findMap.get("vipUUID")) && !"null".equals(findMap.get("vipUUID"))) {
+				//vipUUID
+				sql.append(" and vipUUID = ?");
+				params.add(findMap.get("vipUUID"));
+			}
+			
+			if(findMap.get("state") != null && !"".equals(findMap.get("state")) && !"null".equals(findMap.get("state"))) {
+				//商品状态（0：上架，1：下架）
+				sql.append(" and state = ?");
+				params.add(findMap.get("state"));
+			}
+			
+			if(findMap.get("stop") != null && !"".equals(findMap.get("stop")) && !"null".equals(findMap.get("stop"))) {
+				//商品管理（0：启用，1：停用）
+				sql.append(" and stop = ?");
+				params.add(findMap.get("stop"));
+			}
+			
+			if(findMap.get("menuCode") != null && !"".equals(findMap.get("menuCode")) && !"null".equals(findMap.get("menuCode"))) {
+				//编码分类
+				sql.append(" and menuCode = ?");
+				params.add(findMap.get("menuCode"));
+			}
+			
+			if(findMap.get("commodityTitle") != null && !"".equals(findMap.get("commodityTitle")) && !"null".equals(findMap.get("commodityTitle"))) {
+				//标题
+				sql.append(" and commodityTitle like '%").append(findMap.get("commodityTitle").replace("'","")).append("%'");
+			}
+		}	
+		sql.append(" order by time desc ");
+		if(page==null){
+			return (List<GxDemand>)sqldao.findListBySql(sourceId, sql.toString(), GxDemand.class, closeConn, params);
+		}else{
+			return (List<GxDemand>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, GxDemand.class, page, params);
+		}
+	}
+
+	@Override
+	public GxCommodity commodityId(String sourceId, boolean closeConn, String commodityUUID) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("select * from gx_commodity where commodityUUID = ?");
+		params.add(commodityUUID);
+		return (GxCommodity) sqldao.findEntityBySql(sourceId, sql.toString(), GxCommodity.class, closeConn, params);
+		
+	}
+
+	@Override
+	public GxDemand gxDemandId(String sourceId, boolean closeConn, String demandUUID) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("select * from gx_demand where demandUUID = ?");
+		params.add(demandUUID);
+		return (GxDemand) sqldao.findEntityBySql(sourceId, sql.toString(), GxDemand.class, closeConn, params);
+	}
+
+	@Override
+	public boolean commodityDel(String sourceId, boolean closeConn, String commodityUUID) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("delete from gx_commodity where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandDel(String sourceId, boolean closeConn, String demandUUID) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("delete from gx_demand where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean commodityBrowse(String sourceId, boolean closeConn, Object commodityUUID) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("update gx_commodity set browse = browse+1 where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean reportSave(String sourceId, boolean closeConn, GxReport gxReport) {
+		if(gxReport == null) {
+			return false;
+		}
+		if(gxReport.getId()==null) {
+			return entitydao.saveEntity(sourceId, gxReport, closeConn);
+		}else {
+			return entitydao.updateEntity(sourceId, gxReport, closeConn);
+		}
+	}
+
+	@Override
+	public List<GxReport> gxReportsAll(String sourceId, boolean closeConn, Page page, Map<String, String> findMap) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from gx_report where 1=1");
+		if(findMap!=null){
+			if(findMap.get("state") != null && !"".equals(findMap.get("state")) && !"null".equals(findMap.get("state"))) {
+				//状态:0:未处理，1:已处理
+				sql.append(" and state = ?");
+				params.add(findMap.get("state"));
+			}
+			if(findMap.get("content") != null && !"".equals(findMap.get("content")) && !"null".equals(findMap.get("content"))) {
+				//举报内容
+				sql.append(" and content like '%").append(findMap.get("content").replace("'","")).append("%'");
+			}
+		}	
+		sql.append(" order by time desc ");
+		if(page==null){
+			return (List<GxReport>)sqldao.findListBySql(sourceId, sql.toString(), GxReport.class, closeConn, params);
+		}else{
+			return (List<GxReport>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, GxReport.class, page, params);
+		}
+	}
+
+	@Override
+	public boolean reportDel(String sourceId, boolean closeConn, String reportUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("delete from gx_report where reportUUID = ?");
+		params.add(reportUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean commodityStateUp(String sourceId, boolean closeConn, String commodityUUID, String state) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("update gx_commodity set state = "+state+" where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandStateUp(String sourceId, boolean closeConn, String demandUUID, String state) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("update gx_demand set state = "+state+" where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean collectionSave(String sourceId, boolean closeConn, GxCollection gxCollection) {
+		if(gxCollection == null) {
+			return false;
+		}
+		if(gxCollection.getId()==null) {
+			return entitydao.saveEntity(sourceId, gxCollection, closeConn);
+		}else {
+			return entitydao.updateEntity(sourceId, gxCollection, closeConn);
+		}
+	}
+
+	@Override
+	public GxCollection gxCollectionId(String sourceId, boolean closeConn, Map<String, String> findMap) {
+		StringBuilder sql = new StringBuilder();
+		List<Object> params = new ArrayList<Object>();
+		sql.append("select * from gx_collection where 1=1");
+		if(findMap != null) {
+			if(findMap.get("collectionUUID") != null && !"".equals(findMap.get("collectionUUID")) && !"null".equals(findMap.get("collectionUUID"))) {
+				//UUID
+				sql.append(" and collectionUUID = ?");
+				params.add(findMap.get("collectionUUID"));
+			}
+			if(findMap.get("dataUUID") != null && !"".equals(findMap.get("dataUUID")) && !"null".equals(findMap.get("dataUUID"))) {
+				//数据UUID
+				sql.append(" and dataUUID = ?");
+				params.add(findMap.get("dataUUID"));
+			}
+			if(findMap.get("vipUUID") != null && !"".equals(findMap.get("vipUUID")) && !"null".equals(findMap.get("vipUUID"))) {
+				//收藏人UUID
+				sql.append(" and vipUUID = ?");
+				params.add(findMap.get("vipUUID"));
+			}
+		}
+		return (GxCollection) sqldao.findEntityBySql(sourceId, sql.toString(), GxCollection.class, closeConn, params);
+	}
+
+	@Override
+	public List<GxCollection> collectionsAll(String sourceId, boolean closeConn, Page page,
+			Map<String, String> findMap) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from gx_collection where 1=1");
+		sql.append(" order by time desc ");
+		if(page==null){
+			return (List<GxCollection>)sqldao.findListBySql(sourceId, sql.toString(), GxCollection.class, closeConn, params);
+		}else{
+			return (List<GxCollection>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, GxCollection.class, page, params);
+		}
+	}
+
+	@Override
+	public boolean commodityCollection(String sourceId, boolean closeConn, String commodityUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_commodity set collection = collection+1 where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandCollection(String sourceId, boolean closeConn, String demandUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand set collection = collection+1 where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandBrowse(String sourceId, boolean closeConn, Object demandUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand set browse = browse+1 where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandGive(String sourceId, boolean closeConn, Object demandUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand set give = give+1 where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandCommentSave(String sourceId, boolean closeConn, GxDemandComment gxDemandComment) {
+		if(gxDemandComment == null) {
+			return false;
+		}
+		if(gxDemandComment.getId()==null) {
+			return entitydao.saveEntity(sourceId, gxDemandComment, closeConn);
+		}else {
+			return entitydao.updateEntity(sourceId, gxDemandComment, closeConn);
+		}
+	}
+
+	@Override
+	public List<GxDemandComment> commentsAll(String sourceId, boolean closeConn, Page page,
+			Map<String, String> findMap) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from gx_demand_comment where 1=1");
+		if(findMap != null) {
+			if(findMap.get("dataUUID") != null && !"".equals(findMap.get("dataUUID")) && !"null".equals(findMap.get("dataUUID"))) {
+				//评论数据UUID
+				sql.append(" and dataUUID = ?");
+				params.add(findMap.get("dataUUID"));
+			}
+		}
+		sql.append(" order by time desc ");
+		if(page==null){
+			return (List<GxDemandComment>)sqldao.findListBySql(sourceId, sql.toString(), GxDemandComment.class, closeConn, params);
+		}else{
+			return (List<GxDemandComment>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, GxDemandComment.class, page, params);
+		}
+	}
+
+	@Override
+	public boolean commentGive(String sourceId, boolean closeConn, Object commentUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand_comment give = give+1 where commentUUID = ?");
+		params.add(commentUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean commodityStop(String sourceId, boolean closeConn, String commodityUUID, String stop) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_commodity set stop = "+stop+" where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandStop(String sourceId, boolean closeConn, String demandUUID, String stop) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand set stop = "+stop+" where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean commodityShare(String sourceId, boolean closeConn, String commodityUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_commodity set share = share+1 where commodityUUID = ?");
+		params.add(commodityUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+	@Override
+	public boolean demandShare(String sourceId, boolean closeConn, String demandUUID) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder();
+		sql.append("update gx_demand set share = share+1 where demandUUID = ?");
+		params.add(demandUUID);
+		return sqldao.executeSql(sourceId, sql.toString(), closeConn, params);
+	}
+
+}

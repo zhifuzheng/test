@@ -1,0 +1,351 @@
+html,
+body,
+div,
+span,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+abbr,
+address,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+samp,
+small,
+strong,
+sub,
+sup,
+var,
+b,
+i,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+	margin: 0;
+	padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+em,
+i {
+	font-weight: 100;
+	font-style: normal;
+}
+
+img {
+	border: none;
+}
+
+ul,
+ol,
+li {
+	list-style-type: none;
+}
+
+a {
+	color: #333;
+	text-decoration: none;
+	outline: 0;
+	cursor: pointer;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+button {
+	cursor: pointer;
+}
+
+article,
+aside,
+dialog,
+footer,
+header,
+section,
+footer,
+nav,
+figure,
+menu {
+	display: block;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	font-family: "微软雅黑";
+	background: #f9f9f9;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	font-family: "微软雅黑";
+	background: #f9f9f9;
+	margin-top: 80px;
+	*margin-top: 60px;
+}
+
+.clear {
+	clear: both;
+	width: 0;
+	height: 0;
+}
+
+.clearfix {
+	zoom: 1;
+	clear: both;
+}
+
+.fl {
+	float: left;
+}
+
+.fr {
+	float: right;
+}
+
+.clearfix:after {
+	content: '';
+	display: block;
+	height: 0;
+	clear: both;
+	overflow: hidden;
+}
+
+.hidden {
+	display: none;
+}
+
+footer {
+	height: 250px;
+	width: 100%;
+	/* background: url(../../img/index/500.jpg) no-repeat center;
+	background-size: 100% 100%; */
+	background-color: #d3d3d3;
+	position: relative;
+}
+
+footer .foot {
+	height: 250px;
+	width: 64%;
+	margin: 0 18%;
+	box-sizing: border-box;
+}
+
+footer .foot .fot-content {
+	width: 100%;
+	height: 100%;
+}
+
+footer .foot .fot-content .left {
+	float: left;
+	width: 40%;
+	height: 100%;
+}
+
+footer .foot .fot-content .left img {
+	display: block;
+	width: 45%;
+	margin: 0 auto;
+	transform: translateY(-50%);
+	position: relative;
+	top: 50%;
+}
+
+footer .foot .fot-content .right {
+	float: right;
+	width: 50%;
+	height: 100%;
+}
+
+footer .foot .fot-content .right .align-center {
+	width: auto;
+	height: auto;
+	transform: translateY(-50%);
+	position: relative;
+	top: 50%;
+	overflow: hidden;
+}
+
+footer .foot .fot-content .right .align-center .r-left {
+	float: left;
+	width: 22%;
+	margin-right: 5%;
+}
+
+footer .foot .fot-content .align-center .r-right {
+	float: left;
+	width: 70%;
+}
+
+.foot .fot-content .align-center .r-left img {
+	width: 100%;
+}
+
+.foot .fot-content .align-center .r-left p {
+	color: #333;
+	font-size: 13px;
+	text-align:center;
+}
+
+.foot .fot-content .align-center .r-right li {
+	color: #333;
+	font-size: 13px;
+	margin-bottom: 3%;
+}
+
+.foot .fot-content .align-center .r-right .contact {
+	font-size: 14px;
+}
+
+footer .copyright {
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
+	background: #d3d3d3;
+	opacity: .6;
+	color: #333;
+	font-size: 16px;
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.con {
+	top: 30%;
+	z-index: 2;
+	text-align: center;
+	width: 60px;
+	height: 250px;
+	display: none;
+	position: fixed!important;
+	right: 0px!important;
+	position: absolute;
+	left: expression(eval(document.documentElement.scrollLeft+document.documentElement.clientWidth-this.offsetWidth)-(parseInt(this.currentStyle.marginLeft, 10)||0)-(parseInt(this.currentStyle.marginRight, 10)||0));
+	top: expression(eval(document.documentElement.scrollTop+document.documentElement.clientHeight-this.offsetHeight-(parseInt(this.currentStyle.marginTop, 50)||0)-(parseInt(this.currentStyle.marginBottom, 10)||0)))
+}
+
+.con {
+	position: absolute;
+	right: expression(eval(document.documentElement.scrollright+0));
+	top: expression(eval(document.documentElement.scrollTop+100))
+}
+
+.con .weixin {
+	display: none;
+	position: absolute;
+	left: -122px;
+	top: 0px;
+}
+
+.con div {
+	width: 60px;
+	height: 60px;
+	border-radius: 5px;
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+
+.con .top {
+	display: none;
+}
+
+.con .hide {
+	background: url("/Public/Home/maker2.0/common/images/wechat_icon-white.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .hide:hover {
+	background: url("/Public/Home/maker2.0/common/images/wechat_icon-green.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .zixun {
+	background: url("/Public/Home/maker2.0/common/images/ask_icon-white.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .zixun:hover {
+	background: url("/Public/Home/maker2.0/common/images/ask_icon-green.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .top {
+	background: url("/Public/Home/maker2.0/common/images/top_icon-white.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .top:hover {
+	background: url("/Public/Home/maker2.0/common/images/top_icon-green.png") no-repeat center;
+	width: 60px;
+	height: 60px;
+}
+
+.con .zixun img {
+	width: 60px;
+	height: 60px;
+	opacity: 0;
+}
+
+.con .hide img {
+	border-radius: 10px;
+}

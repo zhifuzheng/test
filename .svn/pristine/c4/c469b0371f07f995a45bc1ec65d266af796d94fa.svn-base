@@ -1,0 +1,818 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+	<style>
+		/*默认*/
+		.tree-icon {
+			background:url('<%=basePath %>static/img/tree/arrow.png') no-repeat center center !important;
+		}
+		/*折叠时图片*/
+		.tree-folder {
+			background:url('<%=basePath %>static/img/tree/search.png') no-repeat center center !important;
+		} 
+		/*展开时图片*/
+		.tree-folder-open {
+			background:url('<%=basePath %>static/img/tree/look.png') no-repeat center center !important;
+		}
+		ul {
+			list-style:none;
+		}
+		.hide {
+			display:none;
+		}
+		.itemModel .textbox .textbox-prompt {
+			color:black;
+		}
+		.combobox-item{
+			padding-left:100px;
+		}
+		span.title{
+			line-height:35px;
+			width: 80px;
+			display: block;
+			float: left;
+		}
+		.rowHeight{
+			height: 40px;
+			margin-top: 5px;
+		}
+		.l-btn-plain {
+			background: transparent;
+			border: 1px solid #00000038 !important;
+			filter: none;
+		}
+	</style>
+	<div class="easyui-layout" data-options="fit:true">
+		<div data-options="region:'west',title: '商品分类管理（单击分类加载模板列表，右键操作，拖拽进行排序）',iconCls:'icon-cat-menu',collapsible:false" style="width:50%;">
+			<div class="easyui-toolbar" style="margin-top:15px;margin-left:10px;">
+				<a class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cat-add'" onclick="addTop();">新增</a>
+			</div>
+			<ul id="itemCat_tree" class="easyui-tree" style="margin-top:15px;"></ul>
+			<div id="itemCatMenu" class="easyui-menu" style="width:120px;" data-options="onClick:menuHandler">
+			    <div data-options="iconCls:'icon-cat-add',name:'add'">添加</div>
+			    <div data-options="iconCls:'icon-edit',name:'rename'">重命名</div>
+			    <div data-options="iconCls:'icon-cat-stop',name:'disabled'">停用</div>
+			    <div data-options="iconCls:'icon-cat-start',name:'enable'">启用</div>
+			    <div class="menu-sep"></div>
+			    <div data-options="iconCls:'icon-remove',name:'delete'">删除</div>
+			</div>
+		</div>
+		<div data-options="region:'center'">
+			<table id="model_table"></table>
+			<div id="model_tb" style="padding:2px 5px;">
+				<a href="javascript:void(0)" class="easyui-linkbutton" data-options="'iconCls':'icon-cat-add','plain':true" onclick="addModel()">新增</a>
+				<a class="easyui-menubutton" data-options="menu:'#controll-panel',iconCls:'icon-help'" style="width:120px;"><span id="enableStatus">模板状态</span></a>
+				<input id="condition" data-options="prompt:'请输入模板名称'" class="easyui-textbox" style="width:200px;">				
+        		<a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="query()" data-options="'plain':true">&nbsp;搜索</a>
+        		<a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="initQuery()" data-options="'plain':true">&nbsp;清除</a>
+			</div>
+			<div id="controll-panel" style="width: 80px; display: none;">
+				<div onclick="queryEnableStatus({'enableStatus':'1','statusText':'启用'});">启用</div>
+				<div onclick="queryEnableStatus({'enableStatus':'0','statusText':'停用'});">停用</div>
+				<div class="menu-sep"></div>
+				<div onclick="queryEnableStatus({'enableStatus':'','statusText':'全部'});">全部</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		//默认模板状态
+		var enableStatus = "1";
+		
+		// 定义列
+		var columns = [ [ {
+			field : 'modelName',
+			title : '模板名称',
+			width : 150,
+			align : 'center',
+			editor :{
+				type : 'validatebox',
+				options : {
+					required: true
+				}
+			}
+		},{
+			field : 'sort',
+			title : '排序',
+			width : 30,
+			align : 'center',
+			editor :{
+				type : 'combobox',
+				options : {
+					textField:'sort',
+					valueField:'sort',
+					data:[]
+				}
+			}
+		}, {
+			field : 'enable',
+			title : '状态',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 0){
+					return '停用';
+				}
+				if(data == 1){
+					return '启用';
+				}
+			},
+			editor :{
+				type : 'combobox',
+				options : {
+					textField:'text',
+					valueField:'value',
+	                data:[{'text':'启用','value':1},{'text':'停用','value':0}]
+				}
+			}
+		},{
+			field : 'operation',
+			title : '操作',
+			width : 120,
+			align : 'center',
+			formatter : function(data,row,index){
+				var html = "";
+				if(row.enable == "0"){
+					//info primary warning success danger
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="changeEnable({\'index\':\''+index+'\',\'enable\':\'1\'});">&nbsp;启用&nbsp;</a>';
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="lookModel(\''+index+'\');">&nbsp;查看&nbsp;</a>';
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-info button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="editModel(\''+index+'\');">&nbsp;编辑&nbsp;</a>';
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delModel(\''+index+'\');">&nbsp;删除&nbsp;</a>';
+				}
+				if(row.enable == "1"){
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="changeEnable({\'index\':\''+index+'\',\'enable\':\'0\'});">&nbsp;停用&nbsp;</a>';
+					html += '<a style="margin:2px 3px;" class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="lookModel(\''+index+'\');">&nbsp;查看&nbsp;</a>';
+				}
+				return html;
+			}
+		} ] ];
+		
+		$(function(){
+			
+			//初始化商品分类树
+			$("#itemCat_tree").tree({
+				url : '<%=basePath %>shop/itemCat/findChildrenByParent',
+				animate : true,
+				dnd : true,
+				method : "GET",
+				formatter:function(node){
+					var s = node.text;
+					if(node.enable == "1"){
+						if (node.children){
+							s += ' <span style=\'color:#39B9A4\'>(' + node.children.length + ')</span>';
+						}
+					}else{
+						if (node.children){
+							s = ' <span style=\'color:#CCC\'>'+node.text+'(已停用' + node.children.length + ')</span>';
+						}else{
+							s = ' <span style=\'color:#CCC\'>'+node.text+'(已停用)</span>';
+						}
+					}
+					return s;
+				},
+				onClick : function(node){
+					$('#model_table').datagrid({
+						url : '<%=basePath %>shop/itemModel/findModelPage',
+						queryParams: {"catUUID":node.id,"enable":enableStatus}
+					});
+				},
+				onContextMenu : function(e,node){
+		            e.preventDefault();
+		            $(this).tree('select',node.target);
+		            $('#itemCatMenu').menu('show',{
+		                left: e.pageX,
+		                top: e.pageY
+		            });
+		        },
+		        onBeforeDrop:function(target,source,operate){         
+		        	var targetNode = $(this).tree('getNode',target);
+		        	var modelCount = 0;
+		        	if(operate == "append"){
+						if(source.pid == targetNode.id){
+			        		$.messager.alert('提示','分类\"'+source.text+'\"已经在分类\"'+targetNode.text+'\"中了','warning');
+			        		return false;
+			        	}
+						if(confirm('提示,确认把分类\"'+source.text+'\"放入分类\"'+targetNode.text+'\"中?')){
+							return true;
+						}
+						return false;
+					}
+					if(operate == "top"){
+						if(confirm('提示, 确认把分类\"'+source.text+'\"放到分类 \"'+targetNode.text+'\"上?')){
+	                       return true;                                                
+	                   	}
+	                    return false;
+					}
+					if(operate == "bottom"){
+						if(confirm('提示, 确认把分类\"'+source.text+'\"放到分类 \"'+targetNode.text+'\"下?')){
+	                       return true;                                                
+	                   	}
+	                    return false;
+					}
+               	},
+				onDrop:function(target,source,operate){        
+					// 这个方法的效果是 拖动后触发向后台更新 被拖动节点更新到目标节点下。
+					var targetNode = $(this).tree('getNode',target);
+					if(operate == "append"){
+						$.post('<%=basePath %>shop/itemCat/dragItemCat',{sourceUUID:source.id,targetUUID:targetNode.id,operate:'append'});
+					}
+					if(operate == "top"){
+						$.post('<%=basePath %>shop/itemCat/dragItemCat',{sourceUUID:source.id,targetUUID:targetNode.id,operate:'top'});
+					}
+					if(operate == "bottom"){
+						$.post('<%=basePath %>shop/itemCat/dragItemCat',{sourceUUID:source.id,targetUUID:targetNode.id,operate:'bottom'});
+					}
+				},
+				onAfterEdit : function(node){
+		        	var _tree = $(this);
+		        	if(node.id == 0){
+		        		// 新增节点
+		        		$.post('<%=basePath %>shop/itemCat/addItemCat',{parentUUID:node.parentId,parentCode:node.parentCode,catName:node.text},function(data){
+		        			if(data.status == "1"){
+		        				_tree.tree("update",{
+		            				target : node.target,
+		            				catCode : data.catCode,
+		            				id : data.id
+		            			});
+		        			}else{
+		        				$.messager.alert('提示',data.msg,'warning');
+		        			}
+		        		},'json');
+		        	}else{
+		        		$.post('<%=basePath %>shop/itemCat/upItemCat',{catUUID:node.id,catName:node.text});
+		        	}
+		        }
+			});
+			//初始化模板数据表格
+			$('#model_table').datagrid({
+				iconCls: 'icon-cat-model',
+				title: '&nbsp;&nbsp;模板管理',
+				columns : columns,
+				toolbar : '#model_tb',
+				rownumbers : true,
+				pagination : true,
+				pageList: [10,20,30,40,50],
+				fit : true,
+				fitColumns : true,
+				idField : 'id',
+				singleSelect: true,
+				emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到模板信息哦</span>"
+			});
+			
+		});
+		//新增树
+		function addTop(){
+			var _tree = $("#itemCat_tree");
+			_tree.tree('append', {
+	            data: [{
+	                id : 0,
+	                text : '新建分类',
+	                enable : 1
+	            }]
+	        }); 
+			var _node = _tree.tree('find',0);
+			_tree.tree("select",_node.target).tree('beginEdit',_node.target);
+		}
+		//商品分类控制面板
+		function menuHandler(item){
+			var tree = $("#itemCat_tree");
+			var node = tree.tree("getSelected");
+			if(item.name === "add"){
+				tree.tree('append', {
+		            parent: (node?node.target:null),
+		            data: [{
+		                id : 0,
+		                text: '新建分类',
+		                parentId : node.id,
+		                parentCode : node.catCode,
+		                enable : '1'
+		            }]
+		        });
+				var _node = tree.tree('find',0);
+				tree.tree("select",_node.target).tree('beginEdit',_node.target);
+			}
+			if(item.name === "rename"){
+				tree.tree('beginEdit',node.target);
+			}
+			if(item.name === "disabled"){
+				if(node.enable == "1"){
+					$.post('<%=basePath %>shop/itemCat/enableItemCat',{catUUID:node.id,enable:0},function(data){
+	        			if(data.status == "1"){
+	        				tree.tree("update",{
+	            				target : node.target,
+	            				id : node.id,
+	            				enable : 0
+	            			});
+	        				tree.tree('reload',node.target);
+	        			}else{
+	        				$.messager.alert('提示',data.msg,'warning');
+	        			}
+	        		},'json');
+				}else{
+					$.messager.alert('提示','分类\"'+node.text+'\"已停用','warning');
+				}
+				
+			}
+			if(item.name === "enable"){
+				if(node.enable == "0"){
+					$.post('<%=basePath %>shop/itemCat/enableItemCat',{catUUID:node.id,enable:1},function(data){
+	        			if(data.status == "1"){
+	        				tree.tree("update",{
+	            				target : node.target,
+	            				id : node.id,
+	            				enable : 1
+	            			});
+	        				tree.tree('reload',node.target);
+	        			}else{
+	        				$.messager.alert('提示',data.msg,'warning');
+	        			}
+	        		},'json');
+				}else{
+					$.messager.alert('提示','分类\"'+node.text+'\"已启用','warning');
+				}
+			}
+			if(item.name === "delete"){
+				$.messager.confirm('提示信息','确定删除名为\"'+node.text+'\"的分类吗？',function(r){
+					if(r){
+						$.post('<%=basePath %>shop/itemCat/delItemCat',{catUUID:node.id},function(data){
+							if(data.status == "1"){
+								tree.tree("remove",node.target);
+		        			}else{
+		        				$.messager.alert('提示',data.msg,'warning');
+		        			}
+						},'json');	
+					}
+				});
+			}
+		}
+		//新增模板
+		function addModel(){
+			//获取分类信息
+			var tree = $("#itemCat_tree");
+			var node = tree.tree('getSelected');
+			if(node == null){
+				$.messager.alert('提示信息','请在商品分类管理中，选择分类后再添加模板!','warning');
+				return;
+			}
+			var parent = tree.tree('getParent',node.target);
+			if(parent == null){
+				$.messager.alert('提示信息','不能在一级分类中添加模板!','warning');
+				return;
+			}
+			var catName = shop.getTopCatName(tree,node);
+			var catUUID = node.id;
+			//创建模板
+			var template = $('<form>\
+				<table style="width:100%;">\
+					<tr class="rowHeight">\
+						<td>所属分类:</td>\
+						<td>\
+						    <span style="cursor:default;">'+catName+'</span>\
+			            	<input type="hidden" name="catUUID"></input>\
+			            	<input type="hidden" name="catName"></input>\
+		            	</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板名称:</td>\
+						<td>\
+			            	<input name="modelName" class="easyui-textbox" type="text" data-options="required:true" style="width:220px;"></input>\
+		            	</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板排序:</td>\
+						<td>\
+			            	<input name="sort" type="text" data-options="required:true" style="width:220px;padding-left:100px;"></input>\
+		            	</td>\
+					</tr>\
+					<tr>\
+						<td colspan="2" style="font-weight:bold;text-align:center;background-color:#EAEAEA;">规格参数</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td colspan="2">\
+							<div class="itemModel">\
+								<ul>\
+									<li class="rowHeight">\
+										<span style="margin-right:17px;">参数名称：</span>\
+										<input class="easyui-textbox attr" data-options="required:true,validType:\'length[0,7]\'" style="width:220px;"/>\
+										<a href="javascript:void(0)" class="easyui-linkbutton addAttr">添加参数</a>\
+									</li>\
+								</ul>\
+							</div>\
+							<input type="hidden" name="modelData"></input>\
+						</td>\
+					</tr>\
+				</table>\
+				<input type="hidden" name="enable" value="1"></input>\
+			</form>');
+			$.parser.parse(template);
+			//给模板绑定事件
+	    	template.find(".addAttr").click(addAttr);
+			$("<div>").css({padding:"15px"}).dialog({
+				id : "model_add_dialog",
+	    		width : "420px",
+	    		height : "480px",
+	    		closable : false,
+	    		modal : true,
+	    		title : "新增规格模板",
+			    onOpen : function(){
+			    	template.find('[name=catUUID]').val(catUUID);
+			    	template.find('[name=catName]').val(catName);
+			    	//加载排序
+			    	$.post(
+		    			'<%=basePath %>shop/itemModel/getSortList',
+		    			{'catUUID':catUUID},
+		    			function(data){
+		    				template.find('[name=sort]').combobox({
+								data : data,
+								valueField : 'value',
+								textField : 'text',
+								onLoadSuccess : function(){
+								    $(this).combobox('setValue',data.length);
+								},
+								editable : false
+							});
+		    			},
+		    			'json'
+			    	);
+			    	$('#model_add_dialog').append(template);
+			    },
+			    buttons:[{
+					text:'保存',
+					iconCls: 'icon-ok',
+					handler:function(){
+						if(!template.form('validate')){
+							$.messager.alert('提示','表单还没填完哦，请填完表单再提交!','warning');
+							return;
+						}
+						template.find('[name=modelData]').val(parseToJson(template));
+						//提交模板数据
+						$.post(
+							'<%=basePath %>shop/itemModel/saveOrUpModel',
+							template.serialize(),
+							function(data){
+								if(data){
+									$('#model_table').datagrid('reload',{"enable":enableStatus,'catUUID':catUUID});
+									$('#model_add_dialog').dialog("destroy");
+								}else{
+									$.messager.alert('提示','当前网络繁忙，请稍后重试!','warning');
+								}
+							}
+						);
+					}
+				},{
+					text:'取消',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						template.remove();
+				    	$('#model_add_dialog').dialog("destroy");
+				    }
+				}]
+	    	});
+		}
+		//删除模板
+		function delModel(rowIndex){
+			$('#model_table').datagrid('selectRow',rowIndex);
+			var row = $('#model_table').datagrid('getSelected');
+			var catUUID = row.catUUID;
+			$.messager.confirm('提示信息','确定要删除名为\"'+row.modelName+'\"的模板吗？',function(c){
+				if(c){
+					$.post(
+						'<%=basePath %>shop/itemModel/delModel',
+						{"catUUID":row.catUUID,"modelUUID":row.modelUUID},
+						function(data){
+							if(data){
+								$('#model_table').datagrid('reload',{"enable":enableStatus,'catUUID':catUUID});
+							}else{
+								$.messager.alert('提示','当前网络繁忙，请稍后重试!','info');
+							}
+						}
+					);
+				}
+			});
+		}
+		//编辑模板
+		function editModel(rowIndex){
+			$('#model_table').datagrid('selectRow',rowIndex);
+			var row = $('#model_table').datagrid('getSelected');
+			var catUUID = row.catUUID;
+			var catName = row.catName;
+			var oldSort = row.sort;
+			//创建模板
+			var template = $('<form>\
+				<table style="width:100%;">\
+					<tr class="rowHeight">\
+						<td>所属分类:</td>\
+						<td>\
+							<span style="cursor:default;">'+catName+'</span>\
+			            	<input type="hidden" name="catUUID"></input>\
+			            	<input type="hidden" name="catName"></input>\
+		            	</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板名称:</td>\
+						 <td>\
+			            	<input name="modelName" class="easyui-textbox" type="text" data-options="required:true" style="width:220px;"></input>\
+		            	</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板排序:</td>\
+						 <td>\
+			            	<input name="sort" type="text" data-options="required:true" style="width:220px;padding-left:100px;"></input>\
+		            	</td>\
+					</tr>\
+					<tr>\
+						<td colspan="2" style="font-weight:bold;text-align:center;background-color:#EAEAEA;">规格参数</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td colspan="2">\
+							<div class="itemModel"></div>\
+							<input type="hidden" name="modelData"></input>\
+						</td>\
+					</tr>\
+				</table>\
+				<input type="hidden" name="id"></input>\
+				<input type="hidden" name="modelUUID"></input>\
+			</form>');
+			$.parser.parse(template);
+			//将模板数据渲染成dom元素
+	    	var itemModel = template.find(".itemModel");
+			var modelData = row.modelData;
+			parseToWriteDom(itemModel, modelData);
+			$("<div>").css({padding:"15px"}).dialog({
+				id : "model_edit_dialog",
+	    		width : "420px",
+	    		height : "480px",
+	    		closable : false,
+	    		modal : true,
+	    		title : "编辑规格模板",
+			    onOpen : function(){
+			    	template.find("[name=id]").val(row.id);
+			    	template.find("[name=modelUUID]").val(row.modelUUID);
+			    	template.find('[name=catUUID]').val(catUUID);
+			    	template.find('[name=catName]').val(catName);
+			    	template.find("[textboxname=modelName]").textbox("setValue",row.modelName);
+			    	//加载排序
+			    	$.post(
+		    			'<%=basePath %>shop/itemModel/getSortList',
+		    			{'catUUID':catUUID},
+		    			function(data){
+		    				template.find('[name=sort]').combobox({
+								data : data.slice(0,-1),
+								valueField : 'value',
+								textField : 'text',
+								onLoadSuccess : function(){
+								    $(this).combobox('setValue',row.sort);
+								},
+								editable : false
+							});
+		    			},
+		    			'json'
+			    	);
+			    	$('#model_edit_dialog').append(template);
+			    },
+			    buttons:[{
+					text:'保存',
+					iconCls: 'icon-ok',
+					handler:function(){
+						if(!template.form('validate')){
+							$.messager.alert('提示','表单还没填完哦，请填完表单再提交!','warning');
+							return;
+						}
+						template.find('[name=modelData]').val(parseToJson(template));
+						var catUUID = template.find('[name=catUUID]').val();
+						var catName = template.find('[name=catName]').val();
+						var modelName = template.find('[name=modelName]').val();
+						var sort = template.find('[name=sort]').val();
+						var modelData = template.find('[name=modelData]').val();
+						//提交模板数据
+						$.post(
+							'<%=basePath %>shop/itemModel/saveOrUpModel',
+							template.serialize(),
+							function(data){
+								if(data){
+									if(oldSort == sort){
+										$('#model_table').datagrid('updateRow',{
+										    index: rowIndex,
+										    row: {
+										       'catUUID':catUUID,
+										       'catName':catName,
+										       'modelName':modelName,
+										       'sort':sort,
+										       'modelData':modelData
+										    }
+										});
+									}else{
+										$('#model_table').datagrid('reload',{"enable":enableStatus,'catUUID':catUUID});
+									}
+									$('#model_edit_dialog').dialog("destroy");
+								}else{
+									$.messager.alert('提示','当前网络繁忙，请稍后重试!','warning');
+								}
+							}
+						);
+					}
+				},{
+					text:'取消',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						template.remove();
+				    	$('#model_edit_dialog').dialog("destroy");
+				    }
+				}]
+	    	});
+		}
+		//查看模板
+		function lookModel(rowIndex){
+			$('#model_table').datagrid('selectRow',rowIndex);
+			var row = $('#model_table').datagrid('getSelected');
+			var catUUID = row.catUUID;
+			var catName = row.catName;
+			var oldSort = row.sort;
+			//创建模板
+			var template = $('<form>\
+				<table style="width:100%;">\
+					<tr class="rowHeight">\
+						<td>所属分类:</td>\
+						<td>\
+							<span class="catName" style="display:block;height:30px;line-height:30px;cursor:url(../static/jeasyui-plus/themes/insdep/images/disable.png),default;"></span>\
+						</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板名称:</td>\
+						 <td>\
+			            	<input name="modelName" class="easyui-textbox" type="text" data-options="required:true" style="width:220px;" disabled=true></input>\
+		            	</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td>模板排序:</td>\
+						 <td>\
+			            	<input name="sort" class="easyui-textbox" type="text" data-options="required:true" style="width:220px;padding-left:100px;" disabled=true></input>\
+		            	</td>\
+					</tr>\
+					<tr>\
+						<td colspan="2" style="font-weight:bold;text-align:center;background-color:#EAEAEA;">规格参数</td>\
+					</tr>\
+					<tr class="rowHeight">\
+						<td colspan="2">\
+							<div class="itemModel"></div>\
+						</td>\
+					</tr>\
+				</table>\
+			</form>');
+			template.find('.catName').html(row.catName);
+	    	template.find('[name=modelName]').val(row.modelName);
+	    	template.find('[name=sort]').val(row.sort);
+			$.parser.parse(template);
+			//将模板数据渲染成dom元素
+	    	var itemModel = template.find(".itemModel");
+			var modelData = row.modelData;
+			parseToReadDom(itemModel, modelData);
+			$("<div>").css({padding:"15px"}).dialog({
+				id : "model_look_dialog",
+	    		width : "420px",
+	    		height : "480px",
+	    		closable : false,
+	    		modal : true,
+	    		title : "查看规格模板",
+			    onOpen : function(){
+			    	$('#model_look_dialog').append(template);
+			    },
+			    buttons:[{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						template.remove();
+				    	$('#model_look_dialog').dialog("destroy");
+				    }
+				}]
+	    	});
+		}
+		//修改模板状态
+		function changeEnable(content){
+			var rowIndex = content.index;
+			var enable = content.enable;
+			$('#model_table').datagrid('selectRow',rowIndex);
+			var row = $('#model_table').datagrid('getSelected');
+			var msg = "";
+			if(enable == "0"){
+				msg = "确定要停用名为\"" + row.modelName + "\"的模板吗？";
+			}
+			if(enable == "1"){
+				msg = "确定要启用名为\"" + row.modelName + "\"的模板吗？";
+			}
+			$.messager.confirm("操作提醒", msg, function (c) {
+				if(c){
+					$.ajax({
+						type:"post",
+						url:'<%=basePath %>shop/itemModel/upModelEnable',
+						data:{'modelUUID':row.modelUUID,'enable':enable},
+						success:function(data){
+							if(data){
+								$('#model_table').datagrid('updateRow',{
+								    index: rowIndex,
+								    row: {
+								        'enable' : enable
+								    }
+								});
+							}
+						}
+					});
+				}
+			});
+		}
+		//生成参数节点
+		function addAttr(){
+			var li = $('<li class="rowHeight">\
+				<span style="margin-right:17px;">参数名称：</span>\
+				<input class="easyui-textbox attr" style="width:220px;" data-options="required:true,validType:\'length[0,7]\'"/>\
+				<a href="javascript:void(0)" class="easyui-linkbutton delAttr" title="删除参数" data-options="plain:true,iconCls:\'icon-cancel\'"></a>\
+			</li>');
+			$.parser.parse(li);
+		 	li.find(".delAttr").click(function(){
+		 		$(this).parent().remove();
+		 	});
+		 	li.appendTo($(this).parent("li").parent("ul"));
+		}
+		//将模板dom解析为模板数据
+		function parseToJson(template){
+			var attrList = template.find(".attr");
+			var modelData = [];
+			attrList.each(function(i,e){
+				var _val = $(e).next().find("input").eq(1).val();
+				modelData.push(_val);
+			});
+			return modelData.join(",");
+		}
+		//将模板数据解析为读写dom
+		function parseToWriteDom(itemModel, modelData){
+			var attrList = modelData.split(",");
+			//生成组dom并赋值
+			var ul = $("<ul></ul>");
+			for(var i = 0;i < attrList.length;i++){
+				var li;
+				if(i == 0){
+					li = $('<li class="rowHeight">\
+						<span style="margin-right:17px;">参数名称：</span>\
+						<input class="easyui-textbox attr" style="width:220px;" data-options="required:true,validType:\'length[0,7]\'"/>\
+						<a href="javascript:void(0)" class="easyui-linkbutton addAttr">添加参数</a>\
+					</li>');
+					li.find(".addAttr").click(addAttr);
+				}else{
+					li = $('<li class="rowHeight">\
+						<span style="margin-right:17px;">参数名称：</span>\
+						<input class="easyui-textbox attr" style="width:220px;" data-options="required:true,validType:\'length[0,7]\'"/>\
+						<a href="javascript:void(0)" class="easyui-linkbutton delAttr" title="删除参数" data-options="plain:true,iconCls:\'icon-cancel\'"></a>\
+					</li>');
+					li.find(".delAttr").click(function(){
+						$(this).parent().remove();
+					});
+				}
+				li.find(".attr").val(attrList[i]);
+				ul.append(li);
+			}
+			$.parser.parse(ul);
+			//将新生成的ul添加到itemModel
+			itemModel.append(ul);
+		}
+		//将模板数据解析为只读dom
+		function parseToReadDom(itemModel, modelData){
+			var attrList = modelData.split(",");
+			//生成组dom并赋值
+			var ul = $("<ul></ul>");
+			for(var i = 0;i < attrList.length;i++){
+				var li = $('<li class="rowHeight">\
+					<span style="margin-right:17px;">参数名称：</span>\
+					<input class="easyui-textbox attr" style="width:220px;" data-options="required:true" disabled=true/>\
+				</li>');
+				li.find(".attr").val(attrList[i]);
+				ul.append(li);
+			}
+			$.parser.parse(ul);
+			//将新生成的ul添加到itemModel
+			itemModel.append(ul);
+		}
+		//模板状态切换
+		function queryEnableStatus(data){
+			var node = $("#itemCat_tree").tree('getSelected');
+			var catUUID = node == null?'-1':node.id;
+			enableStatus = data.enableStatus;
+			$("#enableStatus").html(data.statusText);
+			$('#model_table').datagrid('reload',{'enable':enableStatus,'catUUID':catUUID});
+		}
+		//条件查询
+		function query(){
+			var node = $("#itemCat_tree").tree('getSelected');
+			var catUUID = node == null?'-1':node.id;
+			var condition = $("#condition").val();
+			$('#model_table').datagrid('reload',{"enable":enableStatus,'catUUID':catUUID,"modelName":condition});
+		}
+		function initQuery(){
+			var node = $("#itemCat_tree").tree('getSelected');
+			var catUUID = node == null?'-1':node.id;
+			$("#condition").textbox('setValue','');
+			$('#model_table').datagrid('reload',{'enable':enableStatus,'catUUID':catUUID});
+		}
+	</script>

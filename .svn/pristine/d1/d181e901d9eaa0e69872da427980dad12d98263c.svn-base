@@ -1,0 +1,171 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 账户信息
+ * @author wf
+ */
+@Table(tableName = "account")
+public class Account implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = 1917963507461595692L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(fieldSize=32,isNotNull=true,isUKey=true,comment="账户UUID")
+	private String accountUUID;
+	
+	@TableField(fieldSize=1,comment="账户类型：0零售商钱包，1批发商钱包，2会员钱包，3佣金钱包，4平台钱包")
+	private String accountType;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="所属实体UUID")
+	private String entityUUID;
+	
+	@TableField(fieldSize=100,isNotNull=true,comment="所属实体名称")
+	private String entityName;
+	
+	@TableField(comment = "账户总余额，单位为分，默认值为0")
+	private Integer accountBalance = 0;
+	
+	@TableField(comment = "账户总收入，单位为分，默认值为0")
+	private Integer accountIncome = 0;
+	
+	@TableField(comment = "账户总支出，单位为分，默认值为0")
+	private Integer accountExpend = 0;
+	
+	@TableField(fieldSize = 1, comment = "账户状态：0冻结，1启用，默认值为1")
+	private String accountStatus = "1";
+	
+	@TableField(fieldSize=11,comment="账户绑定手机号，11位标准手机长度")
+	private String mobile;
+	
+	@TableField(fieldSize=32,comment="支付密码，md5加密")
+	private String payPwd;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="会员UUID")
+	private String vipUUID;
+	
+	@TableField(fieldSize=20,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=20,comment="修改日期")
+	private String updateTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getAccountUUID() {
+		return accountUUID;
+	}
+
+	public void setAccountUUID(String accountUUID) {
+		this.accountUUID = accountUUID;
+	}
+
+	public String getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(String accountType) {
+		this.accountType = accountType;
+	}
+
+	public String getEntityUUID() {
+		return entityUUID;
+	}
+
+	public void setEntityUUID(String entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public Integer getAccountBalance() {
+		return accountBalance;
+	}
+
+	public void setAccountBalance(Integer accountBalance) {
+		this.accountBalance = accountBalance;
+	}
+
+	public Integer getAccountIncome() {
+		return accountIncome;
+	}
+
+	public void setAccountIncome(Integer accountIncome) {
+		this.accountIncome = accountIncome;
+	}
+
+	public Integer getAccountExpend() {
+		return accountExpend;
+	}
+
+	public void setAccountExpend(Integer accountExpend) {
+		this.accountExpend = accountExpend;
+	}
+
+	public String getAccountStatus() {
+		return accountStatus;
+	}
+
+	public void setAccountStatus(String accountStatus) {
+		this.accountStatus = accountStatus;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getPayPwd() {
+		return payPwd;
+	}
+
+	public void setPayPwd(String payPwd) {
+		this.payPwd = payPwd;
+	}
+
+	public String getVipUUID() {
+		return vipUUID;
+	}
+
+	public void setVipUUID(String vipUUID) {
+		this.vipUUID = vipUUID;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+}

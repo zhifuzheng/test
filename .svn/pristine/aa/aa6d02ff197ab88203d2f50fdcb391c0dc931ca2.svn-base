@@ -1,0 +1,140 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+@Table(tableName="message_bean")
+public class MessageBean {
+	
+		@TableField(isPKey=true,isAutoIncrement=true,comment="主键id,自动增长")
+		private Long id;
+		
+		@TableField(fieldSize=32,isNotNull=true,comment="消息表的UUID")
+		private String messageUUID;// 消息id
+		
+		@TableField(fieldSize=32,isNotNull=false,comment="群表的UUID")
+	    private String groupbeanUUID;// 群表的uuid
+	    
+		@TableField(fieldSize=32,isNotNull=false,comment="消息属性")
+	    private int chatStyle;//0,普通消息；1，群消息；2，讨论组消息；3，系统推送消息；4，好友通知消息(暂时只用到群信息)
+	    
+	    @TableField(fieldSize=32,isNotNull=false,comment="消息类型")
+	    private int chatType;// 消息类型;1,文本；2，图片；3，小视频；4，文件；5，地理位置；6，语音；7，视频通话(暂时拥有1文本2图片(有可能舍弃)3小视频(有可能舍弃))
+	    
+	    @TableField(fieldSize=2000,isNotNull=false,comment="文本信息")
+	    private String content;// 文本消息内容
+	    
+	    @TableField(fieldSize=100,isNotNull=false,comment="文本信息")
+	    private String errorMsg;// 错误信息(比如中途网络断开连接,或者实体字段过短了,判断是否能从新发送)
+	    
+	    @TableField(fieldSize=100,isNotNull=false,comment="文本信息")
+	    private int errorCode;// 错误代码(比如中73663)类似的错误代码数字
+	    
+	    @TableField(fieldSize=36,isNotNull=false,comment="发送信息的用户")
+	    private String userUUID;//用户id
+	    
+	    @TableField(fieldSize=36,isNotNull=false,comment="发送信息的用户")
+	    private String friendId;//目标好友id(暂废(目前只有群方面))
+	    
+	    
+	    private int  pxid;//排序id
+
+	    private String time;//发布时间
+	    
+		public Long getId() {
+			return id;
+		}
+
+		public String getMessageUUID() {
+			return messageUUID;
+		}
+
+		public String getGroupbeanUUID() {
+			return groupbeanUUID;
+		}
+
+		public int getChatStyle() {
+			return chatStyle;
+		}
+
+		public int getChatType() {
+			return chatType;
+		}
+
+		public String getContent() {
+			return content;
+		}
+
+		public String getErrorMsg() {
+			return errorMsg;
+		}
+
+		public int getErrorCode() {
+			return errorCode;
+		}
+
+		public String getUserUUID() {
+			return userUUID;
+		}
+
+		public String getFriendId() {
+			return friendId;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
+
+		public void setMessageUUID(String messageUUID) {
+			this.messageUUID = messageUUID;
+		}
+
+		public void setGroupbeanUUID(String groupbeanUUID) {
+			this.groupbeanUUID = groupbeanUUID;
+		}
+
+		public void setChatStyle(int chatStyle) {
+			this.chatStyle = chatStyle;
+		}
+
+		public void setChatType(int chatType) {
+			this.chatType = chatType;
+		}
+
+		public void setContent(String content) {
+			this.content = content;
+		}
+
+		public void setErrorMsg(String errorMsg) {
+			this.errorMsg = errorMsg;
+		}
+
+		public void setErrorCode(int errorCode) {
+			this.errorCode = errorCode;
+		}
+
+		public void setUserUUID(String userUUID) {
+			this.userUUID = userUUID;
+		}
+
+		public void setFriendId(String friendId) {
+			this.friendId = friendId;
+		}
+
+		public int getPxid() {
+			return pxid;
+		}
+
+		public void setPxid(int pxid) {
+			this.pxid = pxid;
+		}
+
+		public String getTime() {
+			return time;
+		}
+
+		public void setTime(String time) {
+			this.time = time;
+		}
+			
+}

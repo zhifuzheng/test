@@ -1,0 +1,9 @@
+package com.xryb.zhtc.service;
+
+import com.xryb.zhtc.entity.OperationLog;
+/**
+ * 操作日志相关service接口
+ * @author wf
+ */
+public interface IOperationLogService extends IBaseService<OperationLog> {
+}

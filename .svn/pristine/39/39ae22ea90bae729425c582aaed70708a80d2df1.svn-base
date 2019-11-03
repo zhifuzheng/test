@@ -1,0 +1,713 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 供需管理商品订单表
+ * @author zzf
+ */
+
+@Table(tableName="supply_order")
+public class SupplyOrder implements Serializable{
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = -67129455280879534L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="订单UUID")
+	private String orderUUID;
+	
+	@TableField(fieldSize=32,comment="退款单号")
+	private String refundNo;
+	
+	@TableField(fieldSize=64,comment="订单通知")
+	private String advice;
+	
+	@TableField(isNotNull=true,fieldSize=128,comment="订单标题")
+	private String title;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="卖家UUID")
+	private String sellerUUID;
+	
+	@TableField(isNotNull=true,fieldSize=128,comment="卖家名称")
+	private String sellerName;
+	
+	@TableField(fieldSize=1000,comment="卖家图片")
+	private String sellerLogo;
+	
+	@TableField(fieldSize=11,comment="卖家联系电话")
+	private String contactMobile;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="商品UUID")
+	private String goodUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="商品名称")
+	private String goodTitle;
+	
+	@TableField(fieldSize=65534,comment="商品详情")
+	private String goodDetails;
+	
+	@TableField(fieldSize=1000,comment="商品图片")
+	private String goodImg;
+	
+	@TableField(comment="商品单价")
+	private Integer price;
+	
+	@TableField(comment="商品总件数")
+	private Integer totalCount;
+	
+	@TableField(comment="商品总价")
+	private Integer totalPrice;
+	
+	@TableField(comment="优惠总金额，默认值为0")
+	private Integer reducePrice = 0;
+	
+	@TableField(comment="实付金额")
+	private Integer payment;
+	
+	@TableField(comment="运费金额")
+	private Integer deliveryMoney;
+	
+	@TableField(fieldSize=1,comment="支付渠道：0-余额，1-微信，默认值为1")
+	private String payChannel = "1";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="订单付款状态：0-未付款，1-已付款，默认值为0")
+	private String isPay = "0";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="订单状态：0-待付款，1-已付款，未发货，2-已发货，未签收，3-已签收，未评价，交易完成，4-已评价，-1-交易取消，-2-超时关闭，-3-待退款，-4-同意退款，-5驳回退款，-6待退货，-7同意退货，-8驳回退货，9无可退货商品，默认值为0")
+	private String orderStatus = "0";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="发起退款和退货前的订单状态,初始默认未0")
+	private String originStatus = "0";
+	
+	@TableField(fieldSize=100, comment="退款退货驳回原因")
+	private String rejectMsg;
+	
+	@TableField(fieldSize=200, comment="退款退货驳回原因详细说明")
+	private String rejectMsgDetail;
+	
+	@TableField(fieldSize=5000, comment="退款退货驳回图片凭证")
+	private String rejectImgList;
+	
+	@TableField(fieldSize=2, comment="退款服务类型，1-仅退款(未收到货)，2-退货退款(已收到货)")
+	private String refundType;
+	
+	@TableField(fieldSize=2, comment="物流状态，1-未收到货，2-已收到货")
+	private String deliveryStatus;
+	
+	@TableField(comment="申请退款金额")
+	private Integer refundMoney;
+	
+	@TableField(fieldSize=50,comment="申请退款原因")
+	private String refundReason;
+	
+	@TableField(fieldSize=200,comment="申请退款详情说明")
+	private String refundDetail;
+	
+	@TableField(fieldSize=5000,comment="申请退款详情说明凭证图片")
+	private String refundDetailImg;
+	
+	@TableField(fieldSize=30, comment="退货收货人姓名")
+	private String refundName;
+	
+	@TableField(fieldSize=11, comment="退货收货人手机号码，11位标准手机长度，全局唯一")
+	private String refundMobile;
+	
+	@TableField(fieldSize=100, comment="退货收货人省市区")
+	private String refundProvCityDist;
+	
+	@TableField(fieldSize=100, comment="退货收货人详细地址")
+	private String refundDetailAddr;
+	
+	@TableField(fieldSize=30, comment="买家退货的快递单号")
+	private String refundDeliveryNumber;
+	
+	@TableField(fieldSize=30, comment="买家退货的的快递公司")
+	private String refundDeliveryCompany;
+	
+	@TableField(fieldSize=30, comment="商家发货的快递单号")
+	private String deliveryNumber;
+	
+	@TableField(fieldSize=30, comment="商家发货的快递公司")
+	private String deliveryCompany;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="买家订单删除状态：1-未删除，2-已删除，默认值为1")
+	private String  payerIsDel = "1";
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="卖家订单删除状态：1-未删除，2-已删除，默认值为1")
+	private String sellerIsDel = "1";
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="买家UUID")
+	private String payerUUID;
+	
+	@TableField(fieldSize=30,comment="买家名称")
+	private String payerName;
+	
+	@TableField(fieldSize=1000,comment="买家头像")
+	private String payerLogo;
+	
+	@TableField(fieldSize=11, comment="买家手机号码，11位标准手机长度，全局唯一")
+	private String payerMobile;
+	
+	@TableField(fieldSize=100, comment="买家地址")
+	private String detailAddr;
+	
+	@TableField(fieldSize=100, comment="卖家发布商品地址")
+	private String goodReleaseAddr;
+	
+	@TableField(fieldSize=200, comment="买家留言")
+	private String buyerMsg;
+	
+	@TableField(fieldSize=30, comment="收货人姓名")
+	private String receiverName;
+	
+	@TableField(fieldSize=11, comment="收货人手机号码，11位标准手机长度，全局唯一")
+	private String receiverMobile;
+	
+	@TableField(fieldSize=100, comment="收货人省市区")
+	private String provCityDist;
+	
+	@TableField(fieldSize=100, comment="收货人详细地址")
+	private String receiverDetailAddr;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="配送方式：1-快递物流，2-面对面交易，默认值为1")
+	private String deliveryType = "1";
+	
+	@TableField(fieldSize=30,comment="订单创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="订单修改时间")
+	private String updateTime;
+	
+	@TableField(fieldSize=30,comment="订单退款退货申请时间")
+	private String refundTime;
+	
+	@TableField(fieldSize=30,comment="拒绝退款退货申请时间")
+	private String rejecTime;
+	
+	@TableField(fieldSize=30,comment="订单付款时间")
+	private String payTime;
+	
+	@TableField(fieldSize=30,comment="订单取消时间")
+	private String abolishTime;
+	
+	@TableField(fieldSize=30,comment="订单完成时间")
+	private String endTime;
+	
+	@TableField(fieldSize=30,comment="订单关闭时间")
+	private String closeTime;
+	
+	
+	
+	
+
+	public String getRejecTime() {
+		return rejecTime;
+	}
+
+	public void setRejecTime(String rejecTime) {
+		this.rejecTime = rejecTime;
+	}
+
+	public String getRejectMsgDetail() {
+		return rejectMsgDetail;
+	}
+
+	public void setRejectMsgDetail(String rejectMsgDetail) {
+		this.rejectMsgDetail = rejectMsgDetail;
+	}
+
+	public String getRejectImgList() {
+		return rejectImgList;
+	}
+
+	public void setRejectImgList(String rejectImgList) {
+		this.rejectImgList = rejectImgList;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getOrderUUID() {
+		return orderUUID;
+	}
+
+	public void setOrderUUID(String orderUUID) {
+		this.orderUUID = orderUUID;
+	}
+
+	public String getRefundNo() {
+		return refundNo;
+	}
+
+	public void setRefundNo(String refundNo) {
+		this.refundNo = refundNo;
+	}
+
+	public String getAdvice() {
+		return advice;
+	}
+
+	public void setAdvice(String advice) {
+		this.advice = advice;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getSellerUUID() {
+		return sellerUUID;
+	}
+
+	public void setSellerUUID(String sellerUUID) {
+		this.sellerUUID = sellerUUID;
+	}
+
+	public String getSellerName() {
+		return sellerName;
+	}
+
+	public void setSellerName(String sellerName) {
+		this.sellerName = sellerName;
+	}
+
+	public String getSellerLogo() {
+		return sellerLogo;
+	}
+
+	public void setSellerLogo(String sellerLogo) {
+		this.sellerLogo = sellerLogo;
+	}
+
+	public String getContactMobile() {
+		return contactMobile;
+	}
+
+	public void setContactMobile(String contactMobile) {
+		this.contactMobile = contactMobile;
+	}
+
+	public String getGoodUUID() {
+		return goodUUID;
+	}
+
+	public void setGoodUUID(String goodUUID) {
+		this.goodUUID = goodUUID;
+	}
+
+	public String getGoodTitle() {
+		return goodTitle;
+	}
+
+	public void setGoodTitle(String goodTitle) {
+		this.goodTitle = goodTitle;
+	}
+
+	public String getGoodDetails() {
+		return goodDetails;
+	}
+
+	public void setGoodDetails(String goodDetails) {
+		this.goodDetails = goodDetails;
+	}
+
+	public String getGoodImg() {
+		return goodImg;
+	}
+
+	public void setGoodImg(String goodImg) {
+		this.goodImg = goodImg;
+	}
+
+	public Integer getPrice() {
+		return price;
+	}
+
+	public void setPrice(Integer price) {
+		this.price = price;
+	}
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public Integer getTotalPrice() {
+		return totalPrice;
+	}
+
+	public void setTotalPrice(Integer totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+
+	public Integer getReducePrice() {
+		return reducePrice;
+	}
+
+	public void setReducePrice(Integer reducePrice) {
+		this.reducePrice = reducePrice;
+	}
+
+	public Integer getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Integer payment) {
+		this.payment = payment;
+	}
+
+	public Integer getDeliveryMoney() {
+		return deliveryMoney;
+	}
+
+	public void setDeliveryMoney(Integer deliveryMoney) {
+		this.deliveryMoney = deliveryMoney;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
+	}
+
+	public String getIsPay() {
+		return isPay;
+	}
+
+	public void setIsPay(String isPay) {
+		this.isPay = isPay;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getOriginStatus() {
+		return originStatus;
+	}
+
+	public void setOriginStatus(String originStatus) {
+		this.originStatus = originStatus;
+	}
+
+	public String getRejectMsg() {
+		return rejectMsg;
+	}
+
+	public void setRejectMsg(String rejectMsg) {
+		this.rejectMsg = rejectMsg;
+	}
+
+	public String getRefundType() {
+		return refundType;
+	}
+
+	public void setRefundType(String refundType) {
+		this.refundType = refundType;
+	}
+
+	public String getDeliveryStatus() {
+		return deliveryStatus;
+	}
+
+	public void setDeliveryStatus(String deliveryStatus) {
+		this.deliveryStatus = deliveryStatus;
+	}
+
+	public Integer getRefundMoney() {
+		return refundMoney;
+	}
+
+	public void setRefundMoney(Integer refundMoney) {
+		this.refundMoney = refundMoney;
+	}
+
+	public String getRefundReason() {
+		return refundReason;
+	}
+
+	public void setRefundReason(String refundReason) {
+		this.refundReason = refundReason;
+	}
+
+	public String getRefundDetail() {
+		return refundDetail;
+	}
+
+	public void setRefundDetail(String refundDetail) {
+		this.refundDetail = refundDetail;
+	}
+
+	public String getRefundDetailImg() {
+		return refundDetailImg;
+	}
+
+	public void setRefundDetailImg(String refundDetailImg) {
+		this.refundDetailImg = refundDetailImg;
+	}
+
+	public String getRefundName() {
+		return refundName;
+	}
+
+	public void setRefundName(String refundName) {
+		this.refundName = refundName;
+	}
+
+	public String getRefundMobile() {
+		return refundMobile;
+	}
+
+	public void setRefundMobile(String refundMobile) {
+		this.refundMobile = refundMobile;
+	}
+
+	public String getRefundProvCityDist() {
+		return refundProvCityDist;
+	}
+
+	public void setRefundProvCityDist(String refundProvCityDist) {
+		this.refundProvCityDist = refundProvCityDist;
+	}
+
+	public String getRefundDetailAddr() {
+		return refundDetailAddr;
+	}
+
+	public void setRefundDetailAddr(String refundDetailAddr) {
+		this.refundDetailAddr = refundDetailAddr;
+	}
+
+	public String getRefundDeliveryNumber() {
+		return refundDeliveryNumber;
+	}
+
+	public void setRefundDeliveryNumber(String refundDeliveryNumber) {
+		this.refundDeliveryNumber = refundDeliveryNumber;
+	}
+
+	public String getRefundDeliveryCompany() {
+		return refundDeliveryCompany;
+	}
+
+	public void setRefundDeliveryCompany(String refundDeliveryCompany) {
+		this.refundDeliveryCompany = refundDeliveryCompany;
+	}
+
+	public String getDeliveryNumber() {
+		return deliveryNumber;
+	}
+
+	public void setDeliveryNumber(String deliveryNumber) {
+		this.deliveryNumber = deliveryNumber;
+	}
+
+	public String getDeliveryCompany() {
+		return deliveryCompany;
+	}
+
+	public void setDeliveryCompany(String deliveryCompany) {
+		this.deliveryCompany = deliveryCompany;
+	}
+
+	public String getPayerIsDel() {
+		return payerIsDel;
+	}
+
+	public void setPayerIsDel(String payerIsDel) {
+		this.payerIsDel = payerIsDel;
+	}
+
+	public String getSellerIsDel() {
+		return sellerIsDel;
+	}
+
+	public void setSellerIsDel(String sellerIsDel) {
+		this.sellerIsDel = sellerIsDel;
+	}
+
+	public String getPayerUUID() {
+		return payerUUID;
+	}
+
+	public void setPayerUUID(String payerUUID) {
+		this.payerUUID = payerUUID;
+	}
+
+	public String getPayerName() {
+		return payerName;
+	}
+
+	public void setPayerName(String payerName) {
+		this.payerName = payerName;
+	}
+
+	public String getPayerLogo() {
+		return payerLogo;
+	}
+
+	public void setPayerLogo(String payerLogo) {
+		this.payerLogo = payerLogo;
+	}
+
+	public String getPayerMobile() {
+		return payerMobile;
+	}
+
+	public void setPayerMobile(String payerMobile) {
+		this.payerMobile = payerMobile;
+	}
+
+	public String getDetailAddr() {
+		return detailAddr;
+	}
+
+	public void setDetailAddr(String detailAddr) {
+		this.detailAddr = detailAddr;
+	}
+
+	public String getGoodReleaseAddr() {
+		return goodReleaseAddr;
+	}
+
+	public void setGoodReleaseAddr(String goodReleaseAddr) {
+		this.goodReleaseAddr = goodReleaseAddr;
+	}
+
+	public String getBuyerMsg() {
+		return buyerMsg;
+	}
+
+	public void setBuyerMsg(String buyerMsg) {
+		this.buyerMsg = buyerMsg;
+	}
+
+	public String getReceiverName() {
+		return receiverName;
+	}
+
+	public void setReceiverName(String receiverName) {
+		this.receiverName = receiverName;
+	}
+
+	public String getReceiverMobile() {
+		return receiverMobile;
+	}
+
+	public void setReceiverMobile(String receiverMobile) {
+		this.receiverMobile = receiverMobile;
+	}
+
+	public String getProvCityDist() {
+		return provCityDist;
+	}
+
+	public void setProvCityDist(String provCityDist) {
+		this.provCityDist = provCityDist;
+	}
+
+	public String getReceiverDetailAddr() {
+		return receiverDetailAddr;
+	}
+
+	public void setReceiverDetailAddr(String receiverDetailAddr) {
+		this.receiverDetailAddr = receiverDetailAddr;
+	}
+
+	public String getDeliveryType() {
+		return deliveryType;
+	}
+
+	public void setDeliveryType(String deliveryType) {
+		this.deliveryType = deliveryType;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public String getRefundTime() {
+		return refundTime;
+	}
+
+	public void setRefundTime(String refundTime) {
+		this.refundTime = refundTime;
+	}
+
+	public String getPayTime() {
+		return payTime;
+	}
+
+	public void setPayTime(String payTime) {
+		this.payTime = payTime;
+	}
+
+	public String getAbolishTime() {
+		return abolishTime;
+	}
+
+	public void setAbolishTime(String abolishTime) {
+		this.abolishTime = abolishTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getCloseTime() {
+		return closeTime;
+	}
+
+	public void setCloseTime(String closeTime) {
+		this.closeTime = closeTime;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	
+	
+	
+	
+
+}

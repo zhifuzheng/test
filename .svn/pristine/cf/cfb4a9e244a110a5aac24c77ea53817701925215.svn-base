@@ -1,0 +1,133 @@
+/*package spark.websoket;
+
+import javax.websocket.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.*;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+
+import com.xryb.zp.entity.UserInfo;
+import com.xryb.zp.entity.VipInfo;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+
+public class Message {
+	
+	private static Logger logger = Logger.getLogger(Message.class);
+
+	
+	  *//**
+     * 消息类型
+     *//*
+    public static String NOTICE = "notice";     //通知
+    public static String MESSAGE = "message";   //消息
+    
+    
+    *//**
+     * 组装信息返回给前台
+     * @param message  交互信息
+     * @param type     信息类型
+     * @param collection 在线列表
+     * @return
+     *
+     * "massage" : {
+     *              "from" : "xxx",
+     *              "to" : "xxx",
+     *              "content" : "xxx",
+     *              "time" : "xxxx.xx.xx"
+     *          },
+     * "type" : {notice|message},
+     * "list" : {[xx],[xx],[xx]}
+     * @throws JSONException 
+     *//*
+    
+    public static String getMessage(String message,String type,Collection<VipInfo> vipinfolist) throws JSONException{
+        JSONObject msg = new JSONObject();
+        msg.put("message",message);
+        msg.put("type", type);
+        List<String> propertys = new ArrayList<String>();
+        propertys.add("session");
+        JSONArray userListArray = JSONArray.fromObject(vipinfolist);
+        msg.put("list", userListArray);
+		return msg.toString();
+    }
+    
+    *//**
+     * 广播消息
+     * @param message 消息
+     * @param UserInfo 在线用户
+     *//*
+    public static void broadcast(String message,Collection<VipInfo> onlineUsers){
+        *//***************************在线用户***************************//*
+        StringBuffer userStr = new StringBuffer();
+        for(VipInfo user : onlineUsers){
+            userStr.append(user.getVipName() + ",");
+         }
+        userStr.deleteCharAt(userStr.length()-1);
+        *//***************************在线用户***************************//*
+        for(VipInfo user : onlineUsers){
+                try {
+                	if (user.getSession()==null) {
+						
+					}
+                    user.getSession().getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    logger.info("消息发送失败！" + e.getMessage());
+                    continue;
+                }
+        }
+    }
+
+	public static String getContent(VipInfo fromUser, List<VipInfo> vipinfolist, String context, String time) throws JSONException {
+		 
+		 JSONObject contentJson = new JSONObject();
+		 
+		 JSONArray jsonArray = new JSONArray();
+	   // 转化为json串时去掉session，用户session不能被序列化
+        
+		 List<String> propertys = new ArrayList<String>();
+        
+        propertys.add("session");
+        
+        contentJson.put("from",JSONObject.fromObject(fromUser));
+
+        for (VipInfo vipinfo : vipinfolist) {
+        	
+        	JSONObject jsonObject1 = new JSONObject();
+        	
+        	jsonObject1.put("id", vipinfo.getVipUUID());
+        	
+        	jsonObject1.put("name",vipinfo.getVipName());
+        	
+        	jsonArray.add(jsonObject1);
+        }
+        
+        contentJson.put("to",jsonArray);
+        
+        contentJson.put("content",context);
+        
+        contentJson.put("time",time);
+        
+        return contentJson.toString();
+	}
+
+	public static void singleSend(String message, VipInfo vipInfo) {
+	        try {
+	        	vipInfo.getSession().getBasicRemote().sendText(message);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            logger.info("消息发送失败！" + e.getMessage());
+	        }
+	    }
+    
+
+}
+*/

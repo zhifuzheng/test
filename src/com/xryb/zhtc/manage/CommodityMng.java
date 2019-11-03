@@ -1,0 +1,611 @@
+package com.xryb.zhtc.manage;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.xryb.zhtc.entity.GxCollection;
+import com.xryb.zhtc.entity.GxCommodity;
+import com.xryb.zhtc.entity.GxDemand;
+import com.xryb.zhtc.entity.GxDemandComment;
+import com.xryb.zhtc.entity.GxReport;
+import com.xryb.zhtc.service.IGxCommodityService;
+import com.xryb.zhtc.service.impl.GxCommodityServiceImpl;
+import com.xryb.zhtc.util.CacheUtil;
+import com.xryb.zhtc.util.DateTimeUtil;
+import com.xryb.zhtc.util.JsonUtil;
+import com.xryb.zhtc.util.ReadProperties;
+import com.xryb.zhtc.util.ReqToEntityUtil;
+import com.xryb.zhtc.util.ReqToMapUtil;
+import com.xryb.zhtc.util.UpFileUtil;
+
+import dbengine.util.Page;
+
+import java.util.Collections;
+import java.util.Comparator;
+
+import spark.annotation.Auto;
+
+/**
+ * 供需管理
+ * @author Administrator
+ *
+ */
+
+public class CommodityMng {
+	@Auto(name=GxCommodityServiceImpl.class)
+	private IGxCommodityService iGxCommodityService;
+	
+	/**
+	 * uni-app图片上传
+	 */
+	public Object uploadImg(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		UpFileUtil uy =new UpFileUtil();
+		Map map =new HashMap();
+	    Map<String, String> maps = new HashMap<String,String>();
+	    String path = ReadProperties.getValue("getCommodityImg");
+	    String getPath = ReadProperties.getValue("commodityImg");
+		String fileName = uy.saveHttpUpFiles(request, path, map, maps,"0");
+		Map<String, String> msgMap = new HashMap<>();
+		msgMap.put("url", getPath+fileName);
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 新增或修改商品
+	 */
+	public Object commoditySave(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, String> msgMap = new HashMap<>();
+		GxCommodity gxCommodity = (GxCommodity) ReqToEntityUtil.reqToEntity(request, GxCommodity.class);
+		if(gxCommodity.getId() == null) {
+			gxCommodity.setCommodityUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			gxCommodity.setState("0");
+			gxCommodity.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+			gxCommodity.setStop("0");
+		}
+		if(iGxCommodityService.commoditySave(sourceId, closeConn, gxCommodity)) {
+			msgMap.put("msg", "发布成功");
+		}else {
+			msgMap.put("msg", "发布失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 新增或修改需求
+	 */
+	public Object demandSave(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, String> msgMap = new HashMap<>();
+		GxDemand gxDemand = (GxDemand) ReqToEntityUtil.reqToEntity(request, GxDemand.class);
+		if(gxDemand.getId() == null) {
+			gxDemand.setDemandUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			gxDemand.setState("0");
+			gxDemand.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+			gxDemand.setStop("0");
+		}
+		if(iGxCommodityService.demandSave(sourceId, closeConn, gxDemand)) {
+			msgMap.put("msg", "发布成功");
+		}else {
+			msgMap.put("msg", "发布失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 查询我的发布
+	 */
+	public Object myRelease(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String record = request.getParameter("rows");//每页多少条
+		String pageNumber = request.getParameter("page");//当前页
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("state", request.getParameter("state"));//商品状态（0：上架，1：下架）
+		findMap.put("stop", "0");
+		findMap.put("vipUUID", request.getParameter("vipUUID"));//vipUUID
+		
+		//供需商品
+		List<GxCommodity> commodityList = new ArrayList<>();
+		commodityList = iGxCommodityService.commodityAll(sourceId, closeConn, null, findMap);
+		
+		//供需需求
+		List<GxDemand> demandList = new ArrayList<>();
+		demandList = iGxCommodityService.demandAll(sourceId, closeConn, null, findMap);
+		
+		List<Map<Object, Object>> listMap = new ArrayList<>();
+		for(int i = 0; i < commodityList.size(); i++) {
+			GxCommodity gxCommodity = null;
+			Map<Object, Object> map = new HashMap<>();
+			gxCommodity = commodityList.get(i);
+			map.put("id", gxCommodity.getId());
+			map.put("uuid", gxCommodity.getCommodityUUID());
+			map.put("commodityTitle", gxCommodity.getCommodityTitle());
+			String img = gxCommodity.getCommodityImg();
+			String[] imgArr = img.split(",");
+			for(int c = 0; c < imgArr.length; c++) {
+				map.put("img", imgArr[c]);
+				break;
+			}
+			map.put("price", gxCommodity.getPrice());
+			map.put("details", gxCommodity.getDetails());
+			map.put("state", "0");//供需商品
+			listMap.add(map);
+		}
+		for(int i = 0; i < demandList.size(); i++) {
+			GxDemand gxDemand = null;
+			Map<Object, Object> map = new HashMap<>();
+			gxDemand = demandList.get(i);
+			map.put("id", gxDemand.getId());
+			map.put("uuid", gxDemand.getDemandUUID());
+			map.put("commodityTitle", gxDemand.getCommodityTitle());
+			map.put("img", gxDemand.getDemandImg());
+			map.put("details", gxDemand.getDetails());
+			map.put("state", "1");//供需需求
+			listMap.add(map);
+		}
+		
+		//排序
+		Collections.sort(listMap, new Comparator<Map<Object, Object>>() {
+            public int compare(Map<Object, Object> p1, Map<Object, Object> p2) {
+            	if(Float.parseFloat((String) String.valueOf(p1.get("id"))) < Float.parseFloat((String) String.valueOf(p2.get("id")))) {
+            		return 1;
+            	}
+            	if(Float.parseFloat((String) String.valueOf(p1.get("id"))) == Float.parseFloat((String) String.valueOf(p2.get("id")))) {
+            		return 0;
+            	}
+            	return -1;
+            }
+        });
+		
+		List<Map<Object, Object>> list = new ArrayList<Map<Object,Object>>();
+		Map map = new HashMap<>();
+		//计算总页数
+		int len = listMap.size();
+		len = len-1;
+		int row = Integer.parseInt(record);
+		int count = len/row;
+		int pageCount = (int) Math.floor(count);
+		pageCount = pageCount+1;//总页数
+		
+		int page = Integer.parseInt(pageNumber);
+		if(pageCount <= page) {//如果总页数小于等于当前页
+			for(int i = (page-1)*row; i < listMap.size(); i++) {
+				list.add(listMap.get(i));
+			}
+		}else {
+			for(int i = (page-1)*row; i < page*row; i++) {
+				list.add(listMap.get(i));
+			}
+		}
+		map.put("pageCount", pageCount);
+		map.put("page", page);
+		map.put("list", list);
+		return JsonUtil.ObjToJson(map);
+		
+	}
+	
+	/**
+	 * 上架或下架
+	 */
+	public Object stateUp(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, String> msgMap = new HashMap<>();
+		String stateUp = request.getParameter("stateUp");//0:供需商品，1:供需需求
+		String id = request.getParameter("id");
+		String uuid = request.getParameter("uuid");
+		String state = request.getParameter("state");
+		GxCommodity gxCommodity = new GxCommodity();//供需商品
+		GxDemand gxDemand = new GxDemand();//供需需求
+		boolean flg = false;
+		if("0".equals(stateUp)) {
+			gxCommodity.setId(Long.valueOf(id));
+			gxCommodity.setCommodityUUID(uuid);
+			gxCommodity.setState(state);
+			if(iGxCommodityService.commoditySave(sourceId, closeConn, gxCommodity)) {
+				flg = true;
+			}
+		}
+		if("1".equals(stateUp)) {
+			gxDemand.setId(Long.valueOf(id));
+			gxDemand.setDemandUUID(uuid);
+			gxDemand.setState(state);
+			if(iGxCommodityService.demandSave(sourceId, closeConn, gxDemand)) {
+				flg = true;
+			}
+		}
+		if(flg) {
+			msgMap.put("state", "0");
+			msgMap.put("msg", "操作成功");
+		}else {
+			msgMap.put("state", "1");
+			msgMap.put("msg", "操作失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 根据ID查询供需商品
+	 */
+	public String commodityId(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String commodityUUID = request.getParameter("commodityUUID");
+		GxCommodity gxCommodity = null;
+		gxCommodity = iGxCommodityService.commodityId(sourceId, closeConn, commodityUUID);
+		return JsonUtil.ObjToJson(gxCommodity);
+	}
+	
+	/**
+	 * 根据ID查询供需需求
+	 */
+	public String gxDemandId(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String demandUUID = request.getParameter("demandUUID");
+		GxDemand gxDemand = null;
+		gxDemand = iGxCommodityService.gxDemandId(sourceId, closeConn, demandUUID);
+		return JsonUtil.ObjToJson(gxDemand);
+	}
+	
+	/**
+	 * 删除供需商品或供需需求
+	 */
+	public Object demandDel(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String state = request.getParameter("state");
+		String uuid = request.getParameter("uuid");
+		boolean flg = false;
+		if("0".equals(state)) {//删除供需商品
+			if(iGxCommodityService.commodityDel(sourceId, closeConn, uuid)) {
+				flg = true;
+			}else {
+				flg = false;
+			}
+		}
+		if("1".equals(state)) {//删除供需需求
+			if(iGxCommodityService.demandDel(sourceId, closeConn, uuid)) {
+				flg = true;
+			}else {
+				flg = false;
+			}
+		}
+		Map<String, String> msgMap = new HashMap<>();
+		if(flg) {
+			msgMap.put("state", "0");
+			msgMap.put("msg", "删除成功");
+		}else {
+			msgMap.put("state", "1");
+			msgMap.put("msg", "删除失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 查询供需商品
+	 */
+	public Object commodityAll(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Page page = null;
+		String record = request.getParameter("rows");
+		String pageNumber = request.getParameter("page");
+		if(record != null && !"".equals(record) && pageNumber != null && !"".equals(pageNumber)) {
+			page = new Page();
+			page.setPageRecord(Integer.parseInt(record));
+			page.setPage(Integer.parseInt(pageNumber));
+		}
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, GxCommodity.class);
+		List<GxCommodity> listData = iGxCommodityService.commodityAll(sourceId, closeConn, page, findMap);
+		Map map = new HashMap();
+		if(page == null) {
+			map.put("listData", listData);
+			return JsonUtil.ObjToJson(map);
+		}else {
+			map.put("total", page.getTotalRecord());
+			if(listData == null) {
+				map.put("rows", 0);
+			}else {
+				map.put("rows", listData);
+			}
+			map.put("page", page);
+			return JsonUtil.ObjToJson(map);
+		}
+	}
+	
+	/**
+	 * 查询供需需求
+	 */
+	public Object demandAll(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Page page = null;
+		String record = request.getParameter("rows");
+		String pageNumber = request.getParameter("page");
+		if(record != null && !"".equals(record) && pageNumber != null && !"".equals(pageNumber)) {
+			page = new Page();
+			page.setPageRecord(Integer.parseInt(record));
+			page.setPage(Integer.parseInt(pageNumber));
+		}
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, GxDemand.class);
+		List<GxDemand> listData = iGxCommodityService.demandAll(sourceId, closeConn, page, findMap);
+		Map map = new HashMap();
+		if(page == null) {
+			map.put("listData", listData);
+			return JsonUtil.ObjToJson(map);
+		}else {
+			map.put("total", page.getTotalRecord());
+			if(listData == null) {
+				map.put("rows", 0);
+			}else {
+				map.put("rows", listData);
+			}
+			map.put("page", page);
+			return JsonUtil.ObjToJson(map);
+		}
+	}
+	
+	/**
+	 * 商品浏览量缓存
+	 */
+	public boolean commodityBrowse(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String commodityUUID = request.getParameter("commodityUUID");
+		CacheUtil.getInstance().setLyBrowse(commodityUUID);
+		return true;
+	}
+	
+	/**
+	 * 举报新增或修改
+	 */
+	public Object reportSave(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, String> msgMap = new HashMap<>();
+		GxReport gxReport = (GxReport) ReqToEntityUtil.reqToEntity(request, GxReport.class);
+		if(gxReport.getId() == null) {
+			gxReport.setReportUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			gxReport.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+		}
+		if(iGxCommodityService.reportSave(sourceId, closeConn, gxReport)) {
+			msgMap.put("state", "0");
+		}else {
+			msgMap.put("state", "1");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 举报内容查询
+	 */
+	public Object gxReportsAll(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Page page = null;
+		String record = request.getParameter("rows");
+		String pageNumber = request.getParameter("page");
+		if(record != null && !"".equals(record) && pageNumber != null && !"".equals(pageNumber)) {
+			page = new Page();
+			page.setPageRecord(Integer.parseInt(record));
+			page.setPage(Integer.parseInt(pageNumber));
+		}
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, GxReport.class);
+		List<GxReport> list = iGxCommodityService.gxReportsAll(sourceId, closeConn, page, findMap);
+		Map map = new HashMap();
+		if(page == null) {
+			map.put("list", list);
+			return JsonUtil.ObjToJson(map);
+		}else {
+			map.put("total", page.getTotalRecord());
+			if(list == null) {
+				map.put("rows", 0);
+			}else {
+				map.put("rows", list);
+			}
+			map.put("page", page);
+			return JsonUtil.ObjToJson(map);
+		}
+	}
+	
+	/**
+	 * 供需举报删除
+	 */
+	public boolean reportDel(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String uuid = request.getParameter("reportUUID");
+		String[] uuidArr = uuid.split(",");
+		for(String id:uuidArr) {
+			iGxCommodityService.reportDel(sourceId, closeConn, id);
+		}
+		return true;
+	}
+	
+	/**
+	 * 举报内容停用
+	 */
+	public boolean stateReportState(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String reportUUID = request.getParameter("reportUUID");
+		String id = request.getParameter("id");
+		String dataUUID = request.getParameter("dataUUID");
+		GxReport gxReport = new GxReport();
+		gxReport.setId(Long.valueOf(id));
+		gxReport.setReportUUID(reportUUID);
+		gxReport.setState(1);
+		iGxCommodityService.commodityStop(sourceId, closeConn, dataUUID, "1");
+		iGxCommodityService.demandStop(sourceId, closeConn, dataUUID, "1");
+		iGxCommodityService.reportSave(sourceId, closeConn, gxReport);
+		return true;
+	}
+	
+	/**
+	 * 供需收藏新增或修改
+	 */
+	public Object collectionSave(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Map<String, String> msgMap = new HashMap<>();
+		
+		GxCollection collection = null;
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("dataUUID", request.getParameter("dataUUID"));
+		findMap.put("vipUUID", request.getParameter("vipUUID"));
+		collection = iGxCommodityService.gxCollectionId(sourceId, closeConn, findMap);
+		if(collection != null) {
+			msgMap.put("msg", "不能重复收藏");
+			return JsonUtil.ObjToJson(msgMap);
+		}
+		
+		//缓存收藏量
+		CacheUtil.getInstance().setCollection(request.getParameter("dataUUID"));
+		
+		GxCollection gxCollection = (GxCollection) ReqToEntityUtil.reqToEntity(request, GxCollection.class);
+		
+		if("0".equals(request.getParameter("state"))) {//供需商品
+			GxCommodity gxCommodity = null;
+			gxCommodity = iGxCommodityService.commodityId(sourceId, closeConn, request.getParameter("dataUUID"));
+			gxCollection.setSellerName(gxCommodity.getVipName());
+			gxCollection.setSellerLong(gxCommodity.getVipLogin());
+			gxCollection.setSellerUUID(gxCommodity.getVipUUID());
+			String[] imgArr = gxCommodity.getCommodityImg().split(",");
+			for(int i = 0; i < imgArr.length; i++) {
+				gxCollection.setImg(imgArr[i]);
+				break;
+			}
+			gxCollection.setTitle(gxCommodity.getCommodityTitle());
+			gxCollection.setDetails(gxCommodity.getDetails());
+			gxCollection.setPrice(gxCommodity.getPrice());
+			gxCollection.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+			gxCollection.setPhone(gxCommodity.getPhone());
+		}
+		if("1".equals(request.getParameter("state"))) {//供需需求
+			GxDemand gxDemand = null;
+			gxDemand = iGxCommodityService.gxDemandId(sourceId, closeConn, request.getParameter("dataUUID"));
+			gxCollection.setSellerName(gxDemand.getVipName());
+			gxCollection.setSellerLong(gxDemand.getVipLogin());
+			gxCollection.setSellerUUID(gxDemand.getVipUUID());
+			gxCollection.setImg(gxDemand.getDemandImg());
+			gxCollection.setTitle(gxDemand.getCommodityTitle());
+			gxCollection.setDetails(gxDemand.getDetails());
+			gxCollection.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+			gxCollection.setPhone(gxDemand.getPhone());
+		}
+		
+		if(gxCollection.getId() == null) {
+			gxCollection.setCollectionUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			gxCollection.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+		}
+		if(iGxCommodityService.collectionSave(sourceId, closeConn, gxCollection)) {
+			msgMap.put("msg", "收藏成功");
+		}else {
+			msgMap.put("msg", "操作失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 供需收藏查询
+	 */
+	public Object collectionsAll(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		Page page = null;
+		String record = request.getParameter("rows");
+		String pageNumber = request.getParameter("page");
+		if(record != null && !"".equals(record) && pageNumber != null && !"".equals(pageNumber)) {
+			page = new Page();
+			page.setPageRecord(Integer.parseInt(record));
+			page.setPage(Integer.parseInt(pageNumber));
+		}
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, GxCollection.class);
+		List<GxCollection> list = iGxCommodityService.collectionsAll(sourceId, closeConn, page, findMap);
+		Map map = new HashMap();
+		if(page == null) {
+			map.put("list", list);
+			return JsonUtil.ObjToJson(map);
+		}else {
+			map.put("total", page.getTotalRecord());
+			if(list == null) {
+				map.put("rows", 0);
+			}else {
+				map.put("rows", list);
+			}
+			map.put("page", page);
+			return JsonUtil.ObjToJson(map);
+		}
+	}
+	
+	/**
+	 * 供需点赞缓存
+	 */
+	public Object giveCache(String sourceId,boolean closeConn,HttpServletRequest request,HttpServletResponse response) {
+		String vipUUID = request.getParameter("vipUUID");//获取会员UUID
+		String dataUUID = request.getParameter("dataUUID");//获取点赞数据UUID
+		Map<String, String> msgMap = new HashMap<>();
+		
+		List<Map<String, Object>> giveList = CacheUtil.getInstance().getGive();
+		for(Map<String, Object> map:giveList) {
+			for(Map.Entry<String, Object> entry:map.entrySet()) {
+				if(entry.getKey().equals(vipUUID) && entry.getValue().equals(dataUUID)) {
+					msgMap.put("state", "0");
+					CacheUtil.getInstance().delKey(vipUUID);
+					return JsonUtil.ObjToJson(msgMap);
+				}
+			}
+		}
+		
+		Map<String, Object> mapData = new HashMap<>();
+		mapData.put(vipUUID, dataUUID);
+		CacheUtil.getInstance().setGive(mapData);
+		msgMap.put("state", "1");
+		return JsonUtil.ObjToJson(msgMap);
+		
+	}
+	
+	/**
+	 * 供需评论
+	 */
+	public Object demandCommentSave(String sourceId,boolean closeConn,HttpServletRequest request,HttpServletResponse response) {
+		GxDemandComment gxDemandComment = (GxDemandComment) ReqToEntityUtil.reqToEntity(request, GxDemandComment.class);
+		Map<String,String> msgMap = new HashMap<>();
+		if(gxDemandComment.getId() == null) {
+			gxDemandComment.setCommentUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			gxDemandComment.setTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm"));
+		}
+		if(iGxCommodityService.demandCommentSave(sourceId, closeConn, gxDemandComment)) {
+			msgMap.put("msg", "评论成功");
+		}else {
+			msgMap.put("msg", "评论失败");
+		}
+		return JsonUtil.ObjToJson(msgMap);
+	}
+	
+	/**
+	 * 供需评论查询
+	 */
+	public Object commentsAll(String sourceId,boolean closeConn,HttpServletRequest request,HttpServletResponse response) {
+		Page page = null;
+		String record = request.getParameter("rows");
+		String pageNumber = request.getParameter("page");
+		if(record != null && !"".equals(record) && pageNumber != null && !"".equals(pageNumber)) {
+			page = new Page();
+			page.setPageRecord(Integer.parseInt(record));
+			page.setPage(Integer.parseInt(pageNumber));
+		}
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, GxDemandComment.class);
+		List<GxDemandComment> list = iGxCommodityService.commentsAll(sourceId, closeConn, page, findMap);
+		Map map = new HashMap();
+		if(page == null) {
+			map.put("list", list);
+			return JsonUtil.ObjToJson(map);
+		}else {
+			map.put("total", page.getTotalRecord());
+			if(list == null) {
+				map.put("rows", 0);
+			}else {
+				map.put("rows", list);
+			}
+			map.put("page", page);
+			return JsonUtil.ObjToJson(map);
+		}
+	}
+	
+	/**
+	 * 供需停用或启用
+	 */
+	public boolean supplyStop(String sourceId,boolean closeConn,HttpServletRequest request,HttpServletResponse response) {
+		String uuid = request.getParameter("uuid");
+		String state = request.getParameter("state");
+		String stop = request.getParameter("stop");
+		if("0".equals(state)) {//供需商品
+			iGxCommodityService.commodityStop(sourceId, closeConn, uuid, stop);
+		}
+		if("1".equals(state)) {//供需需求
+			iGxCommodityService.demandStop(sourceId, closeConn, uuid, stop);
+		}
+		return true;
+	}
+
+}

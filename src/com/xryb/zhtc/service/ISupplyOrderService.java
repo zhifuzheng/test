@@ -1,0 +1,140 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.GxCommodity;
+import com.xryb.zhtc.entity.Order;
+import com.xryb.zhtc.entity.SupplyCommodityComment;
+import com.xryb.zhtc.entity.SupplyOrder;
+import com.xryb.zhtc.entity.SupplyUserAddress;
+
+import dbengine.util.Page;
+
+/**
+ * 供需管理持久层接口
+ * @author zzf
+ *
+ */
+public interface ISupplyOrderService {
+	/**
+	 * 查询用户卖出的订单信息列表
+	 */
+	List<SupplyOrder> findUserSellSupplyOrderList(String sourceId,boolean closeConn,Page page,String vipUUID,String type);
+	
+	/**
+	 * 查看用户买到的订单信息列表
+	 */
+	List<SupplyOrder> findUserBuySupplyOrderList(String sourceId,boolean closeConn,Page page,String vipUUID,String type);
+	
+	/**
+	 * 获取供需商品信息
+	 */
+	GxCommodity findSupplyGoodInfo(String sourceId,boolean closeConn,String commodityUUID);
+	
+	/**
+	 * 新增或修改订单
+	 */
+	boolean saveOrUpdateOrder(String sourceId,boolean closeConn,SupplyOrder order);
+	
+	/**
+	 * 修改商品库存
+	 */
+	boolean updateGoodStock(String sourceId,boolean closeConn,String commodityUUID,Integer stock);
+	
+	/**
+	 * 取消订单
+	 */
+	boolean abolishOrder(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 查询订单信息
+	 */
+	SupplyOrder findOrderInfoByOrderUUID(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 撤销退款退货申请
+	 */
+	boolean cancelApply(String sourceId,boolean closeConn,SupplyOrder order);
+	
+	/**
+	 * 确认收货
+	 */
+	boolean confirmReceipt(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 商品确认收货后，商品评价提交
+	 */
+	boolean submitComment(String sourceId,boolean closeConn,SupplyCommodityComment comment);
+	boolean updateSupplyOrderSate(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 生成新订单order
+	 */
+	boolean createVipOrder(String sourceId,boolean closeConn,Order order);
+	
+	/**
+	 * 获取用户收货地址列表
+	 */
+	List<SupplyUserAddress> findSupplyUserAddressList(String sourceId,boolean closeConn,Page page,String vipUUID);
+	Map<String,Object> findSupplyUserAddrNumbers(String sourceId,boolean closeConn,String vipUUID);
+	
+	
+	/**
+	 * 新增或编辑收货地址
+	 */
+	boolean saveOrUpdateAddr(String sourceId,boolean closeConn,SupplyUserAddress address);
+	
+	/**
+	 * 修改用户所有可用收货地址为非默认收货地址
+	 */
+	boolean updateAllAddressNotDefault(String sourceId,boolean closeConn,String vipUUID);
+	
+	/**
+	 * 获取用户默认收货地址信息
+	 */
+	SupplyUserAddress findUserDefaultAddress(String sourceId,boolean closeConn,String vipUUID);
+	
+	/**
+	 * 删除订单
+	 */
+	boolean deleteSupplyAddress(String sourceId,boolean closeConn,String addrUUID);
+	
+	/**
+	 * 修改订单为已支付
+	 */
+	boolean updateSupplyOrderIspay(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 获取订单商品评论列表
+	 */
+	List<SupplyCommodityComment> findSupplyOrderComment(String sourceId,boolean closeConn,Page page,String commodityUUID);
+	
+	/**
+	 * 商家确认发货
+	 */
+	boolean SellerConfirmDelivery(String sourceId,boolean closeConn,String orderUUID);
+	
+	/**
+	 * 获取数据库中所有需要处理超时的订单
+	 */
+	List<SupplyOrder> findOverTimeOrder(String sourceId,boolean closeConn,String orderStatus);
+	
+//	/**
+//	 *处理超时订单
+//	 */
+//	boolean manageOverTimeOrder(String sourceId,boolean closeConn);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

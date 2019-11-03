@@ -1,0 +1,185 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@page import="com.xryb.zp.util.ReadProperties"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+String uuid = request.getParameter("uuid");
+String isEdit = request.getParameter("isEdit");
+%>
+﻿<link rel="stylesheet" type="text/css" href="<%=path%>/static/js/video-js/video-js.min.css"/>
+<script>
+window.UEDITOR_HOME_URL="<%=basePath%>"+"static/js/ueditor/";
+var ueditor_home_url=window.UEDITOR_HOME_URL;//方便配置 图片和附件 上传的位置，以便传递参数
+var folder_url = '<%=ReadProperties.getValue("imgUploadPath")%>';
+</script>
+<script src="<%=path%>/static/js/ueditor/editor_config.js"></script>
+<script type="text/javascript" charset="utf-8" src="<%=path%>/static/js/ueditor/lang/zh-cn/zh-cn.js"></script> 
+
+<!-- 
+<script type="text/javascript" src="<%=path%>/static/js/video-js/video.js"></script>
+ -->
+
+<form id="addCommon_form" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="id" id="id"/>
+    <input type="hidden" name="comTypeName" id="comTypeName"/>
+	<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">
+		<tr>
+			<td align="right">
+				<label>信息标题:</label>
+			</td>
+			<td>
+				<input class="easyui-textbox easyui-" type="text" style="width:910px" name="commonTitle" id="commonTitle" required="required" maxlength="20" size="20"/>
+			</td>
+		</tr>
+		
+		<tr>
+			<td align="right">
+				<label>信息类型</label>
+			</td>
+			<td>
+				<input class="easyui-textbox easyui-" type="text" style="width:910px" name="comTypeCode" id="comTypeCode" required="required" maxlength="20" size="20"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				<label>购买地址</label>
+			</td>
+			<td>
+				<input class="easyui-textbox easyui-" type="text" style="width:910px" name="buyUrl" id="buyUrl" maxlength="20" size="20"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				<label>缩略图:</label>
+			</td>
+			<td>
+	   			<input style="width:100%" id="imageURLFile" name="imageURLFile" onchange="fileChange(this);" type="file"/>
+	   			<input style="width:100%" id="imageURL" name="imageURL" type="hidden"/>
+	   			<span id="commonImgShow_span"><img id="commonImgSrc" src = "http://img.taopic.com/uploads/allimg/110910/2518-11091022301758.jpg" width="100" height="80"></img></span>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				<label>信息内容:</label>
+			</td>
+			<td>
+				<textarea id="commonContent" name="commonContent" style="width:910px"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" align="right">
+				<label>备注:</label>
+			</td>
+			<td>
+				<textarea class="easyui-validatebox" name="commonMark" id="commonMark" style="width: 910px" rows="4" maxlength="100"></textarea> 
+			</td>
+		</tr>
+	</table>
+</form>
+<script type="text/javascript">
+var editor;
+//定时执行初始化编辑器方法 
+var setTimeEdit;
+$(function(){
+        //构建编辑器
+		editor = new UE.ui.Editor({
+			textarea : 'commonContent',
+			fullscreen : false,
+			initialFrameWidth : '1024',
+			initialFrameHeight : 300,
+			initialContent : "",
+			autoHeightEnabled : false
+		});
+	   $("#commonImgShow_span").hide();
+	   //初始化
+	   if("1"=="<%=isEdit%>" && ""!="<%=uuid%>"){
+		   //是编辑数据
+		   $("#addCommon_form").form('load', "<%=path%>/system/common/findCommon?uuid=<%=uuid%>");
+		   //定时执行初始化编辑器方法 
+		   setTimeEdit = window.setInterval("initEditor();",100);
+	   }else{
+		  //是新增数据
+		  //实例化编辑器
+		  editor.render("commonContent");
+	   }  
+	   var url = "../system/commontype/getCommonTypeTree";
+	   $('#comTypeCode').combotree({    
+		    url: url,
+		    required: true
+		});
+	   if($('#comTypeCode').val() == ""){
+		   $('#comTypeCode').combotree("setValue","01"); 
+	   }else{
+	   	   $('#comTypeCode').combotree("setValue",$('#comTypeCode').val());
+	   }
+});
+
+function initEditor(){
+		  if($("#commonContent").val() != "" && $("#commonContent").val() != null){
+			  //去掉定时器的方法 
+			  window.clearInterval(setTimeEdit);
+			  //实例化编辑器
+			  editor.render("commonContent");
+		  }
+		  if($("#imageURL").val() != "" && $("#imageURL").val() != null){
+			   $("#commonImgSrc").attr("src","../system/img/getImg?imgName="+$("#imageURL").val());
+			   $("#commonImgShow_span").show();
+		  }
+}
+function saveCommon(){
+   var formid = "addCommon_form";
+   $('#commonContent').val(editor.getContent());//获取baidu编辑器内容
+   var ctTree = $('#comTypeCode').combotree('tree'); // 获取树对象
+   var selectTree = ctTree.tree('getSelected');    // 获取选择的节点
+   $("#comTypeName").val(selectTree.text);
+   $("#"+formid).ajaxSubmit({
+					url:'<%=path%>/system/common/saveOrUpCommon',
+					type:'post',
+					dataType:'json',
+					beforeSubmit:function(){
+						 //提交前进行文件验证							 
+					    var fileNameFull = $('#'+formid).find("[name='imageURLFile']").val();
+					    if(fileNameFull=="" || fileNameFull=="undefind"){
+					    	//$.messager.alert("提示",'请选择图片文件', "error");
+					    	//return false;
+					    }else{
+							//文件后缀
+							var suffix =  fileNameFull.substring(fileNameFull.lastIndexOf(".")).toLowerCase();
+							if(suffix ==".png" || suffix ==".jpg" || suffix ==".jpeg" || suffix ==".gif" || suffix ==".bmp"){
+								;
+							}else{
+								$("#videoImg").val("");
+								$.messager.alert("提示",'只能上传.png|.jpg|.jpeg|.gif|.bmp格式的文件', "error");
+							}
+					    }
+					},
+					success : function(data){
+						  if(data.status == "1"){
+							  $.messager.alert('提示','操作成功!','info');
+							  //关闭窗口
+							  $("#commonList_addCommon_div").dialog("close");
+							  $("#commonList_addCommon_div").remove();
+							  //刷新列表
+							  $('#common_table').datagrid('reload');
+						  }else{
+							  $.messager.alert("提示", data.msg, "error");
+						  }
+					},
+		            error: function (msg) {
+		                $.messager.alert("提示", "操作失败: "+msg, "error");
+		            }
+			  });
+}
+
+
+function fileChange(dom){
+	var path  = dom.value;
+	var suffix =  path.substring(path.lastIndexOf(".")).toLowerCase();
+	if(suffix ==".png" || suffix ==".jpg" || suffix ==".jpeg" || suffix ==".gif" || suffix ==".bmp"){
+		return;
+	}else{
+		$("#imageURLFile").val("");
+		 $.messager.alert("提示",'只能上传.png|.jpg|.jpeg|.gif|.bmp格式的文件', "error");
+	}
+}
+</script>

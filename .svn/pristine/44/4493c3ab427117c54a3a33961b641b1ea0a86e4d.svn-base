@@ -1,0 +1,167 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>信息管理</title>
+<!--end-->
+<base href="http://localhost:8080/yzpx/" />
+</head>
+<body>
+	<table id="common_table" class="easyui-datagrid">
+		<thead>
+			<tr>
+				<!-- <th data-options="field:'ck',checkbox:true"></th> -->
+				<th data-options="field:'id',align:'center',width:50,hidden:true">id</th>
+				<th data-options="field:'uuid',align:'center',width:50,hidden:true">uuid</th>
+				<th data-options="field:'commonTitle',align:'center',width:200">信息标题</th>
+				<th data-options="field:'comTypeName',align:'center',width:200">信息类型</th>
+				<th data-options="field:'createUserName',align:'center',width:200">创建人</th>
+				<th data-options="field:'createTime',align:'center',width:200">创建时间</th>
+				<th data-options="field:'CZ',width:200,align:'center',formatter:commonListF">操作</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="common_tb" style="padding:2px 5px;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-mini-add-h" plain="true" onclick="addOrUpCommon('', '0')">新增</a>
+		<span style="float:right">
+			<select name="selectCommonGroup" id="selectCommonGroup" style="width:180px;height:26px;"></select>
+			<a id="btn" href="javascript:findCommon();" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</span>
+	</div>
+	<div id="commonList_window_div">
+		<div id="CommonList_addCommon_div"></div>
+	</div>
+	<script type="text/javascript">
+    var selectRow = null;
+	$(function(){
+		$('#common_table').datagrid({
+			iconCls: 'icon-common-info',
+			title: '&nbsp;&nbsp;通用信息管理', 
+			url: baseURL + 'system/common/findCommonList',
+	        rownumbers: true,
+	        pagination: true,
+	        singleSelect: true,
+	        toolbar: '#common_tb',
+	        onUnselect: function(index, row) {
+	        	//$('#equipmentIdHidden').val('');
+	        }
+		});
+		var url="<%=path%>/system/commontype/findCommonTypeList?page=1&rows=100";
+		$.post(url,"",function(data){
+			$("#selectCommonGroup").append("<option value=''>请选择通用信息分类</option>");
+			if(data != '[]'){
+				for(var i=0;i<data.rows.length;i++){
+					$("#selectCommonGroup").append("<option value='"+data.rows[i].commonTypeCode+"'>"+data.rows[i].commonTypeName+"</option>");
+				}
+			}
+		},'json');
+	});
+
+	//新增或修改通用信息
+	function addOrUpCommon(uuid,type){//新增/修改视频信息
+		$("#commonList_addCommon_div").remove();
+		$("#commonList_window_div").append("<div id='commonList_addCommon_div'></div>");
+		var url = "../admin/common/addCommon.jsp?uuid="+uuid+"&isEdit="+type;
+		var title = '新增信息';
+		if("1"==type){
+			title = '修改信息';
+		}
+		$("#commonList_addCommon_div").dialog({
+			title : title,
+			width : 1024,
+			height : 600,
+			closed : false,
+			eache : false,
+			href : url,
+			modal : false,
+			onOpen:function(){
+				$(".window").css("z-index","999");
+				$(".window-shadow").css("z-index","1");
+			},
+			onMove:function(left,top){
+				$(".window").css("z-index","999");
+				$(".window-shadow").css("z-index","1");
+			},
+			onResize:function(width,height){
+				$(".window").css("z-index","999");
+				$(".window-shadow").css("z-index","1");
+			},
+			buttons:[{
+				text:'保存',
+				iconCls: 'icon-mini-tick',
+				handler:function(){saveCommon();}
+			},{
+				text:'取消',
+				iconCls: 'icon-cancel',
+				handler:function(){
+					$("#commonList_addCommon_div").dialog("close");
+					$("#commonList_addCommon_div").remove();
+			    }
+			}]
+		});
+	}
+    //删除通用信息
+	function deleteCommon(uuid){
+    	$.messager.confirm("操作提醒","确定删除视频信息吗？",function(c){
+    		if(c){
+    			var url="<%=path%>/system/common/deleteCommon?uuid="+uuid;
+    			$.post(url,"",function(data){
+    				if(data.status == '1'){
+    					 $.messager.alert('提示','操作成功!','info');
+    					//刷新
+    					$('#common_table').datagrid('reload');
+    				}else{
+    					$.messager.alert('提示','操作失败!','arrer');
+    				}
+    			},'json');
+    		}
+    	});
+	}
+	//格式化操作
+	function commonListF(value, row, index) {
+		var statusHtml = '';
+		var playerHtml = '<a class="easyui-linkbutton button-blue button-xs l-btn l-btn-small" data-options="plain: true" href="common/playerVideo.jsp?playUrl='+row.videoUrl+'" target="_blank">&nbsp;播放&nbsp;</a>';
+		var editHtml = '<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true" onclick="addOrUpCommon(\'' + row.uuid + '\',\'1\');">&nbsp;修改&nbsp;</a>';
+		var deleteHtml = '<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="deleteCommon(\'' + row.uuid + '\');">&nbsp;删除&nbsp;</a>';
+		var imgHtml = '<img src = "http://img.taopic.com/uploads/allimg/110910/2518-11091022301758.jpg" width="100" height="80"></img>';
+		return statusHtml + "&nbsp;" + editHtml + "&nbsp;" + deleteHtml;
+	}
+	function findCommon(){
+		  //刷新列表
+	        $('#common_table').datagrid('load', {
+	        	comTypeCode:  $('#selectCommonGroup').val()
+	        });
+	}
+	</script>
+	<!-- 异步加载比较大的js文件 -->
+	<script type="text/javascript">
+	(function() {
+	     var s = document.createElement('script');
+	     s.type = 'text/javascript';
+	     s.async = true;
+	     s.src = '<%=path%>/static/js/jquery-form.js';
+	     var x = document.getElementsByTagName('script')[0];
+	     x.parentNode.insertBefore(s, x);
+	 })();
+	</script>
+	<script type="text/javascript">
+	(function() {
+	     var s = document.createElement('script');
+	     s.type = 'text/javascript';
+	     s.async = true;
+	     s.src = '<%=path%>/static/js/ueditor/editor_all_min.js';
+	     var x = document.getElementsByTagName('script')[0];
+	     x.parentNode.insertBefore(s, x);
+	 })();
+	</script>
+</body>
+</html>

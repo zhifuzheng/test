@@ -1,0 +1,57 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.UserGroupBean;
+import com.xryb.zhtc.entity.UserandGroup;
+
+import dbengine.util.Page;
+
+public interface IMUserGropBeanService {
+
+	
+	/**
+	 * 保存新建的群
+	 * @param MYCIRCLE
+	 * @return
+	 */
+	public boolean saveUsergroup(String sourceId,boolean closeConn,UserGroupBean usergroupbean);
+	
+	/**
+	 * 查询属于自己的群
+	 * @param ecUUID
+	 * @param findMap(查询条件)
+	 * @return
+	 */
+	public List<UserGroupBean> findUserGroupBeanList(String sourceId,boolean closeConn,Page page,UserGroupBean usergroupbean,Map<String,String> findMap);
+	
+	
+	/**
+	 * 
+	 * 根据关键字搜索群号
+	 * 
+	 * */
+	public List<UserGroupBean> findUserGroupBeanameList(String sourceId,boolean closeConn,Page page,UserGroupBean usergroupbean,Map<String,String> findMap);
+	
+	/**
+	 * 
+	 * 修改群名
+	 * 
+	 * */
+	public boolean updategroupbeanName(String sourceId,boolean closeConn,String groupuuid,String groupbeanname);
+	
+	/**
+	 * 
+	 * 修改群简介
+	 * 
+	 * */
+	public boolean updategroupbeanintroduction(String sourceId,boolean closeConn,String groupuuid,String groupbeanintroduction);
+	
+	/**
+	 * 
+	 * 如果是群主(删除本群)
+	 * 
+	 * */
+	public boolean deletegroup(String sourceId,boolean closeConn,String groupuuid);
+}

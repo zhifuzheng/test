@@ -1,0 +1,143 @@
+package com.xryb.zhtc.entity;
+
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+@Table(tableName="user_group_bean")
+public class UserGroupBean {//聊天群表
+	
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键id,自动增长")
+	private Long id;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="聊天群表的UUID")
+	private String groupbeanUUID;
+	
+	@TableField(fieldSize=200,isNotNull=false,comment="聊天群表的名称")
+	
+	private String groupbeanName;
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="创建人用户UUID")
+	private String userUUID;
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="总人数")
+	private int groupNumberByMax=1;//总人数默认为1创建者
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="当前人数")
+	private int groupNumberByCurrent=0;//当前在线人数(默认等于0)
+	
+	@TableField(fieldSize=200,isNotNull=false,comment="群头像")
+	private String groupbeanImger;//群头像
+	
+	@TableField(fieldSize=500,isNotNull=false,comment="群简介")
+	private String groupbeanintroduction;//群简介
+	    
+	@TableField(fieldSize=32,isNotNull=false,comment="群类型 ")
+	private int groupType;//群类型，朋友，家人，同事(暂时用不到留着做接口操作)
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="创建时间")
+	private String uploadTime;
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="是否公开")
+	private String isyingc;
+
+	@TableField(fieldSize=32,isNotNull=false,comment="判断是大咖的群还是跑团的群")
+	private String isqzhpt;//判断是圈子还是跑团(1.圈子 2.跑团)
+	
+	public Long getId() {
+		return id;
+	}
+
+	public String getGroupbeanUUID() {
+		return groupbeanUUID;
+	}
+
+	public String getGroupbeanName() {
+		return groupbeanName;
+	}
+
+	public String getUserUUID() {
+		return userUUID;
+	}
+
+	public int getGroupNumberByMax() {
+		return groupNumberByMax;
+	}
+
+	public int getGroupNumberByCurrent() {
+		return groupNumberByCurrent;
+	}
+
+	public String getGroupbeanImger() {
+		return groupbeanImger;
+	}
+
+	public String getGroupbeanintroduction() {
+		return groupbeanintroduction;
+	}
+
+	public int getGroupType() {
+		return groupType;
+	}
+
+	public String getUploadTime() {
+		return uploadTime;
+	}
+
+	public String getIsyingc() {
+		return isyingc;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setGroupbeanUUID(String groupbeanUUID) {
+		this.groupbeanUUID = groupbeanUUID;
+	}
+
+	public void setGroupbeanName(String groupbeanName) {
+		this.groupbeanName = groupbeanName;
+	}
+
+	public void setUserUUID(String userUUID) {
+		this.userUUID = userUUID;
+	}
+
+	public void setGroupNumberByMax(int groupNumberByMax) {
+		this.groupNumberByMax = groupNumberByMax;
+	}
+
+	public void setGroupNumberByCurrent(int groupNumberByCurrent) {
+		this.groupNumberByCurrent = groupNumberByCurrent;
+	}
+
+	public void setGroupbeanImger(String groupbeanImger) {
+		this.groupbeanImger = groupbeanImger;
+	}
+
+	public void setGroupbeanintroduction(String groupbeanintroduction) {
+		this.groupbeanintroduction = groupbeanintroduction;
+	}
+
+	public void setGroupType(int groupType) {
+		this.groupType = groupType;
+	}
+
+	public void setUploadTime(String uploadTime) {
+		this.uploadTime = uploadTime;
+	}
+
+	public void setIsyingc(String isyingc) {
+		this.isyingc = isyingc;
+	}
+
+	public String getIsqzhpt() {
+		return isqzhpt;
+	}
+
+	public void setIsqzhpt(String isqzhpt) {
+		this.isqzhpt = isqzhpt;
+	}
+	
+}

@@ -1,0 +1,93 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<style>
+	.buttonSubmit {
+		width: 100px;
+		height: 33px;
+		background-color: #02a2ff;
+		color: #fff !important;
+	}
+	.buttonSubmit:hover{
+		color: #000 !important;
+	}
+</style>
+<div style="padding:0px 0px 0px 10px">
+	<form id="itemAddForm" class="itemForm" method="post">
+		<table style="border-collapse:separate; border-spacing:30px 30px;">
+			<tr>
+				<td>是否开启分销:</td>
+				<td>
+					<select class="easyui-combobox" name="itemStatus" data-options="required:true,editable:false" style="width:280px;">
+						<option value="1">开启分销</option>
+						<option value="0">关闭分销</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>是否开启审核:</td>
+				<td>
+					<select class="easyui-combobox" name="itemStatus" data-options="required:true,editable:false" style="width:280px;">
+						<option value="1">开启审核</option>
+						<option value="0">关闭审核</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>设置分销层级:</td>
+				<td>
+					<select class="easyui-combobox" name="itemStatus" data-options="required:true,editable:false" style="width:280px;">
+						<option value="1">一级</option>
+						<option value="2">二级</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>是否开启内购:</td>
+				<td>
+					<select class="easyui-combobox" name="itemStatus" data-options="required:true,editable:false" style="width:280px;">
+						<option value="1">开启内购</option>
+						<option value="0">关闭内购</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>提现方式:</td>
+				<td>
+					<select class="easyui-combobox" name="itemStatus" data-options="required:true,editable:false" style="width:280px;">
+						<option value="1">提现到微信</option>
+						<option value="2">提现到银行卡</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>提现金额设置:</td>
+				<td>
+					<input class="easyui-numberbox" type="text" name="tagPriceView" data-options="min:0,max:99999999,precision:2,required:true" style="width:280px;"/>
+					<input type="hidden" name="tagPrice" />
+				</td>
+			</tr>
+			<tr>
+				<td>佣金提现手续费:</td>
+				<td>
+					<input class="easyui-numberbox" type="text" name="priceView" data-options="min:0,max:99999999,precision:2,required:true" style="width:270px;"/>%
+					<input type="hidden" name="price" />
+				</td>
+			</tr>
+		</table>
+		<div style="margin-left:120px;bottom:0px;width:500px;text-align:left;">
+			<a href="javascript:void(0)" class="easyui-linkbutton buttonSubmit" onclick="submitForm()">提交</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton buttonSubmit" onclick="clearForm()">重置</a>
+		</div>
+	</form>
+
+</div>
+<script type="text/javascript">
+	function clearForm(){
+		loadCenterLayout('distribute/setting.jsp');
+	}
+</script>

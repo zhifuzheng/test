@@ -1,0 +1,284 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+/**
+ * 商品规格信息
+ * @author wf
+ */
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 商品规格参数信息
+ * @author wf
+ */
+@Table(tableName="item_param")
+public class ItemParam implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = 5846748796960195486L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="全局唯一编号，UUID自动生成")
+	private String paramUUID;
+	
+	@TableField(fieldSize=32,comment="规格原始UUID")
+	private String originUUID;
+	
+	@TableField(fieldSize=32,comment="店铺UUID")
+	private String entityUUID;
+	
+	@TableField(fieldSize=128,comment="店铺名称")
+	private String entityName;
+	
+	@TableField(fieldSize=1000,comment="店铺logo")
+	private String entityLogo;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="所属分类UUID")
+	private String catUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="所属商品UUID")
+	private String itemUUID;
+	
+	@TableField(fieldSize=2,comment="商品等级，1一级，2二级...")
+	private String grade;
+	
+	@TableField(fieldSize=1,comment="商品类型：0零售商品，1批发商品")
+	private String itemType;
+	
+	@TableField(fieldSize=128,comment="规格名称")
+	private String title;
+	
+	@TableField(fieldSize=8000,comment="规格数据，json格式")
+	private String paramData;
+	
+	@TableField(fieldSize=20,comment="价格")
+	private Integer price;
+	
+	@TableField(comment="库存")
+	private Integer stock;
+	
+	@TableField(fieldSize=1000,comment="规格图片")
+	private String itemImg;
+	
+	@TableField(comment="总销量")
+	private Integer sales = 0;
+	
+	@TableField(comment="月销量")
+	private Integer monthlySales = 0;
+	
+	@TableField(fieldSize=1,comment="分销状态：0关闭，1开启")
+	private String distributeStatus;
+	
+	@TableField(comment="一级分销商提成比例，默认值为0")
+	private Double firstRatio = 0d;
+	
+	@TableField(comment="二级分销商提成比例，默认值为0")
+	private Double secondRatio = 0d;
+	
+	@TableField(fieldSize=1,comment="状态：1上架，2下架")
+	private String paramStatus;
+	
+	@TableField(fieldSize=1,comment="是否删除：0未删除，1回收站，2删除，默认值为0")
+	private String isDel = "0";
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getParamUUID() {
+		return paramUUID;
+	}
+
+	public void setParamUUID(String paramUUID) {
+		this.paramUUID = paramUUID;
+	}
+
+	public String getOriginUUID() {
+		return originUUID;
+	}
+
+	public void setOriginUUID(String originUUID) {
+		this.originUUID = originUUID;
+	}
+
+	public String getEntityUUID() {
+		return entityUUID;
+	}
+
+	public void setEntityUUID(String entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public String getEntityLogo() {
+		return entityLogo;
+	}
+
+	public void setEntityLogo(String entityLogo) {
+		this.entityLogo = entityLogo;
+	}
+	
+	public String getCatUUID() {
+		return catUUID;
+	}
+
+	public void setCatUUID(String catUUID) {
+		this.catUUID = catUUID;
+	}
+
+	public String getItemUUID() {
+		return itemUUID;
+	}
+
+	public void setItemUUID(String itemUUID) {
+		this.itemUUID = itemUUID;
+	}
+
+	public String getGrade() {
+		return grade;
+	}
+
+	public void setGrade(String grade) {
+		this.grade = grade;
+	}
+
+	public String getItemType() {
+		return itemType;
+	}
+
+	public void setItemType(String itemType) {
+		this.itemType = itemType;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getParamData() {
+		return paramData;
+	}
+
+	public void setParamData(String paramData) {
+		this.paramData = paramData;
+	}
+
+	public Integer getPrice() {
+		return price;
+	}
+
+	public void setPrice(Integer price) {
+		this.price = price;
+	}
+
+	public Integer getStock() {
+		return stock;
+	}
+
+	public void setStock(Integer stock) {
+		this.stock = stock;
+	}
+
+	public String getItemImg() {
+		return itemImg;
+	}
+
+	public void setItemImg(String itemImg) {
+		this.itemImg = itemImg;
+	}
+
+	public Integer getSales() {
+		return sales;
+	}
+
+	public void setSales(Integer sales) {
+		this.sales = sales;
+	}
+
+	public Integer getMonthlySales() {
+		return monthlySales;
+	}
+
+	public void setMonthlySales(Integer monthlySales) {
+		this.monthlySales = monthlySales;
+	}
+
+	public String getDistributeStatus() {
+		return distributeStatus;
+	}
+
+	public void setDistributeStatus(String distributeStatus) {
+		this.distributeStatus = distributeStatus;
+	}
+
+	public Double getFirstRatio() {
+		return firstRatio;
+	}
+
+	public void setFirstRatio(Double firstRatio) {
+		this.firstRatio = firstRatio;
+	}
+
+	public Double getSecondRatio() {
+		return secondRatio;
+	}
+
+	public void setSecondRatio(Double secondRatio) {
+		this.secondRatio = secondRatio;
+	}
+
+	public String getParamStatus() {
+		return paramStatus;
+	}
+
+	public void setParamStatus(String paramStatus) {
+		this.paramStatus = paramStatus;
+	}
+
+	public String getIsDel() {
+		return isDel;
+	}
+
+	public void setIsDel(String isDel) {
+		this.isDel = isDel;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+}

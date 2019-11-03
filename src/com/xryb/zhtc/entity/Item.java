@@ -1,0 +1,336 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 商品信息
+ * @author wf
+ */
+@Table(tableName="item")
+public class Item implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = -498482606196976770L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="全局唯一编号，UUID自动生成")
+	private String itemUUID;
+	
+	@TableField(fieldSize=32,comment="商品原始UUID")
+	private String originUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="所属分类UUID")
+	private String catUUID;
+	
+	@TableField(fieldSize=400,comment="所属分类编号")
+	private String catCode;
+	
+	@TableField(fieldSize=100,comment="所属分类名称，多级分类以>分割")
+	private String catName;
+	
+	@TableField(fieldSize=32,comment="商品规格模板UUID")
+	private String modelUUID;
+	
+	@TableField(fieldSize=32,comment="店铺UUID")
+	private String entityUUID;
+	
+	@TableField(fieldSize=128,comment="店铺名称")
+	private String entityName;
+	
+	@TableField(fieldSize=1000,comment="店铺logo")
+	private String entityLogo;
+	
+	@TableField(fieldSize=1,comment="商品类型：0零售商品，1批发商品")
+	private String itemType;
+	
+	@TableField(fieldSize=128,comment="商品标题")
+	private String title;
+	
+	@TableField(fieldSize=100,comment="商品简介")
+	private String intro;
+	
+	@TableField(fieldSize=20,comment="商品原价")
+	private String tagPrice;
+	
+	@TableField(fieldSize=20,comment="商品现价")
+	private Integer price;
+	
+	@TableField(fieldSize=1000,comment="商品封面图，图片地址相对路径")
+	private String itemImg;
+	
+	@TableField(fieldSize=8000,comment="商品展示图，图片地址相对路径，多个路径以逗号分割")
+	private String subImgList;
+	
+	@TableField(fieldSize=8000,comment="商品详情图，图片地址相对路径，多个路径以逗号分割")
+	private String detailImgList;
+	
+	@TableField(fieldSize=6,comment="评分")
+	private String score;
+	
+	@TableField(comment="总销量")
+	private Integer totalSales = 0;
+	
+	@TableField(comment="月销量")
+	private Integer totalMonthlySales = 0;
+	
+	@TableField(comment="展示销量")
+	private Integer tagMonthlySales;
+	
+	@TableField(fieldSize=1,comment="分销状态：0关闭，1开启")
+	private String distributeStatus;
+	
+	@TableField(comment="一级分销商提成比例，默认值为0")
+	private Double firstRatio = 0d;
+	
+	@TableField(comment="二级分销商提成比例，默认值为0")
+	private Double secondRatio = 0d;
+	
+	@TableField(fieldSize=1,comment="商品状态：1上架，2下架，3商品违规")
+	private String itemStatus;
+	
+	@TableField(fieldSize=1,comment="商品是否删除：0未删除，1回收站，2删除，默认值为0")
+	private String isDel = "0";
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getItemUUID() {
+		return itemUUID;
+	}
+
+	public void setItemUUID(String itemUUID) {
+		this.itemUUID = itemUUID;
+	}
+
+	public String getOriginUUID() {
+		return originUUID;
+	}
+
+	public void setOriginUUID(String originUUID) {
+		this.originUUID = originUUID;
+	}
+
+	public String getCatUUID() {
+		return catUUID;
+	}
+
+	public void setCatUUID(String catUUID) {
+		this.catUUID = catUUID;
+	}
+
+	public String getCatCode() {
+		return catCode;
+	}
+
+	public void setCatCode(String catCode) {
+		this.catCode = catCode;
+	}
+
+	public String getCatName() {
+		return catName;
+	}
+
+	public void setCatName(String catName) {
+		this.catName = catName;
+	}
+
+	public String getModelUUID() {
+		return modelUUID;
+	}
+
+	public void setModelUUID(String modelUUID) {
+		this.modelUUID = modelUUID;
+	}
+
+	public String getEntityUUID() {
+		return entityUUID;
+	}
+
+	public void setEntityUUID(String entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public String getEntityLogo() {
+		return entityLogo;
+	}
+
+	public void setEntityLogo(String entityLogo) {
+		this.entityLogo = entityLogo;
+	}
+
+	public String getItemType() {
+		return itemType;
+	}
+
+	public void setItemType(String itemType) {
+		this.itemType = itemType;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getIntro() {
+		return intro;
+	}
+
+	public void setIntro(String intro) {
+		this.intro = intro;
+	}
+
+	public String getTagPrice() {
+		return tagPrice;
+	}
+
+	public void setTagPrice(String tagPrice) {
+		this.tagPrice = tagPrice;
+	}
+
+	public Integer getPrice() {
+		return price;
+	}
+
+	public void setPrice(Integer price) {
+		this.price = price;
+	}
+
+	public String getItemImg() {
+		return itemImg;
+	}
+
+	public void setItemImg(String itemImg) {
+		this.itemImg = itemImg;
+	}
+
+	public String getSubImgList() {
+		return subImgList;
+	}
+
+	public void setSubImgList(String subImgList) {
+		this.subImgList = subImgList;
+	}
+
+	public String getDetailImgList() {
+		return detailImgList;
+	}
+
+	public void setDetailImgList(String detailImgList) {
+		this.detailImgList = detailImgList;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public void setScore(String score) {
+		this.score = score;
+	}
+
+	public Integer getTotalSales() {
+		return totalSales;
+	}
+
+	public void setTotalSales(Integer totalSales) {
+		this.totalSales = totalSales;
+	}
+
+	public Integer getTotalMonthlySales() {
+		return totalMonthlySales;
+	}
+
+	public void setTotalMonthlySales(Integer totalMonthlySales) {
+		this.totalMonthlySales = totalMonthlySales;
+	}
+
+	public Integer getTagMonthlySales() {
+		return tagMonthlySales;
+	}
+
+	public void setTagMonthlySales(Integer tagMonthlySales) {
+		this.tagMonthlySales = tagMonthlySales;
+	}
+
+	public String getDistributeStatus() {
+		return distributeStatus;
+	}
+
+	public void setDistributeStatus(String distributeStatus) {
+		this.distributeStatus = distributeStatus;
+	}
+
+	public Double getFirstRatio() {
+		return firstRatio;
+	}
+
+	public void setFirstRatio(Double firstRatio) {
+		this.firstRatio = firstRatio;
+	}
+
+	public Double getSecondRatio() {
+		return secondRatio;
+	}
+
+	public void setSecondRatio(Double secondRatio) {
+		this.secondRatio = secondRatio;
+	}
+
+	public String getItemStatus() {
+		return itemStatus;
+	}
+
+	public void setItemStatus(String itemStatus) {
+		this.itemStatus = itemStatus;
+	}
+
+	public String getIsDel() {
+		return isDel;
+	}
+
+	public void setIsDel(String isDel) {
+		this.isDel = isDel;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+}

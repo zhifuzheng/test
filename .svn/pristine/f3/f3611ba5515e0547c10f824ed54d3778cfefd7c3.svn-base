@@ -1,0 +1,53 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.SmsMsg;
+
+import dbengine.util.Page;
+
+/**
+ * 短信消息service接口
+ * @author hshzh
+ *
+ */
+public interface ISmsMsgService {
+	/**
+	 * 保存或修改短信消息
+	 * @param v
+	 * @return
+	 */
+	boolean saveOrUpSmsMsg(String sourceId,boolean closeConn,SmsMsg sm);
+	
+	/**
+	 * 删除短信消息
+	 * @param uuid
+	 * @return
+	 */
+	boolean deleteSmsMsg(String sourceId,boolean closeConn,String uuid);
+	
+	/**
+	 * 查询短信消息
+	 * @param uuid
+	 * @return
+	 */
+	SmsMsg findSmsMsg(String sourceId,boolean closeConn,String uuid);
+	
+	/**
+	 * 查短信消息列表
+	 * @param findMap
+	 * @return
+	 */
+	List<SmsMsg> findSmsMsgList(String sourceId,boolean closeConn,Page page,Map findMap);
+	
+	/**
+	 * 修改短信状态
+	 * @param sourceId
+	 * @param closeConn
+	 * @param uuid
+	 * @param status
+	 * @return
+	 */
+	boolean upSmsMsgStatus(String sourceId,boolean closeConn,String uuid, String status);
+}

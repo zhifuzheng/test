@@ -1,0 +1,40 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.UserandGroup;
+
+import dbengine.util.Page;
+
+public interface IMUserandGroupService {
+		
+	/**
+	 * 保存群成员
+	 * @param MYCIRCLE
+	 * @return
+	 */
+	public boolean saveUserandgroup(String sourceId,boolean closeConn,UserandGroup userandgroup);
+	
+	/**
+	 * 
+	 * 查询人所在的群
+	 * 
+	 * */
+	public List<UserandGroup> findgrouplist(String sourceId,boolean closeConn,String uuid,Map<String,String> findMap);
+	
+	/***
+	 * 查询群里面的人
+	 * 
+	 * */
+	public List<UserandGroup> findUserlist(String sourceId,boolean closeConn,String groupuuid,Map<String,String> findMap);
+	
+	
+	/**
+	 *
+	 * 删除群成员
+	 * 
+	 * */
+	public boolean deleteusergroup(String sourceId,boolean closeConn,String groupuuid,String vipinfouuid);
+	
+}

@@ -1,0 +1,148 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 商家绑定银行卡号
+ * @author Administrator
+ *
+ */
+
+@Table(tableName = "business_bank_card")
+public class BusinessBankCard {
+	@TableField(isPKey=true, isAutoIncrement=true, comment="主键，自增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="UUID")
+	private String cardUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="商家店铺UUID")
+	private String businessUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="申请人姓名")
+	private String vipName;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="申请人UUID")
+	private String vipUUID;
+	
+	@TableField(isNotNull=true,fieldSize=100,comment="银行卡号")
+	private String bankNumber;
+	
+	@TableField(isNotNull=true,fieldSize=100,comment="持卡人姓名")
+	private String name;
+	
+	@TableField(isNotNull=true,fieldSize=100,comment="持卡人手机号码")
+	private String phone;
+	
+	@TableField(isNotNull=true,fieldSize=200,comment="创建时间")
+	private String time;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="默认（0：不是，1：是）")
+	private String defaultNumber;
+	
+	@TableField(isNotNull=true,fieldSize=1000,comment="开户行")
+	private String openingBank;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="类型(0:俱乐部)")
+	private String type;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCardUUID() {
+		return cardUUID;
+	}
+
+	public void setCardUUID(String cardUUID) {
+		this.cardUUID = cardUUID;
+	}
+
+	public String getBusinessUUID() {
+		return businessUUID;
+	}
+
+	public void setBusinessUUID(String businessUUID) {
+		this.businessUUID = businessUUID;
+	}
+
+	public String getVipName() {
+		return vipName;
+	}
+
+	public void setVipName(String vipName) {
+		this.vipName = vipName;
+	}
+
+	public String getVipUUID() {
+		return vipUUID;
+	}
+
+	public void setVipUUID(String vipUUID) {
+		this.vipUUID = vipUUID;
+	}
+
+	public String getBankNumber() {
+		return bankNumber;
+	}
+
+	public void setBankNumber(String bankNumber) {
+		this.bankNumber = bankNumber;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
+
+	public String getDefaultNumber() {
+		return defaultNumber;
+	}
+
+	public void setDefaultNumber(String defaultNumber) {
+		this.defaultNumber = defaultNumber;
+	}
+
+	public String getOpeningBank() {
+		return openingBank;
+	}
+
+	public void setOpeningBank(String openingBank) {
+		this.openingBank = openingBank;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	
+
+}

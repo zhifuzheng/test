@@ -1,0 +1,186 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<div id="button-bar" style="padding: 10px 15px;">
+	<label>状态：</label>
+	<select id="state" name="state" class="easyui-combobox" editable=false; style="width:200px;height:32px">
+	    <option value="">请选择</option>
+	    <option value="0">未处理</option>
+	    <option value="1">已处理</option>
+	</select>
+	<label>内容：</label>
+	<input class="easyui-textbox easyui-" type="text" style="width:200px" data-options="prompt:'请输入搜索内容'" name="content" id="content" maxlength="20" size="20"/>			
+    <a href="javascript:void(0)" onclick="query()" class='easyui-linkbutton' iconcls='icon-search' data-options="iconCls:'icon-add'" style="background-color:#1b8cf2;color: #fff;">&nbsp;搜索</a>
+    <a href="#" onclick="roomDel()" class='easyui-linkbutton' iconcls='icon-cancel' data-options="iconCls:'icon-add'">删除</a>
+</div>
+<table id="jb_table" class="easyui-datagrid">
+	<thead>
+		<tr>
+			<th data-options="field:'cb',checkbox:true"></th>
+			<th data-options="field:'id',align:'center',width:50,hidden:true">id</th>
+			<th data-options="field:'content',align:'center',width:200">举报内容</th>
+			<th data-options="field:'img',align:'center',width:100, formatter:img">举报图片</th>
+			<th data-options="field:'state',width:100,align:'center',formatter:state">状态</th>
+			<th data-options="field:'CZ',width:220,align:'center',formatter:clsListF">操作</th>
+		</tr>
+	</thead>
+</table>
+
+<div id="lookList_window_div">
+	<div id="lookList_addLook_div"></div>
+</div>
+
+<!-- 显示图片 -->
+<div id='shoImg' style="text-align:center;">
+	<img alt="" src="" id="setImg">
+</div>
+
+
+<script type="text/javascript">
+	var path = "<%=basePath%>";
+	var selectRow = null;
+	$(function() {
+		$('#jb_table').datagrid({
+			title: '&nbsp;&nbsp;供需举报',
+			url: '<%=path %>/Public/sp/gxReportsAll',
+			rownumbers: true,
+			pagination: true,
+			singleSelect: false,
+			nowrap:false,
+			onUnselect: function(index, row) {
+				//
+			}
+		});
+	});
+
+	//格式化操作
+	function clsListF(value, row, index) {
+		var stop = '<a href="javascript:void(0);" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true" onclick="stopOpen(\'' + row.id + '\',\'' + row.reportUUID + '\',\'' + row.dataUUID + '\')">&nbsp;停用&nbsp;</a>';
+		var look = '<a href="javascript:void(0);" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true" onclick="lookOpen(\'' + row.dataUUID + '\',\'' + row.type + '\')">&nbsp;查看&nbsp;</a>'; 
+		return stop+"&nbsp;"+look;
+	}
+	
+	//举报图片
+	function img(value, row, index){
+		var img = path+row.img
+		return "<img style='width:24px;height:24px;' border='1' title='点击查看图片' onclick=imgOpen(\""+img+"\") src='"+img+"'/>";
+	}
+	function imgOpen(e){
+		$('#shoImg').dialog({
+		    title: '图片',
+		    width: 800,
+			height: 400,
+		    resizable:true,
+		    closed: false,
+		    cache: false,
+		    modal: true
+		});
+		$("#setImg").attr("src",e);
+	}
+
+	//审核状态
+	function state(value, row, index) {
+		if(row.state == 0){
+			return "未处理";
+		}else if(row.state == 1){
+			return "已处理";
+		}
+	}
+	
+	//删除
+	function roomDel() {
+		var reportUUID = "";
+		var selRow = $("#jb_table").datagrid("getSelections"); //返回选中多行
+		if(selRow.length == 0) {
+			$.messager.alert('提示', '至少选择一项', 'error');
+			return false;
+		}
+		var ids = []; //定义数组，用来记录列表id
+		for(var i = 0; i < selRow.length; i++) {
+			var id = selRow[i].reportUUID; //取列表中的单个Id
+			ids.push(id);
+		}
+		reportUUID = ids.join(",");
+		var msg = "确认删除吗？";
+		$.messager.confirm("操作提醒", msg, function(c) {
+			if(c) {
+				var url = "<%=path%>/Public/sp/reportDel?reportUUID=" + reportUUID;
+				$.post(url, {}, function(data) {
+					if(data) {
+						$.messager.alert('提示', '操作成功!', 'info');
+						//刷新
+						$('#jb_table').datagrid('reload');
+					} else {
+						$.messager.alert('提示', '操作失败!', 'error');
+					}
+				}, 'json');
+			}
+		});
+	}
+	
+
+	
+	//搜索
+	function query(){
+		var state = $("#state").val();
+		var content = $("#content").val();
+		$("#jb_table").datagrid("load",{
+			state:state,
+			content:content
+		});
+	}
+	
+	//停用
+	function stopOpen(id,reportUUID,dataUUID){
+		var msg = "确认停用吗？";
+		$.messager.confirm("操作提醒", msg, function(c) {
+			if(c) {
+				var url = "<%=path%>/Public/sp/stateReportState";
+				$.post(url, {id:id,reportUUID:reportUUID,dataUUID:dataUUID}, function(data) {
+					if(data) {
+						$.messager.alert('提示', '操作成功!', 'info');
+						//刷新
+						$('#jb_table').datagrid('reload');
+					} else {
+						$.messager.alert('提示', '操作失败!', 'error');
+					}
+				}, 'json');
+			}
+		});
+	}
+	
+	//查看
+	function lookOpen(uuid,type){
+		$("#lookList_addLook_div").remove();
+		$("#lookList_window_div").append("<div id='lookList_addLook_div'></div>");
+		var url = "";
+		if(type == 0){
+			url = "gx/commodityLook.jsp?uuid="+uuid;
+		}else if(type == 1){
+			url = "gx/demandLook.jsp?uuid="+uuid;
+		}
+		var title = '查看';
+		$("#lookList_addLook_div").dialog({
+			title: title,
+			width: 800,
+			height: 600,
+			closed: false,
+			eache: false,
+			href: url,
+			modal: true,
+			buttons: [{
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function() {
+					$('#lookList_addLook_div').dialog('close');
+					$("#lookList_addLook_div").remove();
+				}
+			}]
+		});
+	}
+	
+</script>

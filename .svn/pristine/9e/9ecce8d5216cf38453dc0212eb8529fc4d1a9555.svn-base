@@ -1,0 +1,75 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+@Table(tableName="user_and_group")
+public class UserandGroup {//群连接的中间表
+	
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键id,自动增长")
+	private Long id;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="中间连接表的UUID")
+	private String UserandGroupUUID;
+
+	@TableField(fieldSize=32,isNotNull=false,comment="群表的UUID")
+	private String groupbeanUUID;//做链接操作
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="加入群用户的UUID")
+	private String userUUID;
+	
+	@TableField(fieldSize=32,isNotNull=true,comment="用户属性")
+	private int groupUserType;//当前用户在群里面的角色，创建者1，管理员2，普通用户3(创建群默认加入一个创建者1)
+	
+	@TableField(fieldSize=32,isNotNull=false,comment="加入时间")
+	private String uploadTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getUserandGroupUUID() {
+		return UserandGroupUUID;
+	}
+
+	public String getGroupbeanUUID() {
+		return groupbeanUUID;
+	}
+
+	public String getUserUUID() {
+		return userUUID;
+	}
+
+	public int getGroupUserType() {
+		return groupUserType;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setUserandGroupUUID(String userandGroupUUID) {
+		UserandGroupUUID = userandGroupUUID;
+	}
+
+	public void setGroupbeanUUID(String groupbeanUUID) {
+		this.groupbeanUUID = groupbeanUUID;
+	}
+
+	public void setUserUUID(String userUUID) {
+		this.userUUID = userUUID;
+	}
+
+	public void setGroupUserType(int groupUserType) {
+		this.groupUserType = groupUserType;
+	}
+
+	public String getUploadTime() {
+		return uploadTime;
+	}
+
+	public void setUploadTime(String uploadTime) {
+		this.uploadTime = uploadTime;
+	}
+	
+}

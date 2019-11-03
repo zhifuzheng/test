@@ -1,0 +1,227 @@
+package com.xryb.zhtc.action;
+
+import com.xryb.zhtc.manage.SupplyOrderMng;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.annotation.Auto;
+import spark.servlet.ISparkApplication;
+
+/**
+ * 供需管理：我卖出的和我买到的
+ * @author zzf
+ */
+public class SupplyOrderAction implements ISparkApplication{
+	@Auto(name=SupplyOrderMng.class)
+	private SupplyOrderMng supplyOrderMng;
+
+	@Override
+	public void run() {
+		
+		
+		/**
+		 * 供需管理生成商品购买订单
+		 * 
+		 * 由于调用之前已写好的微信支付接口时，当前订单为单独新建的订单(新的订单表)，所以不可以直接调用
+		 * 利用先生成的供需管理模块的订单作为基础，生成可直接调用微信支付接口的Order订单，然后通过对Order
+		 * 的操作，间接处理供需管理订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/createSupplyOrder",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.createSupplyOrder("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		
+		/**
+		 * 我卖出的订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserSellSupplyOrderList",false,"jdbcread") {//jdbcwrite
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserSellSupplyOrderList("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 我买到的订单
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserBuySupplyOrderList",false,"jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserBuySupplyOrderList("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 取消订单，若是商家取消订单则需要将买家的钱退回
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/abolishSupplyOrder",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.abolishSupplyOrder("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 用户提交退款退货申请
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/refundMoneyOrGood",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.refundMoneyOrGood("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 撤销退款退货申请
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/cancelApply",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.cancelApply("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 确认收货
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/confirmReceipt",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.confirmReceipt("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 确认收货后，订单评价
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/SupplyOrderComment",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.SupplyOrderComment("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 卖家同意退款
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/agreeRefund",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.agreeRefund("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		
+		
+		
+		/**
+		 * 获取用户收货地址列表
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserAddress",false,"jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserAddress("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 获取用户默认收货地址信息
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getUserDefaultAddress",false,"jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getUserDefaultAddress("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		
+		/**
+		 * 新增或编辑收货地址
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/saveOrUpdateAddress",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.saveOrUpdateAddress("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 删除收货地址
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/deleteAddress",true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.deleteAddress("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 获取商品评价（即订单完成后，用户的评价数据）
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/getCommodityComments", false,"jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.getCommodityComments("jdbcread",true,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 商家确认发货
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/confirmDelivery", true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.confirmDelivery("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 卖家拒绝买家退款退货申请
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/rejectRefund", true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.rejectRefund("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 卖家同意退货地址填写
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/confirmSendRefundAddr", true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.confirmSendRefundAddr("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		/**
+		 * 买家退货发货
+		 */
+		Spark.post(new Route("/mobile/supplyOrder/buyerSendGood", true,"jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return supplyOrderMng.buyerSendGood("jdbcwrite",false,request.raw(),response.raw());
+			}
+		});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+
+}

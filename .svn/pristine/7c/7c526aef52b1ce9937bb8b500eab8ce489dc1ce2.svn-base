@@ -1,0 +1,62 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+String uuid = request.getParameter("uuid");
+String isEdit = request.getParameter("isEdit");
+%>
+<form id="addCommonType_form" method="post">
+    <input type="hidden" name="id" id="userId"/>
+	<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">
+		<tr>
+			<td align="right">
+				<label>信息类型编码：</label>
+			</td>
+			<td>
+				<input class="easyui-textbox easyui-" type="text" style="width:580px" name="commonTypeCode" id="commonTypeCode" required="required" maxlength="20" size="20"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				<label>信息类型名称：</label>
+			</td>
+			<td>
+				<input class="easyui-textbox easyui-" type="text" style="width:580px" name="commonTypeName" id="commonTypeName" required="required" maxlength="20" size="20"/>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" align="right">
+				<label>备注：</label>
+			</td>
+			<td>
+				<textarea class="easyui-validatebox" name="commonTypeMark" id="commonTypeMark" style="width: 580px" rows="4" maxlength="100"></textarea> 
+			</td>
+		</tr>
+	</table>
+</form>
+<script type="text/javascript">
+$(function(){
+	   //初始化
+	   if("1"=="<%=isEdit%>" && ""!="<%=uuid%>"){
+		   //是编辑数据
+		   $("#addCommonType_form").form('load', "<%=path%>/system/commontype/findCommonType?uuid=<%=uuid%>");
+		   //$("#orgParentName").removeAttr("onclick");
+	   }
+});
+function saveCommonType(){
+	   $.post("<%=path%>/system/commontype/saveOrUpCommonType",$("#addCommonType_form").serialize(),function(data){
+		  if(data){
+			  //$.messager.show({ icon: "info", msg: "error" });
+			  //$.messager.show("提示", "操作成功！", "info", "topCenter");
+			  $.messager.alert('提示','操作成功!','info');
+			  //关闭窗口
+			  $("#commonTypeList_addCommonType_div").dialog("close");
+			  $("#commonTypeList_addCommonType_div").remove();
+			  //刷新列表
+			  $('#commonType_table').datagrid('reload');
+		  }else{
+			  $.messager.alert("提示", "操作失败！请联系管理员！", "error");
+		  }
+	   });
+}
+</script>

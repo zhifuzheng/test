@@ -1,0 +1,64 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.GxCommodity;
+import com.xryb.zhtc.entity.GxDemand;
+
+import dbengine.util.Page;
+
+/**
+ * 供需管理
+ * @author Administrator
+ *
+ */
+
+public interface IGxCommodityService {
+	
+	/**
+	 * 新增或修改商品
+	 */
+	boolean commoditySave(String sourceId,boolean closeConn,GxCommodity commodity);
+	
+	/**
+	 * 新增或修改需求
+	 */
+	boolean demandSave(String sourceId,boolean closeConn,GxDemand gxDemand);
+	
+	/**
+	 * 查询供需商品
+	 */
+	List<GxCommodity> commodityAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);
+	
+	/**
+	 * 查询供需需求
+	 */
+	List<GxDemand> demandAll(String sourceId,boolean closeConn,Page page, Map<String, String> findMap);
+	
+	/**
+	 * 根据ID查询供需商品
+	 */
+	GxCommodity commodityId(String sourceId,boolean closeConn,String commodityUUID);//根据UUID查询供需商品
+	
+	/**
+	 * 根据ID查询供需需求
+	 */
+	GxDemand gxDemandId(String sourceId,boolean closeConn,String demandUUID);//根据UUID查询供需需求
+	
+	/**
+	 * 删除供需商品
+	 */
+	boolean commodityDel(String sourceId,boolean closeConn,String commodityUUID);
+	
+	/**
+	 * 删除供需需求
+	 */
+	boolean demandDel(String sourceId,boolean closeConn,String demandUUID);
+	
+	/**
+	 * 商品浏览量
+	 */
+	boolean commodityBrowse(String sourceId,boolean closeConn,Object commodityUUID);
+	
+}

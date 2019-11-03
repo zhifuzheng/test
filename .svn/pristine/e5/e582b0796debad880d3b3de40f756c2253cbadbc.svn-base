@@ -1,0 +1,803 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+	<style>
+		.img-width-100 {
+			width: 100%;
+			height: 100%;
+			display: block;
+		}
+		.sc_zjz {
+			width:100%;
+			text-align:center;
+			padding:0px;
+		}
+		.list_s_none {
+			list-style:none;
+		}
+		.borbot {
+			border-bottom:1px solid #efeff4;
+		}
+		.backfff {
+			background:#fff;background-color:#fff!important;
+		}
+		.height30 {
+			height:30px;line-height:30px;
+		}
+		.paddinglr {
+			padding:0px 10px;
+		}
+		.fonts13 {
+			font-size:13px;
+		}
+		.hidden {
+			display:none;
+		}
+		.radioSpan {
+	      position: relative;
+	      border: 0 solid #95B8E7;
+	      background-color: #fff;
+	      vertical-align: middle;
+	      display: inline-block;
+	      overflow: hidden;
+	      font-size:24px;
+	      white-space: nowrap;
+	      margin: 0;
+	      padding: 0;
+	      -moz-border-radius: 5px 5px 5px 5px;
+	      -webkit-border-radius: 5px 5px 5px 5px;
+	      border-radius: 5px 5px 5px 5px;
+	      display:block;
+	    }
+	    .l-btn-plain {
+			background: transparent;
+			border: 1px solid #00000038 !important;
+			filter: none;
+		}
+		.frameborder1 { border:1px solid #ccc;}
+	  	.frameborder { border:1px solid #ccc;font-size: 15px; padding: 5px;}
+	</style>
+	<table id="withdrawal_table"></table>
+	<div id="withdrawal_tb" style="padding:2px 5px;">		
+		<a class="easyui-menubutton" data-options="menu:'#withdrawal_controll-panel',iconCls:'icon-help'" style="width:130px;"><span id="auditStatus">审核状态</span></a>
+		<input id="condition" data-options="'prompt':'请输入分销商姓名/联系电话/审核人名称'" class="easyui-textbox" style="width:280px;">				
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="query()"  data-options="'plain':true">&nbsp;搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="initQuery()" data-options="'plain':true">&nbsp;清除</a>
+	</div>
+	<div id="withdrawal_controll-panel" style="width: 130px; display: none;">
+		<div onclick="queryAuditStatus({'auditStatus':'1','statusText':'待审核'});">待审核</div>
+		<div onclick="queryAuditStatus({'auditStatus':'3','statusText':'已通过'});">已通过</div>
+		<div onclick="queryAuditStatus({'auditStatus':'4','statusText':'未通过'});">未通过</div>
+		<div onclick="queryAuditStatus({'auditStatus':'','statusText':'全部'});">全部</div>
+		<div onclick="queryAuditStatus({'auditStatus':'2','statusText':'审核中'});">审核中</div>
+		<div class="menu-sep"></div>
+		<div onclick="myAuditTask();">我的审核任务</div>
+		<div onclick="giveupAudit();">放弃审核任务</div>
+	</div>
+	
+	<script type="text/javascript">
+		var accountType = "3";
+		//默认审核状态
+		var auditStatus = "1";
+		//默认收支类型
+		var detailType = "";
+		//默认支付渠道
+		var payChannel = "";
+		//默认收支来源
+		var detailSource = "";
+		
+		//定义列
+		var columns = [ [ {
+			field : 'personLogo',
+			title : '分销商头像',
+			width : 50,
+			formatter : function(data,row,index){
+				var index = data.indexOf('static');
+				if(index != -1){
+					data = '<%=basePath %>'+data.substr(index);
+				}
+				return '<img style="width:100px;height:100px;margin-left:-15px;" src="'+data+'"/>';
+			}
+		},{
+			field : 'personName',
+			title : '分销商姓名',
+			width : 80,
+			align : 'center'
+		},{
+			field : 'payment',
+			title : '提现金额',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'channel',
+			title : '提现方式',
+			width : 60,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 1){
+					return "提现到微信";
+				}
+				if(data == 2){
+					return "提现到银行卡";
+				}
+			}
+		},{
+			field : 'createTime',
+			title : '申请时间',
+			width : 50,
+			align : 'center'
+		},{
+			field : 'auditorUUID',
+			title : '审核人ID',
+			width : 135,
+			align : 'center'
+		},{
+			field : 'auditorName',
+			title : '审核人名称',
+			width : 80,
+			align : 'center'
+		},{
+			field : 'auditTime',
+			title : '审核时间',
+			width : 50,
+			align : 'center'
+		},{
+			field : 'auditStatus',
+			title : '状态',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 1){
+					return "待审核";
+				}
+				if(data == 2){
+					return "审核中";
+				}
+				if(data == 3){
+					return "通过";
+				}
+				if(data == 4){
+					return "驳回";
+				}
+			}
+		},{
+			field : 'operation',
+			title : '操作',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(row.auditStatus == "1"){
+					return '<a id="beginAudit" class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="beginAudit(\''+index+'\');">&nbsp;开启审核&nbsp;</a>';
+				}
+				if(row.auditStatus == "2"){
+					if(row.auditorUUID == '${ userinfo.userUUID}'){
+						return '<a id="beginAudit" class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="beginAudit(\''+index+'\');">&nbsp;开启审核&nbsp;</a>';
+					}
+					return '<a id="beginAudit" class="easyui-linkbutton button-warning button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="tips({\'title\':\'提示\',\'msg\':\'审核员 '+row.auditorName+' 正在审核该条记录\',\'type\':\'warning\'});">&nbsp;信息&nbsp;</a>';
+				}
+				if(row.auditStatus == "3"){
+					return '<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="tips({\'title\':\'提示\',\'msg\':\'已经认证通过的申请不可再审核！\',\'type\':\'warning\'});">&nbsp;信息&nbsp;</a>';
+				}
+				if(row.auditStatus == "4"){
+					return '<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="tips({\'title\':\'提示\',\'msg\':\'请等待会员重新申请后方可审核！\',\'type\':\'warning\'});">&nbsp;信息&nbsp;</a>';
+				}
+				if(row.auditStatus == 'commit'){
+					return '<a id="beginAudit" class="easyui-linkbutton button-warning button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="tips({\'title\':\'提示\',\'msg\':\'您正在审核该条记录，请选择通过或者驳回！\',\'type\':\'warning\'});">&nbsp;信息&nbsp;</a>';
+				}
+			}
+		} ] ];
+		
+		var detailColumns = [ [ {
+			field : 'orderNo',
+			title : '交易订单号',
+			width : 140,
+			align : 'center'
+		},{
+			field : 'detailType',
+			title : '收支类型',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 1){
+					return "收入";
+				}
+				if(data == 2){
+					return "支出";
+				}
+			}
+		},{
+			field : 'money',
+			title : '交易金额',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'payChannel',
+			title : '交易渠道',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 1){
+					return "微信";
+				}
+				if(data == 2){
+					return "支付宝";
+				}
+				if(data == 3){
+					return "余额";
+				}
+			}
+		},{
+			field : 'detailSource',
+			title : '收支来源',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 1){
+					return "充值";
+				}
+				if(data == 2){
+					return "付款";
+				}
+				if(data == 3){
+					return "提现";
+				}
+				if(data == 4){
+					return "消费";
+				}
+				if(data ==5){
+					return "转账";
+				}
+			}
+		},{
+			field : 'otherName',
+			title : '对方账号',
+			width : 60,
+			align : 'center'
+		},{
+			field : 'createTime',
+			title : '支付时间',
+			width : 80,
+			align : 'center'
+		} ] ];
+		
+		$(function(){
+			//初始化账户数据表格
+			$('#withdrawal_table').datagrid({
+				iconCls: 'icon-order',
+				title: '&nbsp;&nbsp;分销商提现审核',
+				columns : columns,
+				toolbar : '#withdrawal_tb',
+				url : '<%=basePath %>system/account/findWithdrawalPage',
+				queryParams: {"accountType":accountType,"auditStatus":auditStatus},
+				rownumbers : true,
+				pagination : true,
+				pageList : [10,20,30,40],
+				pageSize : 10,
+				fit : true,
+				fitColumns : true,
+				nowrap : false,
+				singleSelect: true,
+				emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到提现信息哦</span>"
+			});
+		});
+		
+		//开启审核
+		function beginAudit(rowIndex){
+			$('#withdrawal_table').datagrid('selectRow',rowIndex);
+			var row = $('#withdrawal_table').datagrid('getSelected');
+			$.ajax({
+				type:"post",
+				url:'<%=basePath %>audit/account/beginWithdrawal',
+				data:{'withdrawalUUID':row.withdrawalUUID},
+				async:false,
+				dataType:'json',
+				success:function(data){
+					if(data.status == "1"){
+						$('#withdrawal_table').datagrid('updateRow',{
+						    index: rowIndex,
+						    row: {
+						        'auditStatus' : 'commit'
+						    }
+						});
+					}else{
+						$.messager.alert("提示", data.msg, "warning");
+						$('#realName_table').datagrid('reload',{'auditStatus':auditStatus});
+					}
+				}
+			});
+			
+			var vipinfo = {};
+			$.ajax({
+				type:"post",
+				url:'<%=basePath %>mobile/vip/findVipByOpenId',
+				data:{'openId':row.openId},
+				async:false,
+				dataType:'json',
+				success:function(data){
+					if(data.status == "1"){
+						vipinfo = data.vipinfo;
+					}else{
+						$.messager.alert("提示", data.msg, "warning");
+					}
+				}
+			});
+			$('<div id="withdrawal_win">\
+				<div class="easyui-layout" data-options="fit:true">\
+					<div data-options="region:\'west\',title:\'提现信息\',iconCls:\'icon-withdrawal\'" style="width:400px;">\
+				   		<ul>\
+					   		<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">账号：&nbsp;<span id="accountUUID"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">账户名称：&nbsp;<span id="entityName"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">提现金额：&nbsp;<span id="payment"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">提现方式：&nbsp;<span id="channel"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">提现银行卡号：&nbsp;<span id="cardNumber"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">开户银行：&nbsp;<span id="bankName"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">银行卡类型：&nbsp;<span id="cardType"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">账户信息：&nbsp;<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" onclick="accountLook(\''+rowIndex+'\');">&nbsp;点击查看&nbsp;</a></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">历史账单：&nbsp;<a class="easyui-linkbutton button-success button-xs l-btn l-btn-small" onclick="detailLook(\''+rowIndex+'\');">&nbsp;点击查看&nbsp;</a></div>\
+				   			</li>\
+				   			<li id="showOpinion" class="list_s_none borbot backfff paddinglr hidden">\
+								<p class="sc_zjz fontco4 explain">审批意见</p>\
+								<textarea style="width:100%;height:150px;" id="auditorOpinion" class="fonts13"></textarea>\
+							</li>\
+				   		</ul>\
+				   		<div style="height:50px;text-align:center;vertical-align:center;">\
+				   			<span class="radioSpan">\
+				   				<input type="radio" name="auditStatus" value="3" onclick="toggleArea();"><span style="color:green">通过</span>&nbsp;&nbsp;&nbsp;\
+			   					<input type="radio" name="auditStatus" value="4" onclick="toggleArea();"><span style="color:red">驳回</span>\
+				   			</span>\
+						</div>\
+						<div onclick="commitAudit(\''+rowIndex+'\');" style="height:50px;text-align:center;vertical-align:center;background: #92ca7b;line-height:50px;font-size:20px;border-radius:6px;color:#fff;cursor:pointer;">\
+				   			提交审核\
+						</div>\
+					</div>\
+					<div data-options="region:\'center\',title:\'申请人信息\',iconCls:\'icon-inbox-document\'">\
+				   		<ul>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">姓名：&nbsp;<span id="vipName"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">性别：&nbsp;<span id="gender"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">出生日期：&nbsp;<span id="birthday"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="mui-col-xs-2 fonts13">住址：&nbsp;<span id="address"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">联系电话：&nbsp;<span id="vipMobile"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">微信号：&nbsp;<span id="wxNumber"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">会员级别：&nbsp;<span id="vipType"></span></div>\
+				   			</li>\
+				   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+				   				<div class="fonts13">注册时间：&nbsp;<span id="createTime"></span></div>\
+				   			</li>\
+				   		</ul>\
+				   		<div style="height:50px;text-align:center;">\
+				   			<span style="color:green;font-size:18px;line-height:50px;">会员状态：</span>\
+				   			<span id="vipStatus" style="color:green;font-size:18px;line-height:50px;"></span>\
+						</div>\
+					</div>\
+				</div>\
+			</div>').window({
+				width:'800px',
+				height:'650px',
+				title : '账户"'+row.entityName+'"',
+				modal : true,
+				onOpen : function(){
+					//重置查询参数
+					accountUUID = row.accountUUID;
+					var _win = $(this);
+					$.parser.parse(_win);
+					//初始化提现信息
+					if(row.entityName != null){
+						$("#entityName").html(row.entityName);
+					}else{
+						$("#entityName").html("");
+					}
+					if(row.accountUUID != null){
+						$("#accountUUID").html(row.accountUUID);
+					}else{
+						$("#accountUUID").html("");
+					}
+					if(row.payment != null){
+						$("#payment").html((row.payment/100).toFixed(2)+"	元");
+					}else{
+						$("#payment").html("");
+					}
+					if(row.channel != null){
+						$("#channel").html(row.channel == "1"?"银行卡":"微信");
+					}else{
+						$("#channel").html("");
+					}
+					if(row.cardNumber != null){
+						$("#cardNumber").html(row.cardNumber);
+					}else{
+						$("#cardNumber").html("");
+					}
+					if(row.bankName != null){
+						$("#bankName").html(row.bankName);
+					}else{
+						$("#bankName").html("");
+					}
+					if(row.cardType != null){
+						$("#cardType").html(row.cardType);
+					}else{
+						$("#cardType").html("");
+					}
+					//初始化实名认证信息
+					if(vipinfo.vipName != null){
+						$("#vipName").html(vipinfo.vipName);
+					}else{
+						$("#vipName").html("");
+					}
+					if(vipinfo.gender != null){
+						$("#gender").html(vipinfo.gender == "1"?"男":"女");
+					}else{
+						$("#gender").html("");
+					}
+					if(vipinfo.vipName != null){
+						$("#birthday").html(vipinfo.birthday);
+					}else{
+						$("#birthday").html("");
+					}
+					if(vipinfo.address != null){
+						$("#address").html(vipinfo.address);
+					}else{
+						$("#address").html("");
+					}
+					if(vipinfo.vipMobile != null){
+						$("#vipMobile").html(vipinfo.vipMobile);
+					}else{
+						$("#vipMobile").html("");
+					}
+					if(vipinfo.wxNumer != null){
+						$("#wxNumber").html(vipinfo.wxNumber);
+					}else{
+						$("#wxNumber").html("");
+					}
+					if(vipinfo.vipType != null){
+						$("#vipType").html(vipinfo.vipType == "1"?"普通会员":vipinfo.vipType == "2"?"付费会员":"平台管理员");
+					}else{
+						$("#vipType").html("");
+					}
+					if(vipinfo.vipStatus != null){
+						$("#vipStatus").html(vipinfo.vipStatus == "1"?"正常":"停用");
+					}else{
+						$("#vipStatus").html("");
+					}
+					if(vipinfo.createTime != null){
+						$("#createTime").html(vipinfo.createTime);
+					}else{
+						$("#createTime").html("");
+					}
+				},
+				onClose : function(){
+					$(this).window('destroy');
+				}
+			}).window('open');
+		}
+		//控制审核意见文本框的隐藏和显示
+		function toggleArea(){
+			var auditStatus = $("input[name='auditStatus']:checked").val();
+			if(auditStatus == 3){
+				$("#auditorOpinion").val("审核通过");
+				if(!$("#showOpinion").hasClass("hidden")){
+					$("#showOpinion").addClass("hidden");
+				}
+			}
+			if(auditStatus == 4){
+				$("#auditorOpinion").val("");
+				if($("#showOpinion").hasClass("hidden")){
+					$("#showOpinion").removeClass("hidden");
+				}
+			}
+		}
+		//提交审核
+		function commitAudit(rowIndex){
+			$('#withdrawal_table').datagrid('selectRow',rowIndex);
+			var row = $('#withdrawal_table').datagrid('getSelected');
+			//获取审核信息
+			var auditStatus = $("input[name='auditStatus']:checked").val();
+			var auditorOpinion = $.trim($("#auditorOpinion").val());
+			if(auditStatus == undefined){
+				$.messager.alert("提示", "请选择通过或驳回", "warning");
+				return;
+			}
+			if(auditorOpinion == undefined || auditorOpinion == ""){
+				$.messager.alert("提示", "请填写审核意见", "warning");
+				return;
+			}
+			$.ajax({
+				type:"post",
+				url:'<%=basePath %>audit/account/commitWithdrawal',
+				data:{'withdrawalUUID':row.withdrawalUUID,'auditStatus':auditStatus,'auditorOpinion':auditorOpinion},
+				dataType:'json',
+				success:function(data){
+					if(data.status == "1"){
+						$.messager.alert("提示", "审核提交成功！", "info");
+						$('#withdrawal_table').datagrid('reload',{"accountType":accountType,'auditStatus':auditStatus});
+					}else{
+						$.messager.alert("提示", data.msg, "warning");
+					}
+					$("#withdrawal_win").window('destroy');
+				}
+			});
+		}
+		//我的审核任务
+		function myAuditTask(){
+			$("#auditStatus").html("我的审核任务");
+			$('#withdrawal_table').datagrid('reload',{'auditorUUID':'${ sessionScope.userinfo.userUUID}',"accountType":accountType,'auditStatus':'2'});
+		}
+		//放弃审核任务
+		function giveupAudit(){
+			$.messager.confirm("操作提醒", "确定要放弃所有的审核任务吗？", function (c) {
+				if(c){
+					$("#auditStatus").html("我的审核任务");
+					$.ajax({
+						type:"post",
+						url:'<%=basePath %>audit/account/giveupWithdrawal',
+						dataType:'json',
+						success:function(data){
+							if(data.status == "1"){
+								$('#withdrawal_table').datagrid('reload',{'auditorUUID':'${ sessionScope.userinfo.userUUID}',"accountType":accountType,'auditStatus':'2'});
+							}
+						}
+					});
+				}
+			});
+		}
+		//查看账户
+		function accountLook(rowIndex){
+			$('#withdrawal_table').datagrid('selectRow',rowIndex);
+			var row = $('#withdrawal_table').datagrid('getSelected');
+			var account = {};
+			$.ajax({
+				async:false,
+				type:"post",
+				url:'<%=basePath %>system/account/findAccountByPc',
+				data:{'accountUUID':row.accountUUID},
+				dataType:'json',
+				success:function(data){
+					account = data;
+				}
+			});
+			$('<div>\
+				<ul>\
+					<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">账号：&nbsp;<span id="accountUUID"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">账户名称：&nbsp;<span id="entityName"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">余额：&nbsp;<span id="accountBalance"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">总收入：&nbsp;<span id="accountIncome"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">总支出：&nbsp;<span id="accountExpend"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">绑定手机号：&nbsp;<span id="mobile"></span></div>\
+		   			</li>\
+		   			<li class="list_s_none borbot backfff height30 paddinglr fonts13">\
+		   				<div class="fonts13">开户时间：&nbsp;<span id="createTime"></span></div>\
+		   			</li>\
+		   		</ul>\
+		   		<div style="height:50px;text-align:center;">\
+		   			<span style="color:green;font-size:18px;line-height:50px;">账户状态：</span>\
+		   			<span id="accountStatus" style="color:green;font-size:18px;line-height:50px;"></span>\
+				</div>\
+			</div>').window({
+				width:'400px',
+				height:'320px',
+				title : '账户"'+row.entityName+'"',
+				modal : true,
+				onOpen : function(){
+					//重置查询参数
+					var _win = $(this);
+					//初始化账户信息
+					if(account.entityName != null){
+						$("#entityName",_win).html(account.entityName);
+					}else{
+						$("#entityName",_win).html("");
+					}
+					if(account.accountUUID != null){
+						$("#accountUUID",_win).html(account.accountUUID);
+					}else{
+						$("#accountUUID",_win).html("");
+					}
+					if(account.accountBalance != null){
+						$("#accountBalance",_win).html((account.accountBalance/100).toFixed(2)+"	元");
+					}else{
+						$("#accountBalance",_win).html("");
+					}
+					if(account.accountIncome != null){
+						$("#accountIncome",_win).html((account.accountIncome/100).toFixed(2)+"	元");
+					}else{
+						$("#accountIncome",_win).html("");
+					}
+					if(account.accountExpend != null){
+						$("#accountExpend",_win).html((account.accountExpend/100).toFixed(2)+"	元");
+					}else{
+						$("#accountExpend",_win).html("");
+					}
+					if(account.mobile != null){
+						$("#mobile",_win).html(account.mobile);
+					}else{
+						$("#mobile",_win).html("");
+					}
+					if(account.createTime != null){
+						$("#createTime",_win).html(account.createTime);
+					}else{
+						$("#createTime",_win).html("");
+					}
+					if(account.accountStatus == "0"){
+						$("#accountStatus",_win).html("冻结");
+					}else if(account.accountStatus == "1"){
+						$("#accountStatus",_win).html("正常");
+					}
+					
+				},
+				onClose : function(){
+					$(this).window('destroy');
+				}
+			}).window('open');
+		}
+		//查看账单
+		function detailLook(rowIndex){
+			$('#withdrawal_table').datagrid('selectRow',rowIndex);
+			var row = $('#withdrawal_table').datagrid('getSelected');
+			$('<div>\
+					<table id="detail_table"></table>\
+					<div id="detailType_controll_panel" style="width: 130px; display: none;">\
+						<div onclick="queryDetailType({\'detailType\':\'1\',\'text\':\'收入\'});">收入</div>\
+						<div onclick="queryDetailType({\'detailType\':\'2\',\'text\':\'支出\'});">支出</div>\
+						<div class="menu-sep"></div>\
+						<div onclick="queryDetailType({\'detailType\':\'\',\'text\':\'全部\'});">全部</div>\
+					</div>\
+					<div id="payChannel_controll_panel" style="width: 130px; display: none;">\
+						<div onclick="queryPayChannel({\'payChannel\':\'1\',\'text\':\'微信\'});">微信</div>\
+						<div onclick="queryPayChannel({\'payChannel\':\'2\',\'text\':\'支付宝\'});">支付宝</div>\
+						<div onclick="queryPayChannel({\'payChannel\':\'3\',\'text\':\'余额\'});">余额</div>\
+						<div class="menu-sep"></div>\
+						<div onclick="queryPayChannel({\'payChannel\':\'\',\'text\':\'全部\'});">全部</div>\
+					</div>\
+					<div id="detailSource_controll_panel" style="width: 130px; display: none;">\
+						<div onclick="queryDetailSource({\'detailSource\':\'1\',\'text\':\'充值\'});">充值</div>\
+						<div onclick="queryDetailSource({\'detailSource\':\'2\',\'text\':\'付款\'});">付款</div>\
+						<div onclick="queryDetailSource({\'detailSource\':\'3\',\'text\':\'提现\'});">提现</div>\
+						<div onclick="queryDetailSource({\'detailSource\':\'4\',\'text\':\'消费\'});">消费</div>\
+						<div onclick="queryDetailSource({\'detailSource\':\'5\',\'text\':\'转账\'});">转账</div>\
+						<div class="menu-sep"></div>\
+						<div onclick="queryDetailSource({\'detailSource\':\'\',\'text\':\'全部\'});">全部</div>\
+					</div>\
+					<div id="detail_tb" style="padding:2px 5px;">\
+						<a class="easyui-menubutton" data-options="menu:\'#detailType_controll_panel\',iconCls:\'icon-help\'" style="width:130px;"><span id="detailType">收支类型</span></a>\
+						<a class="easyui-menubutton" data-options="menu:\'#payChannel_controll_panel\',iconCls:\'icon-help\'" style="width:130px;"><span id="payChannel">交易渠道</span></a>\
+						<a class="easyui-menubutton" data-options="menu:\'#detailSource_controll_panel\',iconCls:\'icon-help\'" style="width:130px;"><span id="detailSource">收支来源</span></a>\
+						<input id="detailCondition" data-options="\'prompt\':\'请输入想要搜索的信息\'" class="easyui-textbox" style="width:200px;">\
+				        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="queryDetail()"  data-options="\'plain\':true"><i class="icon iconfont icon-search"></i>&nbsp;搜索</a>\
+					</div>\
+			</div>').window({
+				width:'1100px',
+				height:'550px',
+				title : '账户"'+row.entityName+'"',
+				modal : true,
+				onOpen : function(){
+					//重置查询参数
+					accountUUID = row.accountUUID;
+					var _win = $(this);
+					$.parser.parse($('#detail_tb',_win));
+					$('#detail_table',_win).datagrid({
+						columns : detailColumns,
+						toolbar : '#detail_tb',
+						url : '<%=basePath %>system/account/findAccountDetailPageByPc',
+						queryParams: {"accountUUID":row.accountUUID},
+						pagination : true,
+						pageList : [10,20,30,40],
+						pageSize : 10,
+						fit : true,
+						fitColumns : true,
+						nowrap : false,
+						singleSelect : true,
+						emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到账单信息哦</span>"
+					});
+				},
+				onClose : function(){
+					$(this).window('destroy');
+				}
+			}).window('open');
+		}
+		
+		//提示信息
+		function tips(content){
+			$.messager.alert(content.title, content.msg, content.type);
+		}
+		
+		function queryAuditStatus(data){
+			auditStatus = data.auditStatus;
+			$("#auditStatus").html(data.statusText);
+			$('#withdrawal_table').datagrid('reload',{"accountType":accountType,'auditStatus':auditStatus});
+		}
+		
+		function query(){
+			var condition = $("#condition").val();
+			//使用正则表达式判断字符串是否为电话号码
+			var regPos = /\d{11}/;
+			if(regPos.test(condition)){
+				$('#withdrawal_table').datagrid('reload',{"accountType":accountType,"auditStatus":auditStatus,"mobile":condition});
+				return;
+			}
+			$('#withdrawal_table').datagrid('reload',{"accountType":accountType,"auditStatus":auditStatus,"personName":condition,"auditorName":condition});
+		}
+		
+		function initQuery(){
+			$("#condition").textbox("setValue",'');
+			$('#withdrawal_table').datagrid('reload',{'accountType':accountType,'auditStatus':auditStatus});
+		}
+		
+		function queryDetailType(data){
+			detailType = data.detailType;
+			$("#detailType").html(data.text);
+			$('#detail_table').datagrid('reload',{'accountUUID':accountUUID,'detailType':detailType,'payChannel':payChannel,'detailSource':detailSource});
+		}
+		
+		function queryPayChannel(data){
+			payChannel = data.payChannel;
+			$("#payChannel").html(data.text);
+			$('#detail_table').datagrid('reload',{'accountUUID':accountUUID,'detailType':detailType,'payChannel':payChannel,'detailSource':detailSource});
+		}
+		
+		function queryDetailSource(data){
+			detailSource = data.detailSource;
+			$("#detailSource").html(data.text);
+			$('#detail_table').datagrid('reload',{'accountUUID':accountUUID,'detailType':detailType,'payChannel':payChannel,'detailSource':detailSource});
+		}
+		
+		function queryDetail(){
+			var condition = $("#detailCondition2").val();
+			//使用正则表达式判断字符串是否为数字
+			var regPos = /^(\-)?\d+(\.\d+)?$/;
+			if(regPos.test(condition) && condition.length != 11){
+				condition = condition*100;
+				$('#detail_table').datagrid('reload',{'accountUUID':accountUUID,'detailType':detailType,'payChannel':payChannel,'detailSource':detailSource,'money':condition});
+				return;
+			}
+			$('#detail_table').datagrid('reload',{'accountUUID':accountUUID,'detailType':detailType,'payChannel':payChannel,'detailSource':detailSource,'orderNo':condition,'otherName':condition});
+		}
+		
+	</script>

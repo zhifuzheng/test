@@ -1,0 +1,99 @@
+package com.xryb.zhtc.service.impl;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import spark.annotation.Auto;
+
+import com.xryb.zhtc.entity.CommonInfo;
+import com.xryb.zhtc.entity.SmsMsg;
+import com.xryb.zhtc.service.ISmsMsgService;
+import com.xryb.zhtc.util.DateTimeUtil;
+
+import dbengine.dao.EntityDao;
+import dbengine.dao.SqlDao;
+import dbengine.util.Page;
+
+public class SmsMsgServiceImpl implements ISmsMsgService{
+
+	@Auto(name = SqlDao.class)
+	private SqlDao sqldao;
+	
+	@Auto(name = EntityDao.class)
+	private EntityDao entitydao;
+	
+	@Override
+	public boolean saveOrUpSmsMsg(String sourceId, boolean closeConn, SmsMsg sm) {
+		if(sm == null){
+			return false;
+		}
+		if(sm.getId() == null){
+			//新增
+			sm.setCreateTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			sm.setUuid(UUID.randomUUID().toString().replace("-", ""));
+			return entitydao.saveEntity(sourceId, sm, closeConn);
+		}else{
+			//修改
+			sm.setUpTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			return entitydao.updateEntity(sourceId, sm, closeConn);
+		}
+	}
+
+	@Override
+	public boolean deleteSmsMsg(String sourceId, boolean closeConn, String uuid) {
+		if(uuid == null || "".equals(uuid) || "null".equals(uuid)){
+			return false;
+		}
+		String sql = "delete from sms_msg where uuid = '"+uuid+"'";		
+		return sqldao.executeSql(sourceId, sql, closeConn, null);
+	}
+
+	@Override
+	public SmsMsg findSmsMsg(String sourceId, boolean closeConn, String uuid) {
+		if(uuid == null || "".equals(uuid) || "null".equals(uuid)){
+			return null;
+		}
+		String sql = "select * from sms_msg where uuid = '"+uuid+"'";
+		return (SmsMsg)sqldao.findEntityBySql(sourceId, sql, SmsMsg.class, closeConn, null);
+	}
+
+	@Override
+	public List<SmsMsg> findSmsMsgList(String sourceId, boolean closeConn, Page page, Map findMap) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from sms_msg where 1=1");
+		if(findMap != null){
+			if(findMap.get("typeName") != null && !"".equals(findMap.get("typeName")) && !"null".equals(findMap.get("typeName"))){
+				sql.append(" and typeName like '%").append(findMap.get("typeName")).append("%'");
+			}
+			if(findMap.get("uuid") != null && !"".equals(findMap.get("uuid")) && !"null".equals(findMap.get("uuid"))){
+				sql.append(" and uuid = '").append(findMap.get("uuid")).append("'");
+			}
+			if(findMap.get("createUser") != null && !"".equals(findMap.get("createUser")) && !"null".equals(findMap.get("createUser"))){
+				sql.append(" and createUser = '").append(findMap.get("createUser")).append("'");
+			}
+			if(findMap.get("status") != null && !"".equals(findMap.get("status")) && !"null".equals(findMap.get("status"))){
+				sql.append(" and status = '").append(findMap.get("status")).append("'");
+			}
+			if(findMap.get("upUser") != null && !"".equals(findMap.get("upUser")) && !"null".equals(findMap.get("upUser"))){
+				sql.append(" and upUser = '").append(findMap.get("upUser")).append("'");
+			}
+			if(findMap.get("vipUUID") != null && !"".equals(findMap.get("vipUUID")) && !"null".equals(findMap.get("vipUUID"))){
+				sql.append(" and vipUUID = '").append(findMap.get("vipUUID")).append("'");
+			}
+			
+		}
+		return sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, SmsMsg.class, page, null);
+	}
+
+	@Override
+	public boolean upSmsMsgStatus(String sourceId, boolean closeConn, String uuid, String status) {
+		if(status==null || "".equals(status) || uuid==null || "".equals(uuid)){
+			return false;
+		}
+		String sql = "update sms_msg set status = '"+status+"' where uuid = '"+uuid+"'";
+		return sqldao.executeSql(sourceId, sql, closeConn, null);
+	}
+
+}

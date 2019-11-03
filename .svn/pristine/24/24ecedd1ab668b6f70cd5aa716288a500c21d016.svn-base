@@ -1,0 +1,986 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+	<style>
+		.paramData p{
+			font-size: 18px;
+	    	text-align: center;
+    		line-height: 500px;
+		}
+	</style>
+	<table id="order_table"></table>
+	<div id="order_tb" style="padding:2px 5px;">
+		<input id="entityName" class="easyui-combobox" data-options="required:true,editable:false,'prompt':'请输入店铺名称'" style="width:250px;" />
+		<a class="easyui-menubutton" data-options="menu:'#del-controll-panel',iconCls:'icon-help'" style="width:120px;"><span id="isShow">删除状态</span></a>		
+		<a class="easyui-menubutton" data-options="menu:'#controll-panel',iconCls:'icon-help'" style="width:130px;"><span id="orderStatus">订单状态</span></a>
+		<input id="orderCondition" data-options="'prompt':'请输入编号、总价、买家名称、买家电话'" class="easyui-textbox" style="width:280px;">				
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="queryOrder()" data-options="'plain':true">&nbsp;搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="initQuery()" data-options="'plain':true">&nbsp;清除</a>
+	</div>
+	<div id="del-controll-panel" style="width: 80px; display: none;">
+		<div onclick="queryDel({'isShow':'1','text':'未删除'});">未删除</div>
+		<div onclick="queryDel({'isShow':'0','text':'已删除'});">回收站</div>
+		<div class="menu-sep"></div>
+		<div onclick="queryDel({'isShow':'','text':'全部'});">全部</div>
+	</div>
+	<div id="controll-panel" style="width: 130px; display: none;">
+		<div onclick="queryOrderStatus({'orderStatus':'0','text':'待付款'});">待付款</div>
+		<div onclick="queryOrderStatus({'orderStatus':'1','text':'待接单'});">待接单</div>
+		<div onclick="queryOrderStatus({'orderStatus':'2','text':'待收货'});">待收货</div>
+		<div onclick="queryOrderStatus({'orderStatus':'3','text':'待评价'});">待评价</div>
+		<div class="menu-sep"></div>
+		<div onclick="queryOrderStatus({'orderStatus':'','text':'全部订单'});">全部订单</div>
+		<div onclick="queryOrderStatus({'orderStatus':'refund','text':'退款/退货'});">退款/退货</div>
+	</div>
+	
+	<script type="text/javascript">
+		//商家对应的数据库表名
+		var entityTableName = "business_apply";
+		//商家UUID对应的字段名
+		var entityUUIDField = "businessUUID";
+		//商家名称对应的字段名
+		var entityNameField = "businessName";
+		//控制商家显示对应的字段名(选填，根据业务需要选择某个字段来控制商家是否显示在下拉列表中，多个字段用","来分割，要保证字段名和字段值的顺序一致)
+		var entityShowField = "approvalStatus,shopState";
+		//控制商家显示对应的字段值(选填)
+		var entityShowValue = "1,1";
+		//商家显示时的排序字段(选填，多个字段用","分割，降序排序desc，默认升序asc)
+		var entitySortField = "applyTime asc";
+		//商家申请人UUID对应的字段名
+		var personUUIDField = "vipUUID";
+	
+		//默认订单删除状态
+		var isShow = "1";
+		//默认订单支付状态
+		var orderStatus = "1";
+		//默认店铺uuid
+		var entityUUID = "-1";
+		// 定义列
+		var columns = [ [ {
+			field : 'orderUUID',
+			title : '订单编号',
+			width : 100,
+			align : 'center'
+			
+		},{
+			field : 'receiverMobile',
+			title : '买家联系电话',
+			width : 50,
+			align : 'center'
+			
+		},{
+			field : 'totalPrice',
+			title : '订单总价',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'reducePrice',
+			title : '优惠金额',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (0/100).toFixed(2);
+			}
+		},{
+			field : 'payment',
+			title : '实付金额',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'firstIncome',
+			title : '一度收入',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+			
+		},{
+			field : 'secondIncome',
+			title : '二度收入',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'personMsg',
+			title : '买家留言',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'orderStatus',
+			title : '状态',
+			width : 30,
+			align : 'center',
+			formatter : function(data,row,index){
+				if(data == 0){
+					return "待付款";
+				}
+				if(data == 1){
+					return "待接单";
+				}
+				if(data == 2){
+					return "待收货";
+				}
+				if(data == 3){
+					return "待评价";
+				}
+				if(data == 4){
+					return "交易完成";
+				}
+				if(data == -1){
+					return "交易取消";
+				}
+				if(data == -2){
+					return "超时关闭";
+				}
+				if(data == -3){
+					return "待退款";
+				}
+				if(data == -4){
+					return "同意退款";
+				}
+				if(data == -5){
+					return "驳回退款";
+				}
+				if(data == -6){
+					return "待退货";
+				}
+				if(data == -7){
+					return "同意退货";
+				}
+				if(data == -8){
+					return "驳回退货";
+				}
+				if(data == -9){
+					return "已全部退货";
+				}
+			}
+		},{
+			field : 'operation',
+			title : '操作',
+			width : 60,
+			align : 'center',
+			formatter : function(data,row,index){
+				var html = "";
+				if(row.orderStatus == "1"){
+					html += '<a style="margin:3px 0px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="receipt(\''+index+'\');">&nbsp;接单&nbsp;</a>';
+				}
+				if(row.orderStatus == "-3") {
+					html += '<a style="margin:3px 0px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="refund(\''+index+'\');">&nbsp;同意&nbsp;</a>';
+					html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-warning button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="reject(\''+index+'\',1);">&nbsp;驳回&nbsp;</a>';
+				}
+				if(row.orderStatus == "-6") {
+					html += '<a style="margin:3px 0px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="paramReturn(\''+index+'\');">&nbsp;同意&nbsp;</a>';
+					html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-warning button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="reject(\''+index+'\',2);">&nbsp;驳回&nbsp;</a>';
+				}
+				if(row.orderStatus == 3 || row.orderStatus == 4 || row.orderStatus == -1 || row.orderStatus == -2 || row.orderStatus == -4 || row.orderStatus == -5 || row.orderStatus == -7 || row.orderStatus == -8){
+					if(row.isShow == 0){
+						html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delOrder(\''+index+'\',2);">&nbsp;恢复&nbsp;</a>';
+					}
+					html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delOrder(\''+index+'\',1);">&nbsp;删除&nbsp;</a>';
+				}
+				html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="orderLook(\''+index+'\');">&nbsp;查看&nbsp;</a>';
+				return html;
+			}
+		} ] ];
+		
+		var paramColumns = [ [ {
+			field : 'itemImg',
+			title : '商品图片',
+			width : 60,
+			formatter : function(data,row,index){
+				return '<img style="width:100px;height:100px;margin-left:-15px;" src="<%=basePath %>'+data+'"/>';
+			}
+		},{
+			field : 'title',
+			title : '标题',
+			width : 80,
+			align : 'center'
+		},{
+			field : 'price',
+			title : '价格',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'reducePrice',
+			title : '优惠金额',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'payment',
+			title : '实付金额',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (data/100).toFixed(2);
+			}
+		},{
+			field : 'count',
+			title : '数量',
+			width : 30,
+			align : 'center'
+		},{
+			field : 'firstRatio',
+			title : '一度抽成',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (row.distributeStatus?data:0) * 100 + '%';
+			}
+			
+		},{
+			field : 'secondRatio',
+			title : '二度抽成',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				return (row.distributeStatus?data:0) * 100 + '%';
+			}
+		} ] ];
+		
+		var receiptColumns = [ [ {
+			field : 'id',
+			checkbox : true,
+			align : 'center'
+		},{
+			field : 'name',
+			title : '联系人姓名',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'mobile',
+			title : '联系人电话',
+			width : 50,
+			align : 'center'
+		},{
+			field : 'address',
+			title : '取货地址',
+			width : 200,
+			align : 'center'
+		},{
+			field : 'operation',
+			title : '操作',
+			width : 50,
+			align : 'center',
+			formatter : function(data,row,index){
+				var html = '<a style="margin:3px 0px;" class="easyui-linkbutton button-success button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="editAddr(\''+index+'\');">&nbsp;编辑&nbsp;</a>';
+				html += '&nbsp;&nbsp;<a style="margin:3px 0px;" class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delAddr(\''+index+'\');">&nbsp;删除&nbsp;</a>';
+				return html;
+			}
+		} ] ];
+		
+		$(function(){
+			$.ajax({
+				async:false,
+				type:"post",
+				url : baseURL+'shop/item/findEntityList',
+				data:{'entityTableName':entityTableName,'personUUIDField':personUUIDField,'entityShowField':entityShowField,'entityShowValue':entityShowValue,'entitySortField':entitySortField},
+				dataType:'json',
+				success:function(data){
+					if(data.status == "1"){
+						data = data.data;
+						var loadData = [];
+						for(var i = 0;i < data.length;i++){
+							var text = data[i][entityNameField];
+							var value = data[i][entityUUIDField];
+							loadData.push({'text':text,'value':value})
+						}
+						$('#entityName').combobox({
+							data : loadData,
+							value : loadData[0].value,
+				            valueField : 'value',
+				            textField : 'text',
+				            onLoadSuccess : function(){
+				            	entityUUID = loadData[0].value;
+				            },
+				            onChange: function(){
+				                entityUUID = $(this).combobox('getValue');
+				                $('#order_table').datagrid({
+				    				queryParams: {"entityUUID":entityUUID,"isShow":isShow}
+				                });
+				            }
+				        });
+					}else{
+						$.messager.alert('提示',data.msg,'warning');
+					}
+				}
+			});
+			//初始化订单数据表格
+			$('#order_table').datagrid({
+				iconCls: 'icon-order',
+				title: '&nbsp;&nbsp;订单管理',
+				columns : columns,
+				toolbar : '#order_tb',
+				url : '<%=basePath %>shop/order/findOrderPage',
+				queryParams: {"entityUUID":entityUUID,"orderStatus":orderStatus,"isShow":isShow},
+				rownumbers : true,
+				pagination : true,
+				pageList : [10,20,30,40],
+				pageSize : 10,
+				fit : true,
+				fitColumns : true,
+				nowrap : false,
+				singleSelect: true,
+				emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到订单信息哦</span>"
+			});
+		});
+		
+		//查看订单详情
+		function orderLook(rowIndex){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			$('<div>\
+				<div class="easyui-layout" data-options="fit:true">\
+					<div data-options="region:\'west\',split:true" style="width:800px;">\
+						<table id="param_look_table"></table>\
+					</div>\
+					<div class="paramData" data-options="region:\'center\',border:false">\
+					</div>\
+				</div>\
+			</div>').window({
+				width:'1100px',
+				height:'550px',
+				title : '订单详情',
+				modal : true,
+			    onOpen : function(){
+			    	var _win = $(this);
+			    	$.parser.parse(_win);
+			    	$('#param_look_table',_win).datagrid({
+						columns : paramColumns,
+						rownumbers : true,
+						url : '<%=basePath %>shop/orderItem/findOrderItemPage',
+						queryParams: {"orderUUID":row.orderUUID},
+						pagination : true,
+						pageList : [4,10,20,30,40],
+						pageSize : 4,
+						fit : true,
+						fitColumns : true,
+						nowrap : false,
+						singleSelect : true,
+						onClickRow : doClickRow,
+						emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到商品信息哦</span>"
+					});
+			    	$('.paramData').html('<p>单击表格查看商品规格</p>');
+			    },
+			    onClose : function(){
+			    	$(this).window('destroy');
+			    }
+			});
+		}
+		//接单
+		function receipt(rowIndex){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			$('<div>\
+				<table id="param_addr_table"></table>\
+				<div id="param_consign_tb" style="padding:2px 5px;">\
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="\'iconCls\':\'icon-add\',\'plain\':true" onclick="addAddr()">新增</a>\
+				</div>\
+			</div>').dialog({
+				id : 'param_consign_dialog',
+	    		width : "1000px",
+	    		height : "636px",
+	    		toolbar : '#param_consign_tb',
+	    		closable: false,
+	    		modal: true,
+	    		title : "选择取货地址",
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    			$('#param_addr_table',_dialog).datagrid({
+	    				columns : receiptColumns,
+	    				rownumbers : true,
+	    				url : '<%=basePath %>shop/addr/findAddrList',
+	    				queryParams: {"entityUUID":row.entityUUID,"order":"createTime desc"},
+	    				fit : true,
+	    				fitColumns : true,
+	    				nowrap : false,
+	    				singleSelect : true,
+	    				emptyMsg: "<span style='font-size:18px;color:#C6C4C4;'>没有查询到取货地址信息哦</span>"
+	    			});
+	    		},
+	    		buttons:[{
+					text:'确定',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var addr = $('#param_addr_table').datagrid('getSelected');
+						if(!addr){
+							$.messager.alert('提示','请选择取货地址','warning');
+							return;
+						}
+						$.ajax({
+							type:"post",
+							url:'<%=basePath %>shop/order/receive',
+							data:{'orderUUID':row.orderUUID,'name':addr.name,'mobile':addr.mobile,'address':addr.address},
+							dataType:'json',
+							success:function(data){
+								if(data.status == "1"){
+									$('#order_table').datagrid('updateRow',{
+									    index: rowIndex,
+									    row: {
+									        'orderStatus' : 2
+									    }
+									});
+									$('#param_consign_dialog').dialog('destroy');
+								}else{
+									$.messager.alert("提示", data.msg, "warning");
+								}
+							}
+						});
+					}
+				},{
+					text:'取消',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#param_consign_dialog').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		//查看商品规格
+		function doClickRow(rowIndex,rowData){
+			if(rowData.paramData != null){
+				var table = '<table width="100%" cellpadding="0" cellspacing="0">';
+				table += '<tr><td colspan="2" style="font-weight:bold;text-align:center;background-color:#EAEAEA;height: 40px;">规格参数</td></tr>';
+				var paramData = JSON.parse(rowData.paramData);
+		    	for(var key in paramData){
+					table += '<tr><td style="width:140px;text-align-last: justify; font-size: 14px;text-align:left;border-bottom:#EAEAEA solid 1px;height: 40px;text-indent: 1em;"><span style="color:red;">'+key+'</span></td><td style="width:200px;border-bottom:#EAEAEA solid 1px;text-indent:2em;">'+paramData[key]+'</td></tr>';
+				}
+		    	table += "</table>";
+		    	$('.paramData').html(table);
+			}else{
+				$('.paramData').html('<p>这件商品没有商品规格哦</p>');
+			}
+		}
+		
+		//添加取货地址
+		function addAddr(){
+			$('<div id="add_addr_dialog">\
+				<form>\
+					<input type="hidden" name="entityUUID"></input>\
+					<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+						<tr>\
+							<td align="right">\
+								<label>联系人姓名:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-textbox" type="text" name="name" style="width:300px"  data-options="required:true" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td align="right">\
+								<label>联系人电话:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-numberbox" type="text" name="mobile" style="width:300px"  data-options="required:true" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td align="right">\
+								<label>取货地址:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-textbox" type="text" name="address" style="width:300px;height:100px;"  data-options="required:true,multiline:true" />\
+							</td>\
+						</tr>\
+					</table>\
+				</form>\
+			</div>').css({padding:"5px"}).dialog({
+				id : "add_addr_dialog",
+	    		width : "400px",
+	    		height : "300px",
+	    		closable: false,
+	    		modal: true,
+	    		title : "添加取货地址",
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    		},
+	    		buttons:[{
+					text:'确认',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var form = $('#add_addr_dialog').find('form');
+						form.find('[name=entityUUID]').val(entityUUID);
+						if(!form.form('validate')){
+							$.messager.alert('提示信息','表单还没填完哦，请填完表单后再提交!','warning');
+						}else{
+							$.ajax({
+								type:"post",
+								url:'<%=basePath %>shop/addr/saveOrUpAddr',
+								data:form.serialize(),
+								dataType:'json',
+								success:function(data){
+									if(data.status == "1"){
+										$('#param_addr_table').datagrid({
+											url : '<%=basePath %>shop/addr/findAddrList',
+						    				queryParams: {"entityUUID":entityUUID,"order":"createTime desc"}
+										});
+										$('#add_addr_dialog').dialog('destroy');
+									}else{
+										$.messager.alert("提示", data.msg, "warning");
+									}
+								}
+							});
+						}
+					}
+				},{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#add_addr_dialog').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		
+		function delAddr(rowIndex){
+			$.messager.confirm("操作提醒", "确认要删除该取货地址？", function (c) {
+				if(c){
+					$('#param_addr_table').datagrid('selectRow',rowIndex);
+					var row = $('#param_addr_table').datagrid('getSelected');
+					$.ajax({
+						type:"post",
+						url:'<%=basePath %>shop/addr/delAddr',
+						data:{addrUUID: row.addrUUID},
+						dataType:'json',
+						success:function(data){
+							if(data.status == "1"){
+								$('#param_addr_table').datagrid({
+									url : '<%=basePath %>shop/addr/findAddrList',
+				    				queryParams: {"entityUUID":entityUUID,"order":"createTime desc"}
+								});
+							}else{
+								$.messager.alert("提示", data.msg, "warning");
+							}
+						}
+					});
+				}
+			});
+		}
+		
+		//编辑取货地址
+		function editAddr(rowIndex){
+			$('#param_addr_table').datagrid('selectRow',rowIndex);
+			var row = $('#param_addr_table').datagrid('getSelected');
+			
+			$('<div id="add_addr_dialog">\
+				<form>\
+					<input type="hidden" name="addrUUID"></input>\
+					<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+						<tr>\
+							<td align="right">\
+								<label>联系人姓名:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-textbox" type="text" name="name" style="width:300px"  data-options="required:true" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td align="right">\
+								<label>联系人电话:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-numberbox" type="text" name="mobile" style="width:300px"  data-options="required:true" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td align="right">\
+								<label>取货地址:</label>\
+							</td>\
+							<td>\
+								<input class="easyui-textbox" type="text" name="address" style="width:300px;height:100px;"  data-options="required:true,multiline:true" />\
+							</td>\
+						</tr>\
+					</table>\
+				</form>\
+			</div>').css({padding:"5px"}).dialog({
+				id : "add_addr_dialog",
+	    		width : "400px",
+	    		height : "300px",
+	    		closable: false,
+	    		modal: true,
+	    		title : "编辑取货地址",
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    			var form = $('#add_addr_dialog').find('form');
+	    			form.find('[name=addrUUID]').val(row.addrUUID);
+	    			form.find("[textboxname=name]").textbox("setValue",row.name);
+			    	form.find("[numberboxname=mobile]").numberbox("setValue",row.mobile);
+			    	form.find("[textboxname=address]").textbox("setValue",row.address);
+	    		},
+	    		buttons:[{
+					text:'确认',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var form = $('#add_addr_dialog').find('form');
+						if(!form.form('validate')){
+							$.messager.alert('提示信息','表单还没填完哦，请填完表单后再提交!','warning');
+						}else{
+							$.ajax({
+								type:"post",
+								url:'<%=basePath %>shop/addr/saveOrUpAddr',
+								data:form.serialize(),
+								dataType:'json',
+								success:function(data){
+									if(data.status == "1"){
+										row.name = form.find('[name=name]').val();
+										row.mobile = form.find('[name=mobile]').val();
+										row.address = form.find('[name=address]').val();
+										$('#param_addr_table').datagrid('updateRow',{
+										    index : rowIndex,
+										    row : JSON.stringify(row)
+										});
+										$('#add_addr_dialog').dialog('destroy');
+									}else{
+										$.messager.alert("提示", data.msg, "warning");
+									}
+								}
+							});
+						}
+					}
+				},{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#add_addr_dialog').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		
+		//驳回退款退货
+		function reject(rowIndex,channel){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			$('<div id="reject">\
+				<form>\
+					<input type="hidden" name="orderUUID"></input>\
+					<table data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+						<tr>\
+							<td>\
+								<input class="easyui-textbox" type="text" name="rejectMsg" style="width:380px;height:150px;"  data-options="required:true,multiline:true" />\
+							</td>\
+						</tr>\
+					</table>\
+				</form>\
+			</div>').css({padding:"5px"}).dialog({
+				id : "reject",
+	    		width : "405px",
+	    		height : "270px",
+	    		closable: false,
+	    		modal: true,
+	    		title : "驳回意见",
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    		},
+	    		buttons:[{
+					text:'确认',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var form = $('#reject').find('form');
+						form.find('[name=orderUUID]').val(row.orderUUID);
+						if(!form.form('validate')){
+							$.messager.alert('提示信息','请填写驳回意见!','warning');
+						}else{
+							if(channel==1){
+								$.ajax({
+									type:"post",
+									url:'<%=basePath %>mobile/order/rejectRefund',
+									data:form.serialize(),
+									dataType:'json',
+									success:function(data){
+										if(data.status == "1"){
+											row.orderStatus = -5;
+											row.rejectMsg = form.find('[name=rejectMsg]').val();
+											$('#order_table').datagrid('updateRow',{
+											    index : rowIndex,
+											    row : JSON.stringify(row)
+											});
+											$('#reject').dialog('destroy');
+										}else{
+											$.messager.alert("提示", data.msg, "warning");
+										}
+									}
+								});
+							}else{
+								$.ajax({
+									type:"post",
+									url:'<%=basePath %>mobile/order/rejectReturn',
+									data:form.serialize(),
+									dataType:'json',
+									success:function(data){
+										if(data.status == "1"){
+											row.orderStatus = -8;
+											row.rejectMsg = form.find('[name=rejectMsg]').val();
+											$('#order_table').datagrid('updateRow',{
+											    index : rowIndex,
+											    row : JSON.stringify(row)
+											});
+											$('#reject').dialog('destroy');
+										}else{
+											$.messager.alert("提示", data.msg, "warning");
+										}
+									}
+								});
+							}
+							
+						}
+					}
+				},{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#reject').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		
+		//同意退款
+		function refund(rowIndex){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			$('<div id="refund">\
+				<form>\
+					<table style="border-collapse:separate; border-spacing:0 10px;" data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+						<tr>\
+							<td>\
+								<input class="easyui-numberbox" type="password" name="pwd" style="width:280px;text-align:center;"  data-options="required:true,prompt:\'请输入支付密码\'" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td id="msg" style="color:red">注：密码长度必须为6位字符</td>\
+						</tr>\
+					</table>\
+				</form>\
+			</div>').css({padding:"5px"}).dialog({
+				id : "refund",
+	    		width : "300px",
+	    		height : "200px",
+	    		closable: false,
+	    		modal: true,
+	    		title : "退款给-"+row.payerName,
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    		},
+	    		buttons:[{
+					text:'确认',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var form = $('#refund').find('form');
+						if(!form.form('validate')){
+							$.messager.alert('提示信息','请输入支付密码!','warning');
+						}else{
+							var pwd = form.find('[name=pwd]').val();
+							$.ajax({
+								type:"post",
+								url:'<%=basePath %>shop/account/checkPwd',
+								data:{entityUUID:row.entityUUID,payPwd:pwd,payChannel:'native'},
+								dataType:'json',
+								success:function(data){
+									if(data.status == "1"){
+										var paySign = data[row.entityUUID];
+										$.ajax({
+											type:"post",
+											url:'<%=basePath %>shop/weiXinPay/agreeRefund',
+											data:{orderUUID:row.orderUUID,paySign:paySign},
+											dataType:'json',
+											success:function(data){
+												if(data.status == "1"){
+													$('#order_table').datagrid('updateRow',{
+													    index : rowIndex,
+													    row : {
+													    	orderStatus:-4
+													    }
+													});
+													$('#refund').dialog('destroy');
+												}else{
+													form.find('#msg').html(data.msg);
+												}
+											}
+										});
+									}else{
+										form.find('#msg').html(data.msg);
+									}
+								}
+							});
+						}
+					}
+				},{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#refund').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		
+		//同意退货
+		function paramReturn(rowIndex){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			$('<div id="refund">\
+				<form>\
+					<table style="border-collapse:separate; border-spacing:0 10px;" data-options="fit:true" style="width:100%;margin-top: 5px;border-collapse: separate;border-spacing: 5px;">\
+						<tr>\
+							<td>\
+								<input class="easyui-numberbox" type="password" name="pwd" style="width:280px;text-align:center;"  data-options="required:true,prompt:\'请输入支付密码\'" />\
+							</td>\
+						</tr>\
+						<tr>\
+							<td id="msg" style="color:red">注：密码长度必须为6位字符</td>\
+						</tr>\
+					</table>\
+				</form>\
+			</div>').css({padding:"5px"}).dialog({
+				id : "refund",
+	    		width : "300px",
+	    		height : "200px",
+	    		closable: false,
+	    		modal: true,
+	    		title : "退款给-"+row.payerName,
+	    		onOpen : function(){
+	    			var _dialog = $(this);
+	    			$.parser.parse(_dialog);
+	    		},
+	    		buttons:[{
+					text:'确认',
+					iconCls: 'icon-ok',
+					handler:function(){
+						var form = $('#refund').find('form');
+						if(!form.form('validate')){
+							$.messager.alert('提示信息','请输入支付密码!','warning');
+						}else{
+							var pwd = form.find('[name=pwd]').val();
+							$.ajax({
+								type:"post",
+								url:'<%=basePath %>shop/account/checkPwd',
+								data:{entityUUID:row.entityUUID,payPwd:pwd,payChannel:'native'},
+								dataType:'json',
+								success:function(data){
+									if(data.status == "1"){
+										var paySign = data[row.entityUUID];
+										$.ajax({
+											type:"post",
+											url:'<%=basePath %>shop/weiXinPay/agreeReturn',
+											data:{orderUUID:row.orderUUID,paySign:paySign},
+											dataType:'json',
+											success:function(data){
+												if(data.status == "1"){
+													$('#order_table').datagrid('updateRow',{
+													    index : rowIndex,
+													    row : {
+													    	orderStatus:-7
+													    }
+													});
+													$('#refund').dialog('destroy');
+												}else{
+													form.find('#msg').html(data.msg);
+												}
+											}
+										});
+									}else{
+										form.find('#msg').html(data.msg);
+									}
+								}
+							});
+						}
+					}
+				},{
+					text:'关闭',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						$('#refund').dialog('destroy');
+				    }
+				}]
+	    	});
+		}
+		
+		function delOrder(rowIndex,channel){
+			$('#order_table').datagrid('selectRow',rowIndex);
+			var row = $('#order_table').datagrid('getSelected');
+			var show = 0;
+			var msg = '确认要删除该订单？删除后可在回收站中找回';
+			if(channel == 1 && row.isShow == 0){
+				show = -1;
+				msg = '确认要删除该订单？删除后将不能找回，请谨慎操作！';
+			}
+			if(channel == 2){
+				show = 1;
+				msg = '确认要从回收站中找回该订单吗？';
+			}
+			$.messager.confirm("操作提醒", msg, function (c) {
+				if(c){
+					$.ajax({
+						type:"post",
+						url:'<%=basePath %>shop/order/delOrder',
+						data:{orderUUID: row.orderUUID, isShow: show},
+						dataType:'json',
+						success:function(data){
+							if(data.status == "1"){
+								$('#order_table').datagrid({
+									url : '<%=basePath %>shop/order/findOrderPage',
+									queryParams: {"entityUUID":entityUUID,"orderStatus":orderStatus,"isShow":isShow}
+								});
+							}else{
+								$.messager.alert("提示", data.msg, "warning");
+							}
+						}
+					});
+				}
+			});
+		}
+		
+		function queryDel(data){
+			isShow = data.isShow;
+			$("#isShow").html(data.text);
+			$('#order_table').datagrid('reload',{'entityUUID':entityUUID,'orderStatus':orderStatus,'isShow':isShow});
+		}
+		
+		function queryOrderStatus(data){
+			orderStatus = data.orderStatus;
+			$("#orderStatus").html(data.text);
+			$('#order_table').datagrid('reload',{'entityUUID':entityUUID,'orderStatus':orderStatus,'isShow':isShow});
+		}
+		
+		function queryOrder(){
+			var condition = $("#orderCondition").val();
+			//使用正则表达式判断字符串是否为数字
+			var regPos = /^(\-)?\d+(\.\d+)?$/;
+			if(regPos.test(condition) && condition.length != 11){
+				condition = condition*100;
+				$('#order_table').datagrid('reload',{'entityUUID':entityUUID,'orderStatus':orderStatus,'isShow':isShow,"totalPrice":condition});
+				return;
+			}
+			$('#order_table').datagrid('reload',{'entityUUID':entityUUID,'orderStatus':orderStatus,'isShow':isShow,"orderUUID":condition,"payerName":condition,"receiverMobile":condition});
+		}
+		
+		function initQuery(){
+			$("#orderCondition").textbox('setValue','');
+			$('#order_table').datagrid('reload',{'entityUUID':entityUUID,'orderStatus':orderStatus,'isShow':isShow});
+		}
+		
+	</script>

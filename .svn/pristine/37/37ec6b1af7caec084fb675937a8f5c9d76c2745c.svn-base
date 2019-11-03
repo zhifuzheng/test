@@ -1,0 +1,230 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 供需商品评论信息
+ * @author wf
+ */
+@Table(tableName="supply_commodity_comment")
+public class SupplyCommodityComment implements Serializable {
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = 7400800772067286870L;
+	
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="全局唯一编号，UUID自动生成")
+	private String commentUUID;
+	
+	@TableField(fieldSize=32,comment="订单UUID")
+	private String orderUUID;
+	
+	@TableField(fieldSize=32,comment="卖家UUID")
+	private String sellerUUID;
+	
+	@TableField(fieldSize=128,comment="卖家名称")
+	private String sellerName;
+	
+	@TableField(fieldSize=1000,comment="卖家logo")
+	private String sellerLogo;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="商品UUID")
+	private String commodityUUID;
+	
+	@TableField(fieldSize=200,comment="商品名称")
+	private String title;
+	
+	@TableField(fieldSize=32,comment="评论人UUID")
+	private String payerUUID;
+	
+	@TableField(fieldSize=30,comment="评论人名称")
+	private String payerName;
+	
+	@TableField(fieldSize=200,comment="评论人头像，存放相对地址")
+	private String payerLogo;
+	
+	@TableField(fieldSize=200,comment="评论人电话")
+	private String payerMobile;
+	
+	@TableField(fieldSize=2,comment="匿名状态：1-不使用匿名，2-使用匿名，默认值为1")
+	private String anonym = "1";
+	
+	@TableField(comment="评分，1~5的整数，默认值为5分")
+	private String score = "5.0";
+	
+	@TableField(fieldSize=300,comment="评论详细信息")
+	private String comment;
+	
+	@TableField(fieldSize=8000,comment="评论图片路径列表，以逗号分割")
+	private String imgList;
+	
+	@TableField(fieldSize=1,comment="评论状态：1正常，2违规，默认值为1")
+	private String status = "1";
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+
+	
+	
+	
+	public String getPayerMobile() {
+		return payerMobile;
+	}
+
+	public void setPayerMobile(String payerMobile) {
+		this.payerMobile = payerMobile;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getCommentUUID() {
+		return commentUUID;
+	}
+
+	public void setCommentUUID(String commentUUID) {
+		this.commentUUID = commentUUID;
+	}
+
+	public String getOrderUUID() {
+		return orderUUID;
+	}
+
+	public void setOrderUUID(String orderUUID) {
+		this.orderUUID = orderUUID;
+	}
+
+	public String getSellerUUID() {
+		return sellerUUID;
+	}
+
+	public void setSellerUUID(String sellerUUID) {
+		this.sellerUUID = sellerUUID;
+	}
+
+	public String getSellerName() {
+		return sellerName;
+	}
+
+	public void setSellerName(String sellerName) {
+		this.sellerName = sellerName;
+	}
+
+	public String getSellerLogo() {
+		return sellerLogo;
+	}
+
+	public void setSellerLogo(String sellerLogo) {
+		this.sellerLogo = sellerLogo;
+	}
+
+	public String getCommodityUUID() {
+		return commodityUUID;
+	}
+
+	public void setCommodityUUID(String commodityUUID) {
+		this.commodityUUID = commodityUUID;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getPayerUUID() {
+		return payerUUID;
+	}
+
+	public void setPayerUUID(String payerUUID) {
+		this.payerUUID = payerUUID;
+	}
+
+	public String getPayerName() {
+		return payerName;
+	}
+
+	public void setPayerName(String payerName) {
+		this.payerName = payerName;
+	}
+
+	public String getPayerLogo() {
+		return payerLogo;
+	}
+
+	public void setPayerLogo(String payerLogo) {
+		this.payerLogo = payerLogo;
+	}
+
+	public String getAnonym() {
+		return anonym;
+	}
+
+	public void setAnonym(String anonym) {
+		this.anonym = anonym;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public void setScore(String score) {
+		this.score = score;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public String getImgList() {
+		return imgList;
+	}
+
+	public void setImgList(String imgList) {
+		this.imgList = imgList;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	
+	
+}

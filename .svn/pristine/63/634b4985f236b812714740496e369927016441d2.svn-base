@@ -1,0 +1,90 @@
+package com.xryb.zhtc.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.xryb.zhtc.entity.Withdrawal;
+import com.xryb.zhtc.service.IWithdrawalService;
+import com.xryb.zhtc.util.RegExpUtil;
+
+import dbengine.util.Page;
+/**
+ * 提现申请相关service
+ * @author wf
+ */
+public class WithdrawalServiceImpl extends BaseServiceImpl<Withdrawal> implements IWithdrawalService {
+	
+	@Override
+	public List<Withdrawal> findPageByMap(String sourceId, boolean closeConn, Page page, Map<String, String> findMap, String order) {
+		StringBuffer select = (new StringBuffer("select * from ")).append(tableName);
+		if(findMap.size() > 0){
+			select.append(" where ");
+		}
+		String accountType = null;
+		String auditStatus = null;
+		String auditorUUID = null;
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			if("accountType".equals(entry.getKey())){
+				accountType = entry.getValue();
+			}
+			if("auditStatus".equals(entry.getKey())){
+				auditStatus = entry.getValue();
+			}
+			if("auditorUUID".equals(entry.getKey())){
+				auditorUUID = entry.getValue();
+			}
+		}
+		if(accountType != null){
+			findMap.remove("accountType");
+		}
+		if(auditStatus != null){
+			findMap.remove("auditStatus");
+		}
+		if(auditorUUID != null){
+			findMap.remove("auditorUUID");
+		}
+		int len = select.length();
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			select.append(" or ").append(entry.getKey()).append(" like '%").append(entry.getValue().toString().replaceAll("'", "\"")).append("%'");
+		}
+		int firstOrIndex = select.indexOf("or",len);
+		if(firstOrIndex == len+1){
+			select.replace(firstOrIndex, firstOrIndex+2, "(").append(")");
+		}
+		if(accountType != null){
+			select.append(" and accountType = ").append(accountType);
+		}
+		if(auditStatus != null){
+			select.append(" and auditStatus = ").append(auditStatus);
+		}
+		if(auditorUUID != null){
+			select.append(" and auditorUUID = '").append(auditorUUID).append("'");
+		}
+		int firstAndIndex = select.indexOf("and",len);
+		if(firstAndIndex == len+1){
+			select.delete(firstAndIndex, firstAndIndex+3);
+		}
+		StringBuffer selectTotal = new StringBuffer(select.toString()).replace(select.indexOf("*"), select.indexOf("*")+1, "COUNT(0) as TOTAL");
+		//查询总记录数
+		Map<String, Object> map = findMapBysql(sourceId, selectTotal.toString(), closeConn, null);
+		Long totalRecord = Long.valueOf((map.get("TOTAL").toString()));
+		if(totalRecord == 0L){
+			return null;
+		}
+		//计算开始索引
+		Long index = (page.getPage()-1L)*page.getPageRecord();
+		//计算总页数
+		Long totalPage = (totalRecord+page.getPageRecord()-1)/page.getPageRecord();
+		//分页查询
+		if(!RegExpUtil.isNullOrEmpty(order)){
+			select.append(" order by ").append(order);
+		}
+		select.append(" limit ").append(index).append(",").append(page.getPageRecord());
+		List<Withdrawal> rows = findListBySql(sourceId, select.toString(), closeConn, c, null);
+		page.setTotalRecord(totalRecord);
+		page.setTotalPage(totalPage);
+		page.setRows(rows);
+		return (List<Withdrawal>) rows;
+	}
+	
+}

@@ -1,0 +1,371 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+	<table id="content_table"></table>
+	<div id="content_tb" style="padding:2px 5px;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="'iconCls':'icon-add','plain':true" onclick="addContent()">新增</a>
+		<input id="condition" data-options="'prompt':'请输入想要搜索的信息'" class="easyui-textbox" style="width:200px;">				
+        <a href="javascript:void(0)" class="easyui-linkbutton color-blue" onclick="queryItem()"  data-options="'plain':true"><i class="icon iconfont icon-search"></i>&nbsp;搜索</a>
+	</div>
+	<script type="text/javascript">
+		
+		// 定义列
+		var columns = [ [ {
+			field : 'moduleName',
+			title : '模块名称',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'pageCode',
+			title : '页面编号',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'pageName',
+			title : '页面名称',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'contentCode',
+			title : '内容编号',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'title',
+			title : '内容标题',
+			width : 100,
+			align : 'center'
+		},{
+			field : 'operation',
+			title : '操作',
+			width : 65,
+			align : 'center',
+			formatter : function(data,row,index){
+				var html = "";
+				html += '<a class="easyui-linkbutton button-primary button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="lookContent(\''+index+'\');">&nbsp;查看&nbsp;</a>';
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-info button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="editContent(\''+index+'\');">&nbsp;编辑&nbsp;</a>';
+				html += '&nbsp;&nbsp;<a class="easyui-linkbutton button-danger button-xs l-btn l-btn-small" data-options="plain: true, iconCls: \'icon-remove\'" onclick="delContent(\''+index+'\');">&nbsp;删除&nbsp;</a>';
+				return html;
+			}
+		} ] ];
+		
+		$(function(){
+			//初始化页面内容数据表格
+			$('#content_table').datagrid({
+				iconCls: 'icon-item',
+				title: '&nbsp;&nbsp;内容管理',
+				columns : columns,
+				toolbar : '#content_tb',
+				url : '<%=basePath %>system/content/findContentPage',
+				rownumbers : true,
+				pagination : true,
+				pageList : [10,20,30,40],
+				pageSize : 10,
+				fit : true,
+				fitColumns : true,
+				nowrap : false,
+				singleSelect: true
+			});
+		});
+		
+		//新增页面内容
+		function addContent(rowIndex){
+			var template = $('<div style="padding:10px 10px 10px 10px">\
+				<form method="post">\
+				    <table>\
+					    <tr>\
+				            <td>模块名称:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="moduleName" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>页面编号:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="pageCode" data-options="prompt:\'不填写时使用默认值(推荐)\',validType:\'length[0,50]\'" style="width:280px;"></input>\
+			            	</td>\
+				        </tr>\
+				        <tr>\
+				            <td>页面名称:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="pageName" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>内容编号:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="contentCode" data-options="prompt:\'不填写时使用默认值(推荐)\',validType:\'length[0,50]\'" style="width:280px;"></input>\
+			            	</td>\
+				        </tr>\
+				        <tr>\
+				            <td>内容标题:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="title" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>详细信息:</td>\
+				            <td>\
+				                <textarea class="desc" style="width:800px;height:300px;visibility:hidden;" name="descData"></textarea>\
+				            </td>\
+				        </tr>\
+				    </table>\
+				</form>\
+			</div>');
+			//解析easyui的css
+			$.parser.parse(template);
+			template.find(".textbox .textbox-prompt").css("color","black");
+			$("<div>").css({padding:"5px"}).dialog({
+				id : "content_add_dialog",
+	    		width : "915px",
+	    		height : "600px",
+	    		modal:true,
+	    		title : "新增页面内容",
+	    		closable: false,
+			    onOpen : function(){
+			    	$('#content_add_dialog').append(template);
+			    },
+			    buttons:[{
+					text:'保存',
+					iconCls: 'icon-ok',
+					handler:function(){
+						//同步文本框中的详细
+						editor.sync();
+						var editorData = template.find('[name=descData]').val();
+						//有效性验证
+						if(!template.find("form").form('validate') || $.trim(editorData) == ""){
+							$.messager.alert('提示','表单还未填写完成!','warning');
+							return;
+						}
+						//ajax的post方式提交表单
+						//template.find("form").serialize()将表单序列号为key-value形式的字符串
+						$.post(
+							baseURL+"system/content/saveOrUpContent",
+							template.find("form").serialize(),
+							function(data){
+								if(data.status == "1"){
+									$('#content_table').datagrid('reload');
+									$('#content_add_dialog').dialog("destroy");
+								}else{
+									$.messager.alert('提示',data.msg,'warning');
+								}
+							},
+							'json'
+						);
+					}
+				},{
+					text:'取消',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						template.remove();
+				    	$('#content_add_dialog').dialog("destroy");
+				    }
+				}]
+	    	});
+			var editor = shop.createEditor(template.find(".desc"));
+		}
+		
+		//删除页面内容
+		function delContent(rowIndex){
+			$('#content_table').datagrid('selectRow',rowIndex);
+			var row = $('#content_table').datagrid('getSelected');
+			$.messager.confirm("操作提醒", "确定要删除页面\""+row.pageName+"\"中，标题为\""+row.title+"\"的页面内容吗？", function (c) {
+				if(c){
+					$.post(
+						baseURL+"system/content/delContent",
+						{'contentUUID':row.contentUUID},
+						function(data){
+							if(data){
+								$('#content_table').datagrid('reload');
+							}else{
+								$.messager.alert('提示','网络繁忙，请稍后重试！','warning');
+							}
+						},
+						'json'
+					);
+				}
+			});
+		}
+		
+		//编辑商品信息
+		function editContent(rowIndex){
+			$('#content_table').datagrid('selectRow',rowIndex);
+			var row = $('#content_table').datagrid('getSelected');
+			var template = $('<div style="padding:10px 10px 10px 10px">\
+				<form method="post">\
+					<input type="hidden" name="id"></input>\
+				    <table>\
+					    <tr>\
+				            <td>模块名称:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="moduleName" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>页面编号:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="pageCode" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+			            	</td>\
+				        </tr>\
+				        <tr>\
+				            <td>页面名称:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="pageName" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>内容编号:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="contentCode" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+			            	</td>\
+				        </tr>\
+				        <tr>\
+				            <td>内容标题:</td>\
+				            <td>\
+				            	<input class="easyui-textbox" type="text" name="title" data-options="required:true,validType:\'length[0,50]\'" style="width:280px;"></input>\
+				            </td>\
+				        </tr>\
+				        <tr>\
+				            <td>详细信息:</td>\
+				            <td>\
+				                <textarea class="desc" style="width:800px;height:300px;visibility:hidden;" name="descData"></textarea>\
+				            </td>\
+				        </tr>\
+				    </table>\
+				</form>\
+			</div>');
+			//解析easyui的css
+			$.parser.parse(template);
+			template.find(".textbox .textbox-prompt").css("color","black");
+			$("<div>").css({padding:"5px"}).dialog({
+				id : "content_edit_dialog",
+	    		width : "915px",
+	    		height : "600px",
+	    		modal:true,
+	    		title : "编辑页面内容",
+	    		closable: false,
+			    onOpen : function(){
+			    	template.find("[name=id]").val(row.id);
+			    	template.find("[textboxname=moduleName]").textbox("setValue",row.moduleName);
+			    	template.find("[textboxname=pageCode]").textbox("setValue",row.pageCode);
+			    	template.find("[textboxname=pageName]").textbox("setValue",row.pageName);
+			    	template.find("[textboxname=contentCode]").textbox("setValue",row.contentCode);
+			    	template.find("[textboxname=title]").textbox("setValue",row.title);
+			    	template.find("[name=descData]").val(row.descData);
+			    	$('#content_edit_dialog').append(template);
+			    },
+			    buttons:[{
+					text:'保存',
+					iconCls: 'icon-ok',
+					handler:function(){
+						//同步文本框中的商品描述
+						editor.sync();
+						var editorData = template.find('[name=descData]').val();
+						//有效性验证
+						if(!template.find("form").form('validate') || $.trim(editorData) == ""){
+							$.messager.alert('提示','表单还未填写完成!','warning');
+							return;
+						}
+						//ajax的post方式提交表单
+						//template.find("form").serialize()将表单序列号为key-value形式的字符串
+						$.post(
+							baseURL+"system/content/saveOrUpContent",
+							template.find("form").serialize(),
+							function(data){
+								if(data){
+									//更新行记录
+									row.moduleName = template.find("[name=moduleName]").val();
+									row.pageCode = template.find("[name=pageCode]").val();
+									row.pageName = template.find("[name=pageName]").val();
+									row.contentCode = template.find("[name=contentCode]").val();
+									row.title = template.find("[name=title]").val();
+									row.descData = template.find("[name=descData]").val();
+									$('#content_table').datagrid('updateRow',{
+									    index : rowIndex,
+									    row : JSON.stringify(row)
+									});
+									$('#content_edit_dialog').dialog("destroy");
+								}else{
+									$.messager.alert('提示','网络繁忙，请稍后重试！','warning');
+								}
+							},
+							'json'
+						);
+					}
+				},{
+					text:'取消',
+					iconCls: 'icon-cancel',
+					handler:function(){
+						template.remove();
+				    	$('#content_edit_dialog').dialog("destroy");
+				    }
+				}]
+	    	});
+			var editor = shop.createEditor(template.find(".desc"));
+			editor.html(row.descData);
+		}
+		
+		//查看页面内容信息
+		function lookContent(rowIndex){
+			$('#content_table').datagrid('selectRow',rowIndex);
+			var row = $('#content_table').datagrid('getSelected');
+			var descData = "";
+			$("<div>").css({padding:"5px"}).window({
+	    		width : "800px",
+	    		height : "500px",
+	    		modal:true,
+	    		title : "页面内容信息",
+	    		collapsible : false,
+	    		minimizable : false,
+	    		maximizable : false,
+			    onClose : function(){
+			    	$(this).window("destroy");
+			    },
+			    onOpen : function(){
+			    	var html = '<div style="padding:10px 10px 10px 10px"><table cellpadding="0" cellspacing="0" border="1">';
+			    	
+			    	html += '<tr>';
+			    	html += '<td width="150px"><span style="color:red;">模块名称</span>:' + row.moduleName + '</td>';
+			    	html += '<td width="150px"><span style="color:red;">页面编号</span>:' + row.pageCode + '</td>';
+			    	html += '<td width="150px"><span style="color:red;">页面名称</span>:' + row.pageName + '</td>';
+			    	html += '<td width="150px"><span style="color:red;">内容编号</span>:' + row.contentCode + '</td>';
+			    	html += '<td width="150px"><span style="color:red;">内容标题</span>:' + row.title + '</td>';
+			    	html += '</tr>';
+			    	
+			    	html += '<tr>';
+			    	html += '<td colspan="7" align="center"><span style="color:green;">详细信息</span></td>';
+			    	html += '</tr>';
+			    	
+			    	html += '<tr>';
+			    	html += '<td colspan="7" valign="top">'+row.descData+'</td>';
+			    	html += '</tr>';
+			    	
+			    	html += '</table></div>';
+			    	$(this).html(html);
+			    }
+	    	}).window("open");
+		}
+		
+		function paramQuery(){
+			var row = $('#content_table').datagrid('getSelected');
+			if(row == null){
+				$.messager.alert("提示", "请在商品管理中选择商品", "warning");
+				return;
+			}
+			var itemUUID = row.itemUUID;
+			var condition = $("#paramCondition").val();
+			//使用正则表达式判断字符串是否为数字
+			var regPos = /^(\-)?\d+(\.\d+)?$/;
+			if(regPos.test(condition) && condition.length != 11){
+				condition = condition*100;
+				$('#param_table').datagrid('reload',{"itemUUID":itemUUID,"price":condition});
+				return;
+			}
+			$('#param_table').datagrid('reload',{"itemUUID":itemUUID,"title":condition,"paramData":condition});
+		}
+		
+	</script>

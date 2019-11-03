@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+	<meta http-equiv="Expires" content="0" />
+		<title>视频预览</title>
+		
+		<link href="../../jeasyui-plus/themes/insdep/easyui.css" rel="stylesheet" type="text/css">
+		<link href="../../jeasyui-plus/themes/insdep/easyui_animation.css" rel="stylesheet" type="text/css">
+		<link href="../../jeasyui-plus/themes/insdep/easyui_plus.css" rel="stylesheet" type="text/css">
+		<link href="../../jeasyui-plus/themes/insdep/insdep_theme_default.css" rel="stylesheet" type="text/css">
+		<link href="../../jeasyui-plus/plugin/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+		<script type="text/javascript" src="../../jeasyui-plus/jquery.min.js"></script>
+		<script type="text/javascript" src="../../jeasyui-plus/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../../jeasyui-plus/themes/insdep/jquery.insdep-extend.min.js"></script>
+		<!--end-->
+		<style type="text/css">
+			.left-up-transform {
+				transform: rotate(45deg);
+				-ms-transform: rotate(45deg);
+				/* Internet Explorer */
+				-moz-transform: rotate(45deg);
+				/* Firefox */
+				-webkit-transform: rotate(45deg);
+				/* Safari 和 Chrome */
+				-o-transform: rotate(45deg);
+				/* Opera */
+			}
+			
+			.easyui-linkbutton {
+				margin: 2px 2px;
+			}
+			.bottom-margin-left {
+				margin-left: 21px;
+			}
+			.easyui-panel {
+				margin-bottom: 7px;
+				padding: 3px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="easyui-layout" style="width:100%;height:100%;">
+			<div data-options="region:'east',split:false" style="width:400px;">
+				<div class="easyui-panel" title="预览">
+					<p>
+						<input id="volume" name="volume" value="50" class="easyui-textbox" required="true" label="音量:" style="width:140px">
+						<a href="javascript:void(0)" onclick="clickSetVolume();" class="easyui-linkbutton button-grey">设置</a>
+						<a href="javascript:void(0)" onclick="clickOpenSound();" class="easyui-linkbutton button-grey">打开声音</a>
+						<a href="javascript:void(0)" onclick="clickCloseSound();" class="easyui-linkbutton button-grey">关闭声音</a>
+					</p>
+					<p>
+						<select name="name" class="easyui-combobox" required="true" label="对讲通道:" style="width:140px">
+							
+						</select>
+						<a href="javascript:void(0)" onclick="clickGetAudioInfo();" class="easyui-linkbutton button-grey">获取通道</a>
+						<a href="javascript:void(0)" onclick="clickStartVoiceTalk();" class="easyui-linkbutton button-grey">开始对讲</a>
+						<a href="javascript:void(0)" onclick="clickStopVoiceTalk();" class="easyui-linkbutton button-grey">停止对讲</a>
+					</p>
+					<p>
+						<a href="javascript:void(0)" onclick="clickCapturePic();" class="easyui-linkbutton button-grey">抓图</a>
+						<a href="javascript:void(0)" onclick="clickStartRecord();" class="easyui-linkbutton button-grey">开始录像</a>
+						<a href="javascript:void(0)" onclick="clickStopRecord();" class="easyui-linkbutton button-grey">停止录像</a>
+						<a href="javascript:void(0)" onclick="clickFullScreen();" class="easyui-linkbutton button-grey">全屏</a>
+					</p>
+					<p>
+						<a href="javascript:void(0)" onclick="clickEnableEZoom();" class="easyui-linkbutton button-grey">启用电子放大</a>
+						<a href="javascript:void(0)" onclick="clickDisableEZoom();" class="easyui-linkbutton button-grey">禁用电子放大</a>
+						<a href="javascript:void(0)" onclick="clickEnable3DZoom();" class="easyui-linkbutton button-grey">启用3D放大</a>
+						<a href="javascript:void(0)" onclick="clickDisable3DZoom();" class="easyui-linkbutton button-grey">禁用3D放大</a>
+					</p>
+				</div>
+				<div class="easyui-panel" title="云台控制">
+					<p>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(5);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-left left-up-transform"></i></a>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(1);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-up"></i></a>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(7);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-up left-up-transform"></i></a>
+						<select id="ptzspeed" name="ptzspeed" class="easyui-combobox" required="true" label="云台速度:" style="width:140px">
+							<option value="">1</option>
+							<option value="">2</option>
+							<option value="">3</option>
+							<option value="" selected>4</option>
+							<option value="">5</option>
+							<option value="">6</option>
+							<option value="">7</option>
+						</select>
+						<a href="javascript:void(0)" onmousedown="PTZZoomIn()" onmouseup="PTZZoomStop()" class="easyui-linkbutton button-grey">变倍+</a>
+						<a href="javascript:void(0)" onmousedown="PTZZoomout()" onmouseup="PTZZoomStop()" class="easyui-linkbutton button-grey">变倍-</a>
+					</p>
+					<p>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(3);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-left"></i></a>
+						<a href="javascript:void(0)" onclick="mouseDownPTZControl(9);" class="easyui-linkbutton button-grey"><i class="fa fa-circle-o-notch"></i></a>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(4);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-right"></i></a>
+						<input id="preset" name="preset" value="1" class="easyui-textbox" required="true" label="预置点号:" style="width:140px">
+						<a href="javascript:void(0)" onmousedown="PTZFocusIn()" onmouseup="PTZFoucusStop()" class="easyui-linkbutton button-grey">变焦+</a>
+						<a href="javascript:void(0)" onmousedown="PTZFoucusOut()" onmouseup="PTZFoucusStop()" class="easyui-linkbutton button-grey">变焦-</a>
+					</p>
+					<p>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(6);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-down left-up-transform"></i></a>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(2);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-down"></i></a>
+						<a href="javascript:void(0)" onmousedown="mouseDownPTZControl(8);" onmouseup="mouseUpPTZControl();" class="easyui-linkbutton button-grey"><i class="fa fa-arrow-right left-up-transform"></i></a>
+						<a href="javascript:void(0)" onclick="clickSetPreset();" class="easyui-linkbutton button-grey bottom-margin-left">设置</a>
+						<a href="javascript:void(0)" onclick="clickGoPreset();" class="easyui-linkbutton button-grey">调用</a>
+						<a href="javascript:void(0)" onmousedown="PTZIrisIn()" onmouseup="PTZIrisStop()" class="easyui-linkbutton button-grey bottom-margin-left">光圈+</a>
+						<a href="javascript:void(0)" ouseup="PTZIrisStop()" class="easyui-linkbutton button-grey">光圈-</a>
+					</p>
+				</div>
+				<div class="easyui-panel" title="回放">
+					<p>
+						<input class="easyui-datetimebox" id="starttime" name="starttime" label="开始时间:" labelPosition="left" data-options="editable:false" style="width:100%;">
+						<input class="easyui-datetimebox" id="endtime" name="endtime" label="结束时间:" labelPosition="left" data-options="editable:false" style="width:85%;">
+						<a href="javascript:void(0)" onclick="clickRecordSearch(0);" class="easyui-linkbutton button-grey">搜索</a>
+					</p>
+					<div style="width:100%;height: 110px; border: solid 1px #000000;">
+						<table id="searchlist" cellpadding="0" cellspacing="0" border="0"  style="width: 100%;height: 100%;"></table>
+					</div>
+					<p>
+						<a href="javascript:void(0)" onclick="clickStartPlayback();" class="easyui-linkbutton button-grey"><i class="fa fa-play"></i></a>
+						<a href="javascript:void(0)" onclick="clickStopPlayback();" class="easyui-linkbutton button-grey"><i class="fa fa-stop"></i></a>
+						<a href="javascript:void(0)" onclick="clickReversePlayback();" class="easyui-linkbutton button-grey">倒放</i></a>
+						<a href="javascript:void(0)" onclick="clickFrame();" class="easyui-linkbutton button-grey">单帧</a>
+						<input id="transstream" type="checkbox" name="name" value="1">启用转码码流
+					</p>
+					<p>
+						<a href="javascript:void(0)" onclick="clickPause();" class="easyui-linkbutton button-grey"><i class="fa fa-pause"></i></a>
+						<a href="javascript:void(0)" onclick="clickResume();" class="easyui-linkbutton button-grey"><i class="fa fa-repeat"></i></a>
+						<a href="javascript:void(0)" onclick="clickPlaySlow();" class="easyui-linkbutton button-grey">慢放</a>
+						<a href="javascript:void(0)" onclick="clickPlayFast();" class="easyui-linkbutton button-grey">快放</a>
+						<a href="javascript:void(0)" onclick="clickCapturePic();" class="easyui-linkbutton button-grey">抓图</i></a>
+					</p>
+					<p>
+						<a href="javascript:void(0)" onclick="clickStartRecord();" class="easyui-linkbutton button-grey">开始剪辑</a>
+						<a href="javascript:void(0)" onclick="clickStopRecord();" class="easyui-linkbutton button-grey">停止剪辑</i></a>
+						<a href="javascript:void(0)"  onclick="clickGetOSDTime();"  class="easyui-linkbutton button-grey">OSD时间</a>
+						<input id="osdtime" name="osdtime" value="" class="easyui-textbox" readonly="true" style="width:100px">
+					</p>
+				</div>
+			</div>
+			<div data-options="region:'center'">
+				<div id="divPlugin" class="plugin" style="height: 100%;"></div>
+			</div>
+		</div>
+		<!--<script src="../../third/hkvideo/jquery-1.7.1.min.js"></script>-->
+		<script src="webVideoCtrl.js"></script>
+		<script src="demo.js"></script>
+		<script type="text/javascript">
+			hk_excute_flag = true;
+			autoLogin('192.168.1.107','80','admin','jgsq123456')
+			console.log(localStorage.getItem("channel"));
+			
+		</script>
+	</body>
+
+</html>

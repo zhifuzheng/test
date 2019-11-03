@@ -1,0 +1,135 @@
+package com.xryb.zhtc.entity;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+
+/**
+ * 通用信息类型
+ * @author hshzh
+ *
+ */
+@Table(tableName = "common_type")
+public class CommonType {
+	@TableField(isAutoIncrement = true,isPKey = true, comment = "主键，自动增长")
+    private	Long id; 
+	
+	@TableField(fieldSize = 32, isUKey = true, comment = "uuid,全球唯一编号")
+	private String uuid;
+	
+	@TableField(fieldSize = 36, isUKey = true, comment = "通用信息类型编码，全局唯一")
+	private String commonTypeCode;
+	
+	@TableField(fieldSize = 100, isNotNull = true, comment = "通用信息类型名称,必填项")
+	private String commonTypeName;
+	
+	@TableField(fieldSize = 200, comment = "通用信息类型说明，备注")
+	private String commonTypeMark;
+	
+	@TableField(fieldSize = 32, comment = "创建人UUID")
+	private String createUserUUID;
+	
+	@TableField(fieldSize = 32, comment = "创建人名称")
+	private String createUserName;
+	
+	@TableField(fieldSize = 20, comment = "创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize = 32, comment = "修改人uuid")
+	private String updateUserUUID;
+	
+	@TableField(fieldSize = 32, comment = "修改人姓名")
+	private String updateUserName;
+	
+	@TableField(fieldSize = 20, comment = "修改时间")
+	private String updateTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getCommonTypeCode() {
+		return commonTypeCode;
+	}
+
+	public void setCommonTypeCode(String commonTypeCode) {
+		this.commonTypeCode = commonTypeCode;
+	}
+
+	public String getCommonTypeName() {
+		return commonTypeName;
+	}
+
+	public void setCommonTypeName(String commonTypeName) {
+		this.commonTypeName = commonTypeName;
+	}
+
+	public String getCommonTypeMark() {
+		return commonTypeMark;
+	}
+
+	public void setCommonTypeMark(String commonTypeMark) {
+		this.commonTypeMark = commonTypeMark;
+	}
+
+	public String getCreateUserUUID() {
+		return createUserUUID;
+	}
+
+	public void setCreateUserUUID(String createUserUUID) {
+		this.createUserUUID = createUserUUID;
+	}
+
+	public String getCreateUserName() {
+		return createUserName;
+	}
+
+	public void setCreateUserName(String createUserName) {
+		this.createUserName = createUserName;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateUserUUID() {
+		return updateUserUUID;
+	}
+
+	public void setUpdateUserUUID(String updateUserUUID) {
+		this.updateUserUUID = updateUserUUID;
+	}
+
+	public String getUpdateUserName() {
+		return updateUserName;
+	}
+
+	public void setUpdateUserName(String updateUserName) {
+		this.updateUserName = updateUserName;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+	
+	
+}

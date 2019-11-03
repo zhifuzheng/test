@@ -1,0 +1,203 @@
+package com.xryb.zhtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.ss.formula.functions.T;
+
+import com.xryb.zhtc.entity.ApplyMsg;
+import com.xryb.zhtc.entity.BusinessApply;
+import com.xryb.zhtc.entity.BusinessDistribution;
+import com.xryb.zhtc.entity.BusinessGrade;
+import com.xryb.zhtc.entity.BusinessMiddle;
+import com.xryb.zhtc.entity.Collection;
+import com.xryb.zhtc.entity.Item;
+import com.xryb.zhtc.entity.OfflineDetailed;
+import com.xryb.zhtc.entity.OfflineOrders;
+import com.xryb.zhtc.entity.Order;
+import com.xryb.zhtc.entity.OrderItem;
+import com.xryb.zhtc.entity.SettledMoney;
+import com.xryb.zhtc.entity.SlideImg;
+import com.xryb.zhtc.entity.WholesaleMarket;
+
+import dbengine.util.Page;
+
+/**
+ * 零售商供应商
+ * @author Administrator
+ *
+ */
+
+public interface IBusinessService {
+	/**
+	 * 零售商供应商入驻
+	 */
+	public boolean businessSave(String sourceId,boolean closeConn,BusinessApply businessApply);//新增或修改
+	public BusinessApply apply(String sourceId,boolean closeConn,String vipUUID,String applyType);//查询该用户是否申请过（不能重复申请）
+	public List<BusinessApply> businessAppliesList(String sourceId,boolean closeConn,Page page,Map<String,String> findMap);//零售商供应商入驻查询
+	public BusinessApply applyId(String sourceId,boolean closeConn,String businessUUID);//根据商家UUID查询
+	public boolean shopStateSave(String sourceId,boolean closeConn,String businessUUID,String shopState);//启用或停用
+	public boolean settledSave(String sourceId,boolean closeConn,SettledMoney settledMoney);//商家入驻费用设置新增或修改
+	public List<SettledMoney> settledAll(String sourceId,boolean closeConn,Page page,Map<String,String> findMap);//商家入驻费用设置查询
+	public SettledMoney settledId(String sourceId,boolean closeConn,String settledUUID);//商家入驻费用设置根据ID查询
+	public boolean settledDel(String sourceId,boolean closeConn,String settledUUID);//商家入驻费用设置删除
+	public boolean businessXl(String sourceId,boolean closeConn,String businessUUID,Integer salesVolume);//新增店铺销量
+	
+	/**
+	 * 订单管理
+	 */
+	public List<Order> orderAll(String sourceId,boolean closeConn,Page page,Map<String,String> findMap);//查询订单
+	public Map totalPriceSum(String sourceId,boolean closeConn,Map<String,String> findMap);//销售额
+	public Map orderNumber(String sourceId,boolean closeConn,Map<String,String> findMap);//订单数量
+	public Map placeNumber(String sourceId,boolean closeConn,Map<String,String> findMap) ;//下单人数
+	public List<Map<String, Object>> orderAllApp(String sourceId,boolean closeConn,Page page,Map<String,String> findMap);//App查询订单管理
+	public Map moneyDay(String sourceId,boolean closeConn,String entityUUID);//今日交易额
+	public Map orderDay(String sourceId,boolean closeConn,String entityUUID);//今日订单
+	
+	/**
+	 * 设置分销商
+	 */
+	public BusinessDistribution distributionId(String sourceId,boolean closeConn,String businessUUID);//根据商家UUID查询
+	public boolean distributionSave(String sourceId,boolean closeConn,BusinessDistribution businessDistribution);//新增或修改
+	public BusinessDistribution distributionUUID(String sourceId,boolean closeConn,String distributionUUID);//根据UUID查询
+	
+	/**
+	 * 批发市场
+	 */
+	public List<WholesaleMarket> wholesaleMarketsAll(String sourceId,boolean closeConn,Page page,Map<String,String> findMap);//查询
+	boolean pfSave(String sourceId,boolean closeConn,WholesaleMarket wholesaleMarket);//新增或修改
+	WholesaleMarket wholesaleMarketId(String sourceId,boolean closeConn,String pfUUID);//根据ID查询
+	
+	/**
+	 * 收藏
+	 */
+	boolean collectionSave(String sourceId,boolean closeConn,Collection collection);//新增或修改
+	Collection collection(String sourceId,boolean closeConn,Map<String, String> findMap);//根据条件查询
+	List<Collection> collectionAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询
+	boolean collectionDel(String sourceId,boolean closeConn,String collectionUUID);//删除
+	
+	/**
+	 * 入驻消息通知
+	 */
+	boolean msgSave(String sourceId,boolean closeConn,ApplyMsg applyMsg);//新增或修改
+	boolean msgDel(String sourceId,boolean closeConn,String msgUUID);//删除
+	ApplyMsg dateUUIDAll(String sourceId,boolean closeConn,String dateUUID);//根据驳回数据查询
+	List<ApplyMsg> applyMsgsAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询
+	boolean msgReadUp(String sourceId,boolean closeConn,String msgRead,String msgUUID);//修改阅读状态
+	ApplyMsg applyMsgId(String sourceId,boolean closeConn,String msgUUID);//根据ID查询
+	
+	/**
+	 * 商家等级设置
+	 */
+	boolean gradeSave(String sourceId,boolean closeConn,BusinessGrade businessGrade);//新增或修改
+	boolean gradeDel(String sourceId,boolean closeConn,String gradeUUID);//商家等级设置删除
+	List<BusinessGrade> businessGradeAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询
+	BusinessGrade businessGradeId(String sourceId,boolean closeConn,String gradeUUID);//根据UUID查询
+	BusinessMiddle gysOrlss(String sourceId,boolean closeConn,Map<String, String> findMap);//根据条件查询中间表
+	
+	/**
+	 * 零售商管理
+	 */
+	List<BusinessApply> retailerAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询
+	List<BusinessApply> retailerChoiceAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//供应商添加零售商查询
+	
+	/**
+	 * 零售商管理中间表
+	 */
+	boolean middleSave(String sourceId,boolean closeConn,BusinessMiddle businessMiddle);//新增或修改
+	BusinessMiddle businessMiddle(String sourceId,boolean closeConn,Map<String, String> findMap);//根据条件查询单条数据
+	boolean middleDel(String sourceId,boolean closeConn,String middleUUID);//删除
+	
+	/**
+	 * 线下订单
+	 */
+	boolean offlineSave(String sourceId,boolean closeConn,OfflineOrders offlineOrders);//新增或修改
+	OfflineOrders offlineOrdersParameter(String sourceId,boolean closeConn,Map<String, String> findMap);//根据参数查询
+	List<OfflineOrders> offlineOrdersAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询线下订单
+	Map offlineMoney(String sourceId,boolean closeConn,Map<String, String> findMap);//线下数据金额统计
+	boolean stateUp(String sourceId,boolean closeConn,String offlineUUID);//修改线下订单状态
+	
+	/**
+	 * 线下退货
+	 */
+	Map returnQuantityCount(String sourceId,boolean closeConn,String offlineUUID);//通过线下订单UUID查询退款明细总数量
+	boolean detailedSave(String sourceId,boolean closeConn,OfflineDetailed offlineDetailed);//新增或修改
+	List<OfflineDetailed> offlineDetailedAll(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询线下订单明细表
+	
+	/**
+	 * 线下订单所有数据单个统计
+	 */
+	Map offlineTodayMoney(String sourceId,boolean closeConn,String businessUUID);//线下今日交易额
+	Map offlineCountMoney(String sourceId,boolean closeConn,String businessUUID);//线下总交易额
+	Map offlineTodayOrder(String sourceId,boolean closeConn,String businessUUID);//线下今日订单
+	
+	Map offlineTodayRefund(String sourceId,boolean closeConn,String businessUUID);//线下今日退款额
+	Map offlineMoneyRefund(String sourceId,boolean closeConn,String businessUUID);//线下总退款额
+	Map offlineOrderRefund(String sourceId,boolean closeConn,String businessUUID);//线下退款订单
+	
+	/**
+	 * 线上订单所有数据单个统计
+	 */
+	Map onLineTodayMoney(String sourceId,boolean closeConn,String entityUUID);//线上今日交易额
+	Map onLineCountMoney(String sourceId,boolean closeConn,String entityUUID);//线上总销售额
+	Map onLineTodayOrder(String sourceId,boolean closeConn,String entityUUID);//线上今日订单
+	
+	Map onLineTodayRefund(String sourceId,boolean closeConn,String entityUUID);//线上今日退款
+	Map onLineMoneyRefund(String sourceId,boolean closeConn,String entityUUID);//线上总退款额
+	Map onLineOrderRefund(String sourceId,boolean closeConn,String entityUUID);//线上退款订单
+	
+	/**
+	 * 线下收款统计
+	 */
+	List<OfflineOrders> offlineStatistics(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//线下收款统计查询
+	Map totalMoney(String sourceId,boolean closeConn,Map<String, String> findMap);//合计收款金额
+	Map totalOrder(String sourceId,boolean closeConn,Map<String, String> findMap);//合计订单数量
+	
+	/**
+	 * 线下退款统计
+	 */
+	List<OfflineDetailed> detailedRefund(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//线下退款统计
+	Map detailedMoney(String sourceId,boolean closeConn,Map<String, String> findMap);//合计退款金额
+	Map detailedOrder(String sourceId,boolean closeConn,Map<String, String> findMap);//合计订单数量
+	
+	/**
+	 * 零售商订单交易额总交易额统计
+	 */
+	Map lstoDayMoney(String sourceId,boolean closeConn,String entityUUID);//今日交易额
+	Map lsCountMoney(String sourceId,boolean closeConn,String entityUUID);//总销售额
+	Map lstoDayOrder(String sourceId,boolean closeConn,String entityUUID);//今日订单
+	
+	Map lsTodayRefund(String sourceId,boolean closeConn,String entityUUID);//今日退款额
+	Map lsMoneyRefund(String sourceId,boolean closeConn,String entityUUID);//今日总退款额
+	Map lsOrderRefund(String sourceId,boolean closeConn,String entityUUID);//今日退款订单
+	
+	/**
+	 * 根据商家UUID查询前三条数据
+	 */
+	List<Item> itemList(String sourceId,boolean closeConn,String entityUUID);
+	
+	/**
+	 * 店铺银行卡绑定或解除
+	 */
+	boolean bankSave(String sourceId,boolean closeConn,BusinessApply businessApply);
+	
+	/**
+	 * 幻灯片
+	 */
+	List<SlideImg> slideImg(String sourceId,boolean closeConn,Page page,Map<String, String> findMap);//查询
+	SlideImg slideImgId(String sourceId,boolean closeConn,String slideUUID);//根据ID查询
+	boolean slideSave(String sourceId,boolean closeConn,SlideImg slideImg);//新增或修改
+	boolean slideDel(String sourceId,boolean closeConn,String slideUUID);//删除
+	
+	/**
+	 * 平台数据统计
+	 */
+	List<OrderItem> orderItemsAll(String sourceId,boolean closeConn,Map<String, String> findMap);//线上商品订单
+	Map ptXxNumber(String sourceId,boolean closeConn,Map<String, String> findMap);//线下销售额
+	Map ptXsNumber(String sourceId,boolean closeConn,Map<String, String> findMap);//线上销售额
+	Map ptXxMoney(String sourceId,boolean closeConn);//线下今日交易额
+	Map ptXsMoney(String sourceId,boolean closeConn);//线上今日交易额
+	Map ptXxOrder(String sourceId,boolean closeConn);//线下今日订单
+	Map ptXsOrder(String sourceId,boolean closeConn);//线上今日订单
+	
+}

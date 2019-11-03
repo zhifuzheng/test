@@ -1,0 +1,468 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 订单信息
+ * @author wf
+ */
+@Table(tableName = "vip_order")
+public class Order implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = -67129455280879534L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="订单UUID")
+	private String orderUUID;
+	
+	@TableField(fieldSize=32,comment="订单批次号，当一笔交易中有多个订单参与时，参与交易的所有订单共用同一个批次号")
+	private String batchNo;
+	
+	@TableField(fieldSize=32,comment="退款单号")
+	private String refundNo;
+	
+	@TableField(fieldSize=8000,comment="针对该店铺所有商品的优惠券UUID")
+	private String couponUUID;
+	
+	@TableField(fieldSize=64,comment="订单通知")
+	private String advice;
+	
+	@TableField(isNotNull=true,fieldSize=128,comment="订单标题")
+	private String title;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="店铺UUID")
+	private String entityUUID;
+	
+	@TableField(isNotNull=true,fieldSize=128,comment="店铺名称")
+	private String entityName;
+	
+	@TableField(fieldSize=1000,comment="店铺图片")
+	private String entityLogo;
+	
+	@TableField(fieldSize=11,comment="店铺联系人")
+	private String contactName;
+	
+	@TableField(fieldSize=11,comment="店铺联系电话")
+	private String contactMobile;
+	
+	@TableField(comment="商品总件数")
+	private Integer totalCount;
+	
+	@TableField(comment="商品总价")
+	private Integer totalPrice;
+	
+	@TableField(comment="优惠总金额，默认值为0")
+	private Integer reducePrice = 0;
+	
+	@TableField(comment="实付金额")
+	private Integer payment;
+	
+	@TableField(fieldSize=1,comment="支付渠道：0余额，1微信，默认值为1")
+	private String payChannel = "1";
+	
+	@TableField(fieldSize=1,comment="订单类型：1充值，2购物，3进货，4其他，默认值为2")
+	private String orderType = "2";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="付款状态：0未付款，1已付款，默认值为0")
+	private String isPay = "0";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="订单状态：0未付款，1已付款，未接单，2已接单，未签收，3已签收，未评价，交易完成，4已评价，-1交易取消，-2超时关闭，-3待退款，-4同意退款，-5驳回退款，-6待退货，-7同意退货，-8驳回退货，9无可退货商品，默认值为0")
+	private String orderStatus = "0";
+	
+	@TableField(fieldSize=2,comment="发起退款和退货前的订单状态")
+	private String originStatus;
+	
+	@TableField(fieldSize=200, comment="驳回原因")
+	private String rejectMsg;
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="会员订单删除状态：0未删除，1已删除，默认值为0")
+	private String isDel = "0";
+	
+	@TableField(isNotNull=true,fieldSize=2,comment="店铺订单显示状态：0不显示，1显示，默认值为1")
+	private String isShow = "1";
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="买家UUID")
+	private String payerUUID;
+	
+	@TableField(fieldSize=30,comment="买家名称")
+	private String payerName;
+	
+	@TableField(fieldSize=1000,comment="买家头像")
+	private String payerLogo;
+	
+	@TableField(fieldSize=11, comment="买家手机号码，11位标准手机长度，全局唯一")
+	private String receiverMobile;
+	
+	@TableField(fieldSize=100, comment="买家街道地址")
+	private String detailAddr;
+	
+	@TableField(fieldSize=200, comment="买家留言")
+	private String personMsg;
+	
+	@TableField(fieldSize=100, comment="取货地址")
+	private String pickAddr;
+	
+	@TableField(fieldSize=32,comment="上级分销商UUID")
+	private String firstUUID;
+	
+	@TableField(fieldSize=32,comment="上上级分销商UUID")
+	private String secondUUID;
+	
+	@TableField(comment = "上级分销商收入，默认值为0")
+	private Integer firstIncome = 0;
+	
+	@TableField(comment = "上上级分销商收入，默认值为0")
+	private Integer secondIncome = 0;
+	
+	@TableField(fieldSize=30,comment="订单创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="订单修改时间")
+	private String updateTime;
+	
+	@TableField(fieldSize=30,comment="订单付款时间")
+	private String payTime;
+	
+	@TableField(fieldSize=30,comment="订单接单时间")
+	private String receiveTime;
+	
+	@TableField(fieldSize=30,comment="订单完成时间")
+	private String endTime;
+	
+	@TableField(fieldSize=30,comment="订单关闭时间")
+	private String closeTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getOrderUUID() {
+		return orderUUID;
+	}
+
+	public void setOrderUUID(String orderUUID) {
+		this.orderUUID = orderUUID;
+	}
+
+	public String getBatchNo() {
+		return batchNo;
+	}
+
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
+
+	public String getRefundNo() {
+		return refundNo;
+	}
+
+	public void setRefundNo(String refundNo) {
+		this.refundNo = refundNo;
+	}
+
+	public String getCouponUUID() {
+		return couponUUID;
+	}
+
+	public void setCouponUUID(String couponUUID) {
+		this.couponUUID = couponUUID;
+	}
+
+	public String getAdvice() {
+		return advice;
+	}
+
+	public void setAdvice(String advice) {
+		this.advice = advice;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getEntityUUID() {
+		return entityUUID;
+	}
+
+	public void setEntityUUID(String entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public String getEntityLogo() {
+		return entityLogo;
+	}
+
+	public void setEntityLogo(String entityLogo) {
+		this.entityLogo = entityLogo;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public String getContactMobile() {
+		return contactMobile;
+	}
+
+	public void setContactMobile(String contactMobile) {
+		this.contactMobile = contactMobile;
+	}
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public Integer getTotalPrice() {
+		return totalPrice;
+	}
+
+	public void setTotalPrice(Integer totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+
+	public Integer getReducePrice() {
+		return reducePrice;
+	}
+
+	public void setReducePrice(Integer reducePrice) {
+		this.reducePrice = reducePrice;
+	}
+
+	public Integer getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Integer payment) {
+		this.payment = payment;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
+	}
+
+	public String getOrderType() {
+		return orderType;
+	}
+
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
+	}
+	
+	public String getIsPay() {
+		return isPay;
+	}
+
+	public void setIsPay(String isPay) {
+		this.isPay = isPay;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getOriginStatus() {
+		return originStatus;
+	}
+
+	public void setOriginStatus(String originStatus) {
+		this.originStatus = originStatus;
+	}
+
+	public String getRejectMsg() {
+		return rejectMsg;
+	}
+
+	public void setRejectMsg(String rejectMsg) {
+		this.rejectMsg = rejectMsg;
+	}
+
+	public String getIsDel() {
+		return isDel;
+	}
+
+	public void setIsDel(String isDel) {
+		this.isDel = isDel;
+	}
+
+	public String getIsShow() {
+		return isShow;
+	}
+
+	public void setIsShow(String isShow) {
+		this.isShow = isShow;
+	}
+
+	public String getPayerUUID() {
+		return payerUUID;
+	}
+
+	public void setPayerUUID(String payerUUID) {
+		this.payerUUID = payerUUID;
+	}
+
+	public String getPayerName() {
+		return payerName;
+	}
+
+	public void setPayerName(String payerName) {
+		this.payerName = payerName;
+	}
+
+	public String getPayerLogo() {
+		return payerLogo;
+	}
+
+	public void setPayerLogo(String payerLogo) {
+		this.payerLogo = payerLogo;
+	}
+
+	public String getReceiverMobile() {
+		return receiverMobile;
+	}
+
+	public void setReceiverMobile(String receiverMobile) {
+		this.receiverMobile = receiverMobile;
+	}
+
+	public String getDetailAddr() {
+		return detailAddr;
+	}
+
+	public void setDetailAddr(String detailAddr) {
+		this.detailAddr = detailAddr;
+	}
+
+	public String getPersonMsg() {
+		return personMsg;
+	}
+
+	public void setPersonMsg(String personMsg) {
+		this.personMsg = personMsg;
+	}
+
+	public String getPickAddr() {
+		return pickAddr;
+	}
+
+	public void setPickAddr(String pickAddr) {
+		this.pickAddr = pickAddr;
+	}
+
+	public String getFirstUUID() {
+		return firstUUID;
+	}
+
+	public void setFirstUUID(String firstUUID) {
+		this.firstUUID = firstUUID;
+	}
+
+	public String getSecondUUID() {
+		return secondUUID;
+	}
+
+	public void setSecondUUID(String secondUUID) {
+		this.secondUUID = secondUUID;
+	}
+
+	public Integer getFirstIncome() {
+		return firstIncome;
+	}
+
+	public void setFirstIncome(Integer firstIncome) {
+		this.firstIncome = firstIncome;
+	}
+
+	public Integer getSecondIncome() {
+		return secondIncome;
+	}
+
+	public void setSecondIncome(Integer secondIncome) {
+		this.secondIncome = secondIncome;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public String getPayTime() {
+		return payTime;
+	}
+
+	public void setPayTime(String payTime) {
+		this.payTime = payTime;
+	}
+
+	public String getReceiveTime() {
+		return receiveTime;
+	}
+
+	public void setReceiveTime(String receiveTime) {
+		this.receiveTime = receiveTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getCloseTime() {
+		return closeTime;
+	}
+
+	public void setCloseTime(String closeTime) {
+		this.closeTime = closeTime;
+	}
+	
+}

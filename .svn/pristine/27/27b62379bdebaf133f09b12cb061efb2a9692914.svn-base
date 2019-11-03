@@ -1,0 +1,173 @@
+#banner {
+	background: url(../../img/cj/keji1.png);
+}
+
+#banner .bannerContent {
+	width: 1172px;
+	margin: 0 auto;
+	position: relative;
+}
+
+#body {
+	min-height: 1700px;
+	background: #F3FAFD;
+	width: 100%;
+}
+
+#body .bodyContent {
+	width: 1172px;
+	min-height: 1700px;
+	margin: 0 auto;
+	position: relative;
+}
+
+#body .bodyContent .active1 {
+	width: 1172px;
+	min-height: 1751px;
+}
+
+#body .bodyContent .active1 .active1Img {
+	position: absolute;
+	left: 0;
+	top: -300px;
+}
+
+#body .bodyContent .textBox {
+	width: 1172px;
+	min-height: 300px;
+	background: #fff;
+	margin-bottom: 70px;
+	font-family: "微软雅黑";
+}
+
+#body .bodyContent .textBox h3 {
+	text-align: center;
+	color: #333;
+	padding-top: 20px;
+	font-size: 35px;
+	margin: 10px 44px;
+	line-height: 50px;
+}
+
+#body .bodyContent .textBox .activeExpBox {
+	width: 1172px;
+	min-height: 200px;
+	margin: 0 auto;
+}
+
+#body .bodyContent .textBox .activeExp {
+	margin-left: 50px;
+	font-size: 18px;
+	color: #333;
+	padding: 10px 0 30px 0;
+}
+
+#body .bodyContent .textBox .activeExp h4 {
+	font-size: 30px;
+	margin-bottom: 20px;
+}
+
+#body .bodyContent .textBox .activeExp li {
+	line-height: 30px;
+	font-size: 16px;
+	color: #666666;
+}
+
+#body .bodyContent .textBox .join-title {
+	width: 289px;
+	height: 120px;
+}
+
+#body .bodyContent .textBox .activeExp li {
+	line-height: 30px;
+	font-size: 16px;
+	color: #666666;
+}
+
+#body .bodyContent .textBox .collectMsg {
+	width: 500px;
+	min-height: 400px;
+	margin: 30px auto 70px;
+}
+
+#body .bodyContent .textBox .collectMsg li {
+	clear: both;
+	height: 60px;
+}
+
+#body .bodyContent .textBox .collectMsg .label {
+	float: left;
+	width: 135px;
+	text-align: right;
+	margin-right: 30px;
+}
+
+#body .bodyContent .textBox .collectMsg .content {
+	float: left;
+}
+
+#body .bodyContent .textBox .collectMsg h4 {
+	font-size: 14px;
+	color: #333;
+	font-family: "微软雅黑";
+	margin: 5px 0 10px 0;
+}
+
+#body .bodyContent .textBox .collectMsg input {
+	width: 280px;
+	height: 30px;
+	line-height: 30px;
+	outline: none;
+	font-size: 14px;
+	text-indent: 12px;
+	background: #F3F4F4;
+	border: none;
+	border: 1px solid #E5E1E1;
+}
+
+#body .bodyContent .textBox .collectMsg .textarea-box {
+	height: 160px;
+}
+
+#body .bodyContent .textBox .collectMsg textarea {
+	width: 440px;
+	height: 120px;
+	outline: none;
+	background: #F3F4F4;
+	border: 1px solid #E5E1E1;
+	font-size: 14px;
+	font-family: "微软雅黑";
+	color: #333;
+	text-indent: 12px;
+	resize: none;
+}
+
+#body .bodyContent .textBox .collectMsg button {
+	width: 445px;
+	height: 40px;
+	margin-top: 30px;
+	border: none;
+	background: #60a8ef;
+	color: #ffffff;
+}
+
+.share-box {
+	padding-left: 50px;
+	padding-bottom: 40px;
+}
+
+.share-label {
+	font-size: 16px;
+	line-height: 30px;
+	color: #666;
+	padding-right: 30px;
+	float: left;
+}
+
+.share-content {
+	float: left;
+}
+
+.textBox-img{
+	text-align: center;
+}

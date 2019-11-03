@@ -1,0 +1,175 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>会员信息编辑</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+	<link rel="stylesheet" href="static/css/pintuer.css">
+	<link rel="stylesheet" href="static/css/admin.css">
+	
+	<script src="static/js/jquery.js"></script>
+	<script src="static/js/pintuer.js"></script>
+	<script src="static/js/respond.js"></script>
+	<script src="static/js/layer.js"></script>
+  </head>
+  
+<body>
+	<div id="container" style="margin:0 auto"></div>
+	<div id="myDialog" onload="onLoad()" style="margin-top:10px">
+		<div class="dialog-body" style="margin-left:30px">
+			<form id="vipEditForm" method="post" class="form-small" style="width:94%;" enctype="multipart/form-data">
+				<input type="hidden" id="id" name="id">
+				<input type="hidden" id="vipUUID" name="vipUUID">
+				<input type="hidden" id="vipPwd" name="vipPwd">
+				<input type="hidden" id="unitUUID" name="unitUUID">
+				<input type="hidden" id="vipTel" name="vipTel">
+				<input type="hidden" id="vipEmail" name="vipEmail">
+				<input type="hidden" id="nickName" name="nickName">
+				<input type="hidden" id="vipStatus" name="vipStatus">
+				<input type="hidden" id="createTime" name="createTime">
+				<input type="hidden" id="updateTime" name="updateTime">
+				<input type="hidden" id="simpleSpelling" name="simpleSpelling">
+				<input type="hidden" id="fullSpelling" name="fullSpelling">
+				<input type="hidden" id="vipPic" name="vipPic">
+				<input type="hidden" id="vipDescription" name="vipDescription">
+				<input type="hidden" id="loginTime" name="loginTime">
+				<input type="hidden" id="loginNum" name="loginNum">
+				<input type="hidden" id="kelei" name="kelei">
+				<input type="hidden" id="suozaixuexiao" name="suozaixuexiao">
+				<input type="hidden" id=zongfen name="zongfen">
+				<input type="hidden" id="paiming" name="paiming">
+				<input type="hidden" id="identityCard" name="identityCard">
+				<input type="hidden" id="ethnic" name="ethnic">
+				<input type="hidden" id="vipArea" name="vipArea">
+				<div class="form-group">
+					<div class="label">
+						<label for="loginName"> 登录名 </label>
+					</div>
+					<div class="field">
+						<input type="text" class="input" id="loginName" name="loginName" size="32" maxlength="32" value="" placeholder="请输入用户登录名">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="label">
+						<label for="vipName"> 姓名 </label>
+					</div>
+					<div class="field">
+						<input type="text" class="input" id="vipName" name="vipName" size="50" maxlength="50" value="" placeholder="请输入用户姓名">
+					</div>
+				</div>
+					<div class="form-group">
+						<div class="label">
+							<label>
+								性别</label>
+						</div>
+						<div class="field">
+							<div class="button-group radio">
+								<label class="button active">
+									<input id="vipSexM" name="vipSex" value="1" checked="checked" type="radio"><span class="icon icon-male"></span> 先生
+								</label>
+								<label class="button">
+									<input id="vipSexF" name="vipSex" value="2" type="radio"><span class="icon icon-female"></span> 女士
+								</label>
+							</div>
+						</div>
+					</div>
+				<div class="form-group">
+					<div class="label">
+						<label for="vipType"> 用户类型 </label>
+					</div>
+					<div class="field">
+						<select class="input" id="vipType" name="vipType">
+							<option value="0">超级管理员</option>
+							<option value="1">一般管理员</option>
+							<option value="2">普通用户</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="label">
+						<label for="vipMobile"> 手机 </label>
+					</div>
+					<div class="field">
+						<input type="text" class="input" id="vipMobile" name="vipMobile" size="11" maxlength="11" value="" placeholder="请输入手机号码">
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="hidden">
+		<script type="text/javascript">
+			function validate() {
+				if (!$('#loginName').val()) {
+					layer.msg('用户登录名不能为空！', {
+						icon : 2
+					});
+					return false;
+				}
+				if (!$('#vipName').val()) {
+					layer.msg('用户姓名不能为空！', {
+						icon : 2
+					});
+					return false;
+				}
+				if (!$('#vipMobile').val()) {
+					layer.msg('用户电话不能为空！', {
+						icon : 2
+					});
+					return false;
+				}
+				return true;
+			}
+			//初始化数据
+			function getFromSerialize() {
+				return $('#vipEditForm').serialize();
+			}
+			//修改数据时
+			function initData(data) {
+				$('#id').val(data.id);
+				$('#vipUUID').val(data.vipUUID);
+				$('#loginName').val(data.loginName);
+				$('#vipPwd').val(data.vipPwd);
+				$('#unitUUID').val(data.unitUUID);
+				$('#vipName').val(data.vipName);
+				$('#vipType').val(data.vipType);
+				$('#vipMobile').val(data.vipMobile);
+				$('#vipTel').val(data.vipTel);
+				$('#vipEmail').val(data.vipEmail);
+				$('#nickName').val(data.nickName);
+				$('#vipSex').val(data.vipSex);
+				$('#vipStatus').val(data.vipStatus);
+				$('#createTime').val(data.createTime);
+				$('#updateTime').val(data.updateTime);
+				$('#simpleSpelling').val(data.simpleSpelling);
+				$('#fullSpelling').val(data.fullSpelling);
+				$('#queryCombination').val(data.queryCombination);
+				$('#vipPic').val(data.vipPic);
+				$('#vipDescription').val(data.vipDescription);
+				$('#loginTime').val(data.loginTime);
+				$('#loginNum').val(data.loginNum);
+				$('#kelei').val(data.kelei);
+				$('#suozaixuexiao').val(data.suozaixuexiao);
+				$('#zongfen').val(data.zongfen);
+				$('#paiming').val(data.paiming);
+				$('#identityCard').val(data.identityCard);
+				$('#ethnic').val(data.ethnic);
+				$('#vipArea').val(data.vipArea);
+				$('#autonomyFace').val(data.autonomyFace);
+			}
+		</script>
+	</div>
+</body>
+</html>

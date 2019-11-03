@@ -1,0 +1,202 @@
+package com.xryb.zhtc.service.impl;
+
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import com.xryb.zhtc.entity.VipInfo;
+import com.xryb.zhtc.service.IVipService;
+import com.xryb.zhtc.util.DateTimeUtil;
+import com.xryb.zhtc.util.RegExpUtil;
+
+import dbengine.util.Page;
+/**
+ * vip相关service接口
+ * @author wf
+ */
+public class VipServiceImpl extends BaseServiceImpl<VipInfo> implements IVipService{
+	
+	@Override
+	public boolean saveOrUpdate(String sourceId, boolean closeConn, VipInfo vip) throws Exception {
+		if(vip == null){
+			return false;
+		}
+		//生成sql语句
+		StringBuffer insert = (new StringBuffer("insert into ")).append(tableName).append(" (");
+		StringBuffer values = new StringBuffer(" values(");
+		StringBuffer update = (new StringBuffer("update ")).append(tableName).append(" set ");
+		//获取字节码对象
+		Class<? extends Object> tClass = vip.getClass();
+		//获取对象的属性列表
+		Field[] fields = tClass.getDeclaredFields();
+		for (Field field : fields) {
+			if("id".equals(field.getName()) || "vipUUID".equals(field.getName()) || "createTime".equals(field.getName()) || "updateTime".equals(field.getName()) || "serialVersionUID".equals(field.getName())){
+				continue;
+			}
+			field.setAccessible(true);
+			Object value = field.get(vip);
+			insert.append(field.getName()).append(",");
+			if(RegExpUtil.isNullOrEmpty(value)){
+				values.append("null,");
+				update.append(field.getName()).append(" = null,");
+			}else{
+				values.append("'").append(value.toString().replaceAll("'", "\"")).append("'").append(",");
+				update.append(field.getName()).append(" = '").append(value.toString().replaceAll("'", "\"")).append("',");
+			}
+		}
+		String nowDate = DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss");
+		if(RegExpUtil.isNullOrEmpty(vip.getVipUUID())){//新增
+			String vipUUID = UUID.randomUUID().toString().replaceAll("-", "");
+			values.append("'").append(nowDate).append("','").append(vipUUID).append("')");
+			insert.append("createTime,").append("vipUUID").append(")").append(values);
+			vip.setVipUUID(vipUUID);
+			vip.setCreateTime(nowDate);
+			boolean result = executeSql(sourceId, insert.toString(), closeConn, null);
+			Map<String, Object> map = findMapBysql(sourceId, "select last_insert_id() as id", closeConn, null);
+			Long id = Long.valueOf(map.get("id").toString());
+			vip.setId(id);
+			return result;
+		}else{//修改
+			update.append("updateTime = '").append(nowDate).append("' where vipUUID = '").append(vip.getVipUUID()).append("'");
+			vip.setUpdateTime(nowDate);
+			return executeSql(sourceId, update.toString(), closeConn, null);
+		}
+	}
+	
+	@Override
+	public List<VipInfo> findPageByMap(String sourceId, boolean closeConn, Page page, Map<String, String> findMap, String order) {
+		StringBuffer select = (new StringBuffer("select * from ")).append(tableName);
+		if(findMap.size() > 0){
+			select.append(" where ");
+		}
+		String id = null;
+		String vipStatus = null;
+		String vipType = null;
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			if("id".equals(entry.getKey())){
+				id = entry.getValue();
+			}
+			if("vipStatus".equals(entry.getKey())){
+				vipStatus = entry.getValue();
+			}
+			if("vipType".equals(entry.getKey())){
+				vipType = entry.getValue();
+			}
+		}
+		if(id != null){
+			findMap.remove("id");
+		}
+		if(vipStatus != null){
+			findMap.remove("vipStatus");
+		}
+		if(vipType != null){
+			findMap.remove("vipType");
+		}
+		int len = select.length();
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			select.append(" or ").append(entry.getKey()).append(" like '%").append(entry.getValue().toString().replaceAll("'", "\"")).append("%'");
+		}
+		int firstOrIndex = select.indexOf("or",len);
+		if(firstOrIndex == len+1){
+			select.replace(firstOrIndex, firstOrIndex+2, "(").append(")");
+		}
+		if(id != null){
+			select.append(" and id = ").append(id);
+		}
+		if(vipStatus != null){
+			select.append(" and vipStatus = ").append(vipStatus);
+		}
+		if(vipType != null){
+			select.append(" and vipType = '").append(vipType).append("'");
+		}
+		int firstAndIndex = select.indexOf("and",len);
+		if(firstAndIndex == len+1){
+			select.delete(firstAndIndex, firstAndIndex+3);
+		}
+		StringBuffer selectTotal = new StringBuffer(select.toString()).replace(select.indexOf("*"), select.indexOf("*")+1, "COUNT(0) as TOTAL");
+		//查询总记录数
+		Map<String, Object> map = findMapBysql(sourceId, selectTotal.toString(), closeConn, null);
+		Long totalRecord = Long.valueOf((map.get("TOTAL").toString()));
+		if(totalRecord == 0L){
+			return null;
+		}
+		//计算开始索引
+		Long index = (page.getPage()-1L)*page.getPageRecord();
+		//计算总页数
+		Long totalPage = (totalRecord+page.getPageRecord()-1)/page.getPageRecord();
+		//分页查询
+		if(!RegExpUtil.isNullOrEmpty(order)){
+			select.append(" order by ").append(order);
+		}
+		select.append(" limit ").append(index).append(",").append(page.getPageRecord());
+		List<VipInfo> rows = findListBySql(sourceId, select.toString(), closeConn, c, null);
+		page.setTotalRecord(totalRecord);
+		page.setTotalPage(totalPage);
+		page.setRows(rows);
+		return (List<VipInfo>) rows;
+	}
+
+	@Override
+	public List<VipInfo> findDistributePage(String sourceId, boolean closeConn, Page page, Map<String, String> findMap, String order) {
+		StringBuffer select = (new StringBuffer("select * from ")).append(tableName).append(" where ");
+		String vipStatus = null;
+		String vipType = null;
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			if("vipStatus".equals(entry.getKey())){
+				vipStatus = entry.getValue();
+			}
+			if("vipType".equals(entry.getKey())){
+				vipType = entry.getValue();
+			}
+		}
+		if(vipStatus != null){
+			findMap.remove("vipStatus");
+		}
+		if(vipType != null){
+			findMap.remove("vipType");
+		}
+		int len = select.length();
+		for(Map.Entry<String, String> entry : findMap.entrySet()){
+			select.append(" or ").append(entry.getKey()).append(" like '%").append(entry.getValue().toString().replaceAll("'", "\"")).append("%'");
+		}
+		int firstOrIndex = select.indexOf("or",len);
+		if(firstOrIndex == len+1){
+			select.replace(firstOrIndex, firstOrIndex+2, "(").append(")");
+		}
+		if(vipStatus != null){
+			select.append(" and vipStatus = ").append(vipStatus);
+		}
+		if(vipType != null){
+			select.append(" and vipType = '").append(vipType).append("'");
+		}
+		select.append(" and (firstNum != 0 or secondNum != 0)");
+		int firstAndIndex = select.indexOf("and",len);
+		if(firstAndIndex == len+1){
+			select.delete(firstAndIndex, firstAndIndex+3);
+		}
+		StringBuffer selectTotal = new StringBuffer(select.toString()).replace(select.indexOf("*"), select.indexOf("*")+1, "COUNT(0) as TOTAL");
+		//查询总记录数
+		Map<String, Object> map = findMapBysql(sourceId, selectTotal.toString(), closeConn, null);
+		Long totalRecord = Long.valueOf((map.get("TOTAL").toString()));
+		if(totalRecord == 0L){
+			return null;
+		}
+		//计算开始索引
+		Long index = (page.getPage()-1L)*page.getPageRecord();
+		//计算总页数
+		Long totalPage = (totalRecord+page.getPageRecord()-1)/page.getPageRecord();
+		//分页查询
+		if(!RegExpUtil.isNullOrEmpty(order)){
+			select.append(" order by ").append(order);
+		}
+		select.append(" limit ").append(index).append(",").append(page.getPageRecord());
+		List<VipInfo> rows = findListBySql(sourceId, select.toString(), closeConn, c, null);
+		page.setTotalRecord(totalRecord);
+		page.setTotalPage(totalPage);
+		page.setRows(rows);
+		return (List<VipInfo>) rows;
+	}
+	
+}

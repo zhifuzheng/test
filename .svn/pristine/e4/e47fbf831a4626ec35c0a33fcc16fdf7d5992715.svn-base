@@ -1,0 +1,76 @@
+package com.xryb.zhtc.service.impl;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import spark.annotation.Auto;
+
+import com.xryb.zhtc.entity.CommonType;
+import com.xryb.zhtc.service.ICommonTypeService;
+import com.xryb.zhtc.util.DateTimeUtil;
+
+import dbengine.dao.EntityDao;
+import dbengine.dao.SqlDao;
+import dbengine.util.Page;
+
+public class CommonTypeServiceImpl implements ICommonTypeService{
+	@Auto(name = EntityDao.class)
+	private EntityDao entitydao;
+	
+	@Auto(name = SqlDao.class)
+	private SqlDao sqldao;
+	
+	@Override
+	public boolean saveOrUpCommonType(String sourceId, boolean closeConn, CommonType ct) {
+		if(ct == null){
+			return false;
+		}
+		if(ct.getId() == null){
+			//新增
+			ct.setUuid(UUID.randomUUID().toString().replace("-", ""));//设置uuid
+			ct.setCreateTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));//创建时间
+			return entitydao.saveEntity(sourceId, ct, closeConn);
+		}else{
+			//修改
+			ct.setUpdateTime(DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));//修改时间
+			return entitydao.updateEntity(sourceId, ct, closeConn);
+		}
+	}
+
+	@Override
+	public boolean deleteCommonType(String sourceId, boolean closeConn, String uuid) {
+		if(uuid == null || "".equals(uuid) || "null".equals(uuid)){
+			return false;
+		}
+		String sql = "delete from common_Type where uuid = '"+uuid+"'";
+		
+		return sqldao.executeSql(sourceId, sql, closeConn, null);
+	}
+
+	@Override
+	public CommonType findCommonType(String sourceId, boolean closeConn, String uuid) {
+		if(uuid == null || "".equals(uuid) || "null".equals(uuid)){
+			return null;
+		}
+		String sql = "select * from common_type where uuid = '"+uuid+"'";
+		return (CommonType)sqldao.findEntityBySql(sourceId, sql, CommonType.class, closeConn, null);
+	}
+
+	@Override
+	public List<CommonType> findCommonTypeList(String sourceId, boolean closeConn, Page page, Map findMap) {
+	    StringBuilder sql = new StringBuilder();
+	    sql.append("select * from common_type where 1=1 ");
+	    if(findMap != null){
+	    	if(findMap.get("commonTypeName") != null && !"".equals(findMap.get("commonTypeName")) && !"null".equals(findMap.get("commonTypeName"))){
+	    		sql.append(" and commonTypeName like '%").append(findMap.get("commonTypeName")).append("%'");
+	    	}
+	    }
+	    if(page == null){
+	    	return (List<CommonType>)sqldao.findListBySql(sourceId, sql.toString(), CommonType.class, closeConn, null);
+	    }else{
+	    	return (List<CommonType>)sqldao.findPageByMysql(sourceId, sql.toString(), closeConn, CommonType.class, page, null);
+	    }
+	}
+}

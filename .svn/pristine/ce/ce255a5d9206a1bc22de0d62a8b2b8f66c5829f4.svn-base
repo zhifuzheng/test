@@ -1,0 +1,248 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 资质认证信息
+ * @author wf
+ */
+@Table(tableName="license")
+public class License implements Serializable{
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = 6705890767561312786L;
+
+	@TableField(isPKey=true,isAutoIncrement=true,comment="主键，自动增长")
+	private Long id;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="全局唯一编号，手动生成")
+	private String licenseUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="申请人UUID")
+	private String personUUID;
+	
+	@TableField(isNotNull=true,fieldSize=30,comment="申请人登陆名，长度不超过30字符，建议用手机号")
+	private String loginName;
+	
+	@TableField(isNotNull=true,fieldSize=30,comment="认证类型，1未进行任何认证，2政府，3企业，4媒体，5其他组织，默认值是1")
+	private String licenseType = "1";
+	
+	@TableField(fieldSize=128,comment="认证名称")
+	private String licenseName;
+	
+	@TableField(fieldSize=30,comment="组织机构或者营业执照代码")
+	private String licenseCode;
+	
+	@TableField(fieldSize=200,comment="资质扫描图片")
+	private String licenseImg;
+	
+	@TableField(fieldSize=200,comment="开户许可扫描图片")
+	private String licenseAccount;
+	
+	@TableField(fieldSize=50,comment="身份证姓名")
+	private String idCardName;
+	
+	@TableField(fieldSize=20,comment="身份证号码")
+	private String idCardNumber;
+	
+	@TableField(fieldSize=200,comment="身份证正面照")
+	private String idCardPositive;
+	
+	@TableField(fieldSize=200,comment="身份证反面照")
+	private String idCardOppositive;
+	
+	@TableField(fieldSize=11,comment="手机号码，11位标准手机长度")
+	private String mobile;
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+	
+	@TableField(fieldSize=32,comment="审核人UUID")
+	private String auditorUUID;
+	
+	@TableField(fieldSize=100,comment="审核人姓名")
+	private String auditorName;
+	
+	@TableField(fieldSize=200,comment="审批意见")
+	private String auditorOpinion;
+	
+	@TableField(fieldSize=30,comment="审核时间")
+	private String auditTime;
+	
+	@TableField(isNotNull=true,fieldSize=1,comment="资质认证审核状态：1未提交，2待审核，3审核中，4审核通过，5审核不通过，默认值是1")
+	private String licenseStatus = "1";
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getLicenseUUID() {
+		return licenseUUID;
+	}
+
+	public void setLicenseUUID(String licenseUUID) {
+		this.licenseUUID = licenseUUID;
+	}
+
+	public String getPersonUUID() {
+		return personUUID;
+	}
+
+	public void setPersonUUID(String personUUID) {
+		this.personUUID = personUUID;
+	}
+
+	public String getLoginName() {
+		return loginName;
+	}
+
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+
+	public String getLicenseType() {
+		return licenseType;
+	}
+
+	public void setLicenseType(String licenseType) {
+		this.licenseType = licenseType;
+	}
+
+	public String getLicenseName() {
+		return licenseName;
+	}
+
+	public void setLicenseName(String licenseName) {
+		this.licenseName = licenseName;
+	}
+
+	public String getLicenseCode() {
+		return licenseCode;
+	}
+
+	public void setLicenseCode(String licenseCode) {
+		this.licenseCode = licenseCode;
+	}
+
+	public String getLicenseImg() {
+		return licenseImg;
+	}
+
+	public void setLicenseImg(String licenseImg) {
+		this.licenseImg = licenseImg;
+	}
+	
+	public String getLicenseAccount() {
+		return licenseAccount;
+	}
+
+	public void setLicenseAccount(String licenseAccount) {
+		this.licenseAccount = licenseAccount;
+	}
+
+	public String getIdCardName() {
+		return idCardName;
+	}
+
+	public void setIdCardName(String idCardName) {
+		this.idCardName = idCardName;
+	}
+
+	public String getIdCardNumber() {
+		return idCardNumber;
+	}
+
+	public void setIdCardNumber(String idCardNumber) {
+		this.idCardNumber = idCardNumber;
+	}
+
+	public String getIdCardPositive() {
+		return idCardPositive;
+	}
+
+	public void setIdCardPositive(String idCardPositive) {
+		this.idCardPositive = idCardPositive;
+	}
+
+	public String getIdCardOppositive() {
+		return idCardOppositive;
+	}
+
+	public void setIdCardOppositive(String idCardOppositive) {
+		this.idCardOppositive = idCardOppositive;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public String getAuditorUUID() {
+		return auditorUUID;
+	}
+
+	public void setAuditorUUID(String auditorUUID) {
+		this.auditorUUID = auditorUUID;
+	}
+
+	public String getAuditorName() {
+		return auditorName;
+	}
+
+	public void setAuditorName(String auditorName) {
+		this.auditorName = auditorName;
+	}
+
+	public String getAuditorOpinion() {
+		return auditorOpinion;
+	}
+
+	public void setAuditorOpinion(String auditorOpinion) {
+		this.auditorOpinion = auditorOpinion;
+	}
+
+	public String getAuditTime() {
+		return auditTime;
+	}
+
+	public void setAuditTime(String auditTime) {
+		this.auditTime = auditTime;
+	}
+
+	public String getLicenseStatus() {
+		return licenseStatus;
+	}
+
+	public void setLicenseStatus(String licenseStatus) {
+		this.licenseStatus = licenseStatus;
+	}
+	
+}

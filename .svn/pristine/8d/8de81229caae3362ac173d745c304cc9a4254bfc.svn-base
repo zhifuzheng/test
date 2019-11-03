@@ -1,0 +1,10 @@
+package com.xryb.zhtc.service.impl;
+
+import com.xryb.zhtc.entity.RecAddr;
+import com.xryb.zhtc.service.IRecAddrService;
+/**
+ * vip收货地址相关service
+ * @author wf
+ */
+public class RecAddrServiceImpl extends BaseServiceImpl<RecAddr> implements IRecAddrService {
+}

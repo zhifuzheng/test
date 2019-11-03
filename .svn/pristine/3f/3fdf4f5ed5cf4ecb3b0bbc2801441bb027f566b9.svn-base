@@ -1,0 +1,289 @@
+/*
+JQuery EasyUI 1.5.x of Insdep Theme 1.0.0
+婕旂ず鍦板潃锛歨ttps://www.insdep.com/example/
+涓嬭浇鍦板潃锛歨ttps://www.insdep.com
+闂瓟鍦板潃锛歨ttps://bbs.insdep.com
+
+椤圭洰鍦板潃锛歨ttp://git.oschina.net/weavors/JQuery-EasyUI-1.5.x-Of-Insdep-Theme
+
+QQ浜ゆ祦缇わ細184075694 锛堜紭鍏堝彂甯冩洿鏂颁富棰樺強鍐呮祴鍖咃級
+*/
+.icon-shool-home{
+	background:url('icons/shool_home.png') no-repeat center center;
+}
+.icon-address{
+	background:url('icons/address.png') no-repeat center center;
+}
+.icon-blank{
+	background:url('icons/blank.gif') no-repeat center center;
+}
+.icon-add{
+	background:url('icons/edit_add.png') no-repeat center center;
+}
+.icon-edit{
+	background:url('icons/pencil.png') no-repeat center center;
+}
+.icon-clear{
+	background:url('icons/clear.png') no-repeat center center;
+}
+.icon-remove{
+	background:url('icons/edit_remove.png') no-repeat center center;
+}
+.icon-save{
+	background:url('icons/filesave.png') no-repeat center center;
+}
+.icon-cut{
+	background:url('icons/cut.png') no-repeat center center;
+}
+.icon-ok{
+	background:url('icons/ok.png') no-repeat center center;
+}
+.icon-no{
+	background:url('icons/no.png') no-repeat center center;
+}
+.icon-cancel{
+	background:url('icons/cancel.png') no-repeat center center;
+}
+.icon-reload{
+	background:url('icons/reload.png') no-repeat center center;
+}
+.icon-search{
+	background:url('icons/search.png') no-repeat center center;
+}
+.icon-print{
+	background:url('icons/print.png') no-repeat center center;
+}
+.icon-help{
+	background:url('icons/help.png') no-repeat center center;
+}
+.icon-undo{
+	background:url('icons/undo.png') no-repeat center center;
+}
+.icon-redo{
+	background:url('icons/redo.png') no-repeat center center;
+}
+.icon-back{
+	background:url('icons/back.png') no-repeat center center;
+}
+.icon-sum{
+	background:url('icons/sum.png') no-repeat center center;
+}
+.icon-tip{
+	background:url('icons/tip.png') no-repeat center center;
+}
+.icon-filter{
+	background:url('icons/filter.png') no-repeat center center;
+}
+.icon-man{
+	background:url('icons/man.png') no-repeat center center;
+}
+.icon-lock{
+	background:url('icons/lock.png') no-repeat center center;
+}
+.icon-more{
+	background:url('icons/more.png') no-repeat center center;
+}
+.icon-set{
+	background:url('icons/set.png') no-repeat center center;
+}
+.icon-cog{
+	background:url('icons/cog.png') no-repeat center center;
+}
+.icon-lock-password{
+	background:url('icons/lock_password.png') no-repeat center center;
+}
+.icon-lock-go{
+	background:url('icons/lock_go.png') no-repeat center center;
+}
+.icon-refresh{
+	background:url('icons/arrow_refresh.png') no-repeat center center;
+}
+.icon-sort{
+	background:url('icons/sort_number.png') no-repeat center center;
+}
+.icon-repair{
+	background:url('icons/wrench.png') no-repeat center center;
+}
+.icon-play-group{
+	background:url('icons/playgroup.png') no-repeat center center;
+}
+.icon-play{
+	background:url('icons/play.png') no-repeat center center;
+}
+.icon-folder-search{
+	background:url('icons/folder_search.png') no-repeat center center;
+}
+.icon-user-config{
+	background:url('icons/user_config.png') no-repeat center center;
+}
+.icon-recover-deleted-items{
+	background:url('icons/recover_deleted_items.png') no-repeat center center;
+}
+
+.icon-mini-add-h{
+	background:url('icons/mini_add.png') no-repeat center center;
+}
+.icon-mini-add{
+	background:url('icons/mini-append.png') no-repeat center center;
+}
+.icon-mini-edit{
+	background:url('icons/mini-pencil.png') no-repeat center center;
+}
+.icon-mini-refresh{
+	background:url('icons/mini-reload.png') no-repeat center center;
+}
+
+.icon-large-picture{
+	background:url('icons/large_picture.png') no-repeat center center;
+}
+.icon-large-clipart{
+	background:url('icons/large_clipart.png') no-repeat center center;
+}
+.icon-large-shapes{
+	background:url('icons/large_shapes.png') no-repeat center center;
+}
+.icon-large-smartart{
+	background:url('icons/large_smartart.png') no-repeat center center;
+}
+.icon-large-chart{
+	background:url('icons/large_chart.png') no-repeat center center;
+}
+/**
+*涓�浜涙柊澧炵殑鍥炬爣
+*/
+.icon-users{
+	background:url('icons/users.png') no-repeat center center;
+}
+.icon-mini-tick{
+	background:url('icons/mini_tick.png') no-repeat center center;
+}
+.icon-user-menu{
+	background:url('icons/user_menu.png') no-repeat center center;
+}
+.icon-user-role{
+	background:url('icons/user_role.png') no-repeat center center;
+}
+.icon-role{
+	background:url('icons/role.png') no-repeat center center;
+}
+.icon-menu{
+	background:url('icons/menu.png') no-repeat center center;
+}
+.icon-add-user{
+	background:url('icons/add_user.png') no-repeat center center;
+}
+.icon-common-info{
+	background:url('icons/common_info.png') no-repeat center center;
+}
+.icon-sig{
+	background:url('icons/sig.png') no-repeat center center;
+}
+/**
+*数据字典
+*/
+.icon-book-open{
+	background:url('icons/book_open.png') no-repeat center center;
+}
+/**
+*商城管理
+*/
+.icon-cat-stop{
+	background:url('icons/cat_stop.png') no-repeat center center;
+}
+.icon-cat-start{
+	background:url('icons/cat_start.png') no-repeat center center;
+}
+.icon-cat-add{
+	background:url('icons/cat_add.png') no-repeat center center;
+}
+.icon-cat-menu{
+	background:url('icons/cat_menu.png') no-repeat center center;
+}
+.icon-cat-model{
+	background:url('icons/cat_model.png') no-repeat center center;
+}
+.icon-model-detail{
+	background:url('icons/model_detail.png') no-repeat center center;
+}
+.icon-item{
+	background:url('icons/item.png') no-repeat center center;
+}
+.icon-param{
+	background:url('icons/param.png') no-repeat center center;
+}
+.icon-order{
+	background:url('icons/order.png') no-repeat center center;
+}
+.icon-logistics{
+	background:url('icons/logistics.png') no-repeat center center;
+}
+/**
+*资金管理
+*/
+.icon-withdrawal{
+	background:url('icons/withdrawal.png') no-repeat center center;
+}
+/**
+*认证管理
+*/
+.icon-inbox-document{
+	background:url('icons/inbox_document.png') no-repeat center center;
+}
+.icon-camera{
+	background:url('icons/camera.png') no-repeat center center;
+}
+.icon-shield-off{
+	background:url('icons/shield_off.png') no-repeat center center;
+}
+.icon-shield-on{
+	background:url('icons/shield_on.png') no-repeat center center;
+}
+.icon-false{
+	background:url('icons/false.png') no-repeat center center;
+}
+.icon-true{
+	background:url('icons/true.png') no-repeat center center;
+}
+/*
+智跑
+  */
+.icon-zhipao-paobu{
+	background:url('icons/zhipao.png') no-repeat center center;
+}
+
+.icon-zhipao-bushu{
+	background:url('icons/bushu1.png') no-repeat center center;
+}
+
+.icon-zhipao-qixing{
+	background:url('icons/qixing.png') no-repeat center center;
+}
+/*2019/4/12追加图标*/
+.icon-zhipao-modify{/*修改*/
+	background:url('icons/modify.png') no-repeat center center;
+}
+.icon-zhipao-feedback{/*反馈*/
+	background:url('icons/feedback.png') no-repeat center center;
+}
+.icon-zhipao-distribution{/*分配*/
+	background:url('icons/distribution.png') no-repeat center center;
+}
+.icon-zhipao-set-price{/*价格*/
+	background:url('icons/set-price.png') no-repeat center center;
+}
+.icon-zhipao-set-manage{/*广告管理*/
+	background:url('icons/manage.png') no-repeat center center;
+}
+.icon-zhipao-set-pic{/*上传图片*/
+	background:url('icons/pic.png') no-repeat center center;
+}
+
+/* 卡劵管理 */
+.icon-coupon-mng{/*管理*/
+	background:url('icons/mng.png') no-repeat center center;
+}
+.icon-coupon-record{/*记录*/
+	background:url('icons/record.png') no-repeat center center;
+}
+
+

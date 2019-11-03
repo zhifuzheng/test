@@ -1,0 +1,138 @@
+package com.xryb.zhtc.entity;
+
+import java.io.Serializable;
+
+import dbengine.annotation.Table;
+import dbengine.annotation.TableField;
+/**
+ * 收货地址信息
+ * @author wf
+ */
+@Table(tableName = "receive_addr")
+public class RecAddr implements Serializable {
+	
+	@TableField(isNotField=true)
+	private static final long serialVersionUID = 2549771261299591213L;
+
+	@TableField(isPKey=true, isAutoIncrement=true, comment="主键，自增长")
+	private Long id;
+	
+	@TableField(isNotNull=true, fieldSize=32, comment="全局唯一编号，手动生成")
+	private String addrUUID;
+	
+	@TableField(isNotNull=true,fieldSize=32,comment="所属人UUID")
+	private String personUUID;
+	
+	@TableField(isNotNull=true, fieldSize=50, comment="收货人姓名")
+	private String receiverName;
+	
+	@TableField(isNotNull=true, fieldSize=11, comment="收货人手机号码，11位标准手机长度，全局唯一")
+	private String receiverMobile;
+	
+	@TableField(isNotNull=true, fieldSize=20, comment="省市区")
+	private String provCityDist;
+	
+	@TableField(fieldSize=20, comment="邮编")
+	private String postCode;
+	
+	@TableField(isNotNull=true, fieldSize=100, comment="详细地址")
+	private String detailAddr;
+	
+	@TableField(fieldSize=30,comment="创建时间")
+	private String createTime;
+	
+	@TableField(fieldSize=30,comment="修改时间")
+	private String updateTime;
+	
+	@TableField(fieldSize=1,comment="默认收货地址：0不是，1是，默认值是0")
+	private String defaultAddr = "0";
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getAddrUUID() {
+		return addrUUID;
+	}
+
+	public void setAddrUUID(String addrUUID) {
+		this.addrUUID = addrUUID;
+	}
+
+	public String getPersonUUID() {
+		return personUUID;
+	}
+
+	public void setPersonUUID(String personUUID) {
+		this.personUUID = personUUID;
+	}
+
+	public String getReceiverName() {
+		return receiverName;
+	}
+
+	public void setReceiverName(String receiverName) {
+		this.receiverName = receiverName;
+	}
+
+	public String getReceiverMobile() {
+		return receiverMobile;
+	}
+
+	public void setReceiverMobile(String receiverMobile) {
+		this.receiverMobile = receiverMobile;
+	}
+
+	public String getProvCityDist() {
+		return provCityDist;
+	}
+
+	public void setProvCityDist(String provCityDist) {
+		this.provCityDist = provCityDist;
+	}
+	
+	public String getPostCode() {
+		return postCode;
+	}
+
+	public void setPostCode(String postCode) {
+		this.postCode = postCode;
+	}
+
+	public String getDetailAddr() {
+		return detailAddr;
+	}
+
+	public void setDetailAddr(String detailAddr) {
+		this.detailAddr = detailAddr;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public String getDefaultAddr() {
+		return defaultAddr;
+	}
+
+	public void setDefaultAddr(String defaultAddr) {
+		this.defaultAddr = defaultAddr;
+	}
+	
+}

@@ -1,0 +1,315 @@
+package com.xryb.zhtc.action;
+
+import com.xryb.zhtc.manage.AccountMng;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.annotation.Auto;
+import spark.servlet.ISparkApplication;
+/**
+ * 账户action
+ * @author wf
+ */
+public class AccountAction implements ISparkApplication {
+	
+	@Auto(name=AccountMng.class)
+	private AccountMng accountMng;
+
+	@Override
+	public void run() {
+		//pc端
+		/**
+		 * 重置支付密码
+		 */
+		Spark.post(new Route("/system/account/resetPwd", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.resetPwd("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 根据entityUUID修改账户状态
+		 */
+		Spark.post(new Route("/system/account/upStatus", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.upStatus("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 根据账号查询账户信息
+		 */
+		Spark.post(new Route("/system/account/findAccountByPc", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findAccountByPc("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 分页查询账户列表
+		 */
+		Spark.post(new Route("/system/account/findAccountPage", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findAccountPage("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 分页查询账户明细列表
+		 */
+		Spark.post(new Route("/system/account/findAccountDetailPageByPc", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findAccountDetailPageByPc("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 分页查询账户日志
+		 */
+		Spark.post(new Route("/system/account/findAccountLogPage", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findAccountLogPage("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 分页查询提现申请列表
+		 */
+		Spark.post(new Route("/system/account/findWithdrawalPage", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findWithdrawalPage("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 查询提现设置
+		 */
+		Spark.post(new Route("/system/account/findWitSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findWitSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 修改提现设置
+		 */
+		Spark.post(new Route("/system/account/saveWitSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.saveWitSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 查询分销设置
+		 */
+		Spark.post(new Route("/system/account/findDisSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findDisSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 修改分销设置
+		 */
+		Spark.post(new Route("/system/account/saveDisSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.saveDisSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 开启提现审核
+		 */
+		Spark.post(new Route("/audit/account/beginWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.beginWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 提交提现审核
+		 */
+		Spark.post(new Route("/audit/account/commitWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.commitWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 放弃提现审核
+		 */
+		Spark.post(new Route("/audit/account/giveupWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.giveupWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 支付密码验证签名
+		 */
+		Spark.post(new Route("/shop/account/checkPwd", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.checkPwd("jdbcwrite", false, request.raw());
+			}
+		});
+		
+		//移动端
+		/**
+		 * 设置支付密码
+		 */
+		Spark.post(new Route("/mobile/account/setPwd", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.setPwd("jdbcwrite", false, request.raw());
+			}
+		});
+		/**
+		 * 支付密码验证签名
+		 */
+		Spark.post(new Route("/mobile/account/checkPwd", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.checkPwd("jdbcwrite", false, request.raw());
+			}
+		});
+		/**
+		 * 通过原密码修改支付密码
+		 */
+		Spark.post(new Route("/mobile/account/updatePwd", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.updatePwd("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 向账户绑定的手机号发送验证码，不返回验证码给前端进行js验证，安全性更高
+		 */
+		Spark.post(new Route("/mobile/account/getSmsPassCode") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.getSmsPassCode(request.raw());
+			}
+		});
+		/**
+		 * 验证验证码
+		 */
+		Spark.post(new Route("/mobile/account/checkSmsPassCode") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.checkSmsPassCode(request.raw());
+			}
+		});
+		/**
+		 * 根据entityUUID查询账户信息
+		 */
+		Spark.post(new Route("/mobile/account/findAccount", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findAccount("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 移动端分页查询账户明细列表
+		 */
+		Spark.post(new Route("/mobile/account/findAccountDetailPage", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findAccountDetailPage("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 转账签名
+		 */
+		Spark.post(new Route("/mobile/account/transferAuthen", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.transferAuthen("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 查询提现设置
+		 */
+		Spark.post(new Route("/mobile/account/findWitSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findWitSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 修改提现设置
+		 */
+		Spark.post(new Route("/mobile/account/saveWitSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.saveWitSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 查询分销设置
+		 */
+		Spark.post(new Route("/mobile/account/findDisSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.findDisSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 修改分销设置
+		 */
+		Spark.post(new Route("/mobile/account/saveDisSetting", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.saveDisSetting("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 申请提现
+		 */
+		Spark.post(new Route("/mobile/account/withdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return accountMng.withdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 分页查询提现申请列表
+		 */
+		Spark.post(new Route("/mobile/account/findWithdrawalPage", true, "jdbcread") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.findWithdrawalPage("jdbcread", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 开启提现审核
+		 */
+		Spark.post(new Route("/mobile/account/beginWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.beginWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 提交提现审核
+		 */
+		Spark.post(new Route("/mobile/account/commitWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.commitWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+		/**
+		 * 放弃提现审核
+		 */
+		Spark.post(new Route("/mobile/account/giveupWithdrawal", true, "jdbcwrite") {
+			@Override
+			public Object handle(Request request, Response response) {
+				return accountMng.giveupWithdrawal("jdbcwrite", false, request.raw(), response.raw());
+			}
+		});
+	}
+
+}

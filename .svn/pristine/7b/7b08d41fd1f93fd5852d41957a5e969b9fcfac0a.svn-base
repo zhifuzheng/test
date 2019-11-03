@@ -1,0 +1,842 @@
+package com.xryb.zhtc.manage;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.xryb.cache.service.IJedisClient;
+import com.xryb.cache.service.impl.JedisClientFastMap;
+import com.xryb.zhtc.authen.IPayAuthen;
+import com.xryb.zhtc.entity.Account;
+import com.xryb.zhtc.entity.AccountDetail;
+import com.xryb.zhtc.entity.AccountLog;
+import com.xryb.zhtc.entity.DisSetting;
+import com.xryb.zhtc.entity.UserInfo;
+import com.xryb.zhtc.entity.VipInfo;
+import com.xryb.zhtc.entity.WitSetting;
+import com.xryb.zhtc.entity.Withdrawal;
+import com.xryb.zhtc.factory.AuthenFactory;
+import com.xryb.zhtc.service.IAccountDetailService;
+import com.xryb.zhtc.service.IAccountLogService;
+import com.xryb.zhtc.service.IAccountService;
+import com.xryb.zhtc.service.IOperationLogService;
+import com.xryb.zhtc.service.IWithdrawalService;
+import com.xryb.zhtc.service.impl.AccountDetailServiceImpl;
+import com.xryb.zhtc.service.impl.AccountLogServiceImpl;
+import com.xryb.zhtc.service.impl.AccountServiceImpl;
+import com.xryb.zhtc.service.impl.OperationLogServiceImpl;
+import com.xryb.zhtc.service.impl.WithdrawalServiceImpl;
+import com.xryb.zhtc.util.DateTimeUtil;
+import com.xryb.zhtc.util.HttpEnsms;
+import com.xryb.zhtc.util.JsonUtil;
+import com.xryb.zhtc.util.MD5;
+import com.xryb.zhtc.util.ReadProperties;
+import com.xryb.zhtc.util.RegExpUtil;
+import com.xryb.zhtc.util.ReqToEntityUtil;
+import com.xryb.zhtc.util.ReqToMapUtil;
+
+import dbengine.util.Page;
+import spark.annotation.Auto;
+/**
+ * 账户管理
+ * @author wf
+ */
+@SuppressWarnings("unchecked")
+public class AccountMng {
+	
+	@Auto(name=JedisClientFastMap.class)
+	private IJedisClient jedisClient;
+	
+	@Auto(name=OperationLogServiceImpl.class)
+	private IOperationLogService opLogService;
+	
+	@Auto(name=AccountServiceImpl.class)
+	private IAccountService accountService;
+	
+	@Auto(name=AccountDetailServiceImpl.class)
+	private IAccountDetailService detailService;
+	
+	@Auto(name=WithdrawalServiceImpl.class)
+	private IWithdrawalService withdrawalService;
+	
+	@Auto(name=AccountLogServiceImpl.class)
+	private IAccountLogService logService;
+	
+	/**
+	 * 根据entityUUID修改账户状态
+	 */
+	public String upStatus(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		String accountUUID = request.getParameter("accountUUID");
+		String accountStatus = request.getParameter("accountStatus");
+		String entityUUID = request.getParameter("entityUUID");
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("accountUUID", accountUUID);
+		Map<String, String> paramsMap = new HashMap<>();
+		paramsMap.put("accountStatus", accountStatus);
+		Map<String, String> result = new HashMap<>();
+		if(accountService.updateByMap(sourceId, closeConn, paramsMap, findMap)){
+			Account account = jedisClient.getAccount(sourceId, closeConn, entityUUID);
+			if(account == null){
+				result.put("status", "-1");
+				result.put("msg", "没有查询到账户信息");
+				return JsonUtil.ObjToJson(result);
+			}
+			account.setAccountStatus(accountStatus);
+			jedisClient.setAccount(entityUUID, account);
+			
+			//重置支付密码错误次数为0
+			String allowFailCacheName = ReadProperties.getProperty("/redis.properties", "allowFailCache");
+			Map<String, String> allowFailCache = jedisClient.getCache(allowFailCacheName);
+			if(allowFailCache == null){
+				allowFailCache = new HashMap<String, String>();
+			}
+			allowFailCache.put(entityUUID, "0");
+			jedisClient.setCache(allowFailCacheName, allowFailCache);
+			result.put("status", "1");
+			result.put("msg", "更新账户状态成功");
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-2");
+		result.put("msg", "当前网络繁忙，请稍后重试");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 向账户绑定的手机号发送验证码，不返回验证码给前端验证，安全性更高
+	 */
+	public String getSmsPassCode(HttpServletRequest request) {
+		String mobile = request.getParameter("mobile");
+		Map<String,String> result = new HashMap<String,String>();
+		if(RegExpUtil.isNullOrEmpty(mobile)){
+			result.put("status", "-1");
+			result.put("msg", "请输入手机号码");
+			return JsonUtil.ObjToJson(result);
+		}
+		if(!RegExpUtil.checkMobile(mobile)){
+			result.put("status", "-2");
+			result.put("msg", "手机号码错误");
+			return JsonUtil.ObjToJson(result);
+		}
+		String passCode = createRandomVcode();
+		String sms = "【智跑时代】您的验证码为："+passCode+",请在2分钟内处理";
+		if(HttpEnsms.sendSMS(mobile, sms)){
+			//将手机验证码信息放入缓存
+			jedisClient.setSmsPassCode(mobile, passCode);
+			result.put("status", "1");
+			result.put("msg", "验证码已发送，请注意查收");
+			System.out.println(passCode);
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-3");
+		result.put("msg", "当前网络繁忙,请稍后重试");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 生成有6位随机数组成的验证码
+	 */
+	public String createRandomVcode() {
+		StringBuffer vcode = new StringBuffer();
+		for(int i = 0 ;i < 6 ;i++){
+			vcode.append((int)(Math.random() * 9));
+		}
+		return vcode.toString();
+	}
+	/**
+	 * 支付验证签名方式一
+	 * 
+	 * 通过支付密码获取签名，会记录支付密码错误的次数，当错误次数达到redis.properties中配置的次数时，调用该签名方法将不能再获取到支付签名，账号也将被冻结
+	 * 
+	 * 参数
+	 * 
+	 * entityUUID 	付款方UUID
+	 * payPwd		支付密码
+	 * payChannel	支付渠道(两个值，"app"代表是移动端，"native"代表是pc端)
+	 */
+	public String checkPwd(String sourceId, boolean closeConn, HttpServletRequest request) {
+		String entityUUID = request.getParameter("entityUUID");
+		String payPwd = request.getParameter("payPwd");
+		String payChannel = request.getParameter("payChannel");
+		Map<String, String> result = new HashMap<>();
+		
+		//验证签名参数完整性
+		if(RegExpUtil.isNullOrEmpty(entityUUID) || RegExpUtil.isNullOrEmpty(payPwd) || RegExpUtil.isNullOrEmpty(payChannel)){
+			result.put("status", "-1");
+			result.put("msg", "签名参数不完整");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		//登录验证
+		VipInfo vip = null;
+		if("native".equals(payChannel)){
+			vip = (VipInfo) request.getSession().getAttribute("vipinfo");
+		}else{
+			//验证签名
+			String code = request.getParameter("code");
+			String loginSign = request.getParameter("loginSign");
+			String loginSignCacheName = ReadProperties.getProperty("/redis.properties", "loginSignCache");
+			Map<String, String> loginSignCache = jedisClient.getCache(loginSignCacheName);
+			if(RegExpUtil.isNullOrEmpty(code) || RegExpUtil.isNullOrEmpty(loginSign) || loginSignCache == null || !loginSign.equals(loginSignCache.get(code))){
+				result.put("status", "-2");
+				result.put("msg", "登录签名验证失败");
+				return JsonUtil.ObjToJson(result);
+			}
+			loginSignCache.remove(code);
+			jedisClient.setCache(loginSignCacheName, loginSignCache);
+			String openId = loginSign.substring(32);
+			vip = jedisClient.getVipInfo(sourceId, closeConn, openId);
+		}
+		if(vip == null){
+			result.put("status", "-3");
+			result.put("msg", "登录过期");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		Account account = jedisClient.getAccount(sourceId, closeConn, entityUUID);
+		if(account == null){
+			result.put("status", "-4");
+			result.put("msg", "没有查询到账户信息");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		if(!vip.getVipUUID().equals(account.getVipUUID())){
+			result.put("status", "-5");
+			result.put("msg", "你的网络ip地址和上网实名信息将被记录，盗取资金是违法行为");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		if("0".equals(account.getAccountStatus())){
+			result.put("status", "-6");
+			result.put("msg", "账号已被锁定，请联系管理员解锁");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		if(!new MD5().getMD5ofStr(payPwd).equals(account.getPayPwd())){
+			//检验账号密码输入错误次数
+			String allowFailCacheName = ReadProperties.getProperty("/redis.properties", "allowFailCache");
+			Map<String, String> allowFailCache = jedisClient.getCache(allowFailCacheName);
+			if(allowFailCache == null){
+				allowFailCache = new HashMap<String, String>();
+			}
+			String count = allowFailCache.get(entityUUID);
+			if(RegExpUtil.isNullOrEmpty(count)){
+				count = "0";
+			}
+			Integer counter = new Integer(count);
+			counter++;
+			allowFailCache.put(entityUUID, counter.toString());
+			jedisClient.setCache(allowFailCacheName, allowFailCache);
+			
+			String allowFail = ReadProperties.getProperty("/redis.properties", "allowFail");
+			Integer failCounter = new Integer(allowFail);
+			if(counter >= failCounter){
+				Map<String, String> paramsMap = new HashMap<>();
+				paramsMap.put("accountStatus", "0");
+				Map<String, String> findMap = new HashMap<>();
+				findMap.put("entityUUID", entityUUID);
+				accountService.updateByMap(sourceId, closeConn, paramsMap, findMap);
+				account.setAccountStatus("0");
+				jedisClient.setAccount(entityUUID, account);
+				result.put("status", "-7");
+				result.put("msg", "支付密码输入错误超过"+failCounter+"次，账号已被锁定，请联系管理员解锁");
+				return JsonUtil.ObjToJson(result);
+			}
+			
+			result.put("status", "-8");
+			result.put("msg", "支付密码错误！还有"+(failCounter-counter)+"次机会，输入密码错误次数超过"+failCounter+"次账号将会被锁定");
+			return JsonUtil.ObjToJson(result);
+		}
+		//生成支付签名
+		String paySign = UUID.randomUUID().toString().replace("-", "");
+		String signCacheName = ReadProperties.getProperty("/redis.properties", "pwdSignCache");
+		Map<String, String> signCache = jedisClient.getCache(signCacheName);
+		if(signCache == null){
+			signCache = new HashMap<String, String>();
+		}
+		signCache.put(entityUUID, paySign);
+		jedisClient.setCache(signCacheName, signCache);
+		
+		result.put("status", "1");
+		result.put(entityUUID, paySign);
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 支付验证签名方式二
+	 * 
+	 * 通过手机验证码获取签名
+	 * 
+	 * 参数
+	 * 
+	 * entityUUID 	付款方UUID
+	 * mobile		账户绑定手机号码
+	 * passCode		手机验证码
+	 */
+	public String checkSmsPassCode(HttpServletRequest request) {
+		String entityUUID = request.getParameter("entityUUID");
+		String mobile = request.getParameter("mobile");
+		String passCode = request.getParameter("passCode");
+		Map<String,String> result = new HashMap<String,String>();
+		
+		if(RegExpUtil.isNullOrEmpty(entityUUID) || RegExpUtil.isNullOrEmpty(mobile) || RegExpUtil.isNullOrEmpty(passCode)){
+			result.put("status", "-1");
+			result.put("msg", "签名参数不完整");
+			return JsonUtil.ObjToJson(result);
+		}
+		Map<String, String> passCodeCache = jedisClient.getSmsPassCode(mobile);
+		if(!"1".equals(passCodeCache.get("status"))){
+			return JsonUtil.ObjToJson(passCodeCache);
+		}
+		if(!passCode.equals(passCodeCache.get("passCode"))){
+			result.put("status", "-2");
+			result.put("msg", "验证码错误");
+			return JsonUtil.ObjToJson(result);
+		}
+		//生成支付签名
+		String sign = UUID.randomUUID().toString().replace("-", "");
+		String signCacheName = ReadProperties.getProperty("/redis.properties", "pwdSignCache");
+		Map<String, String> signCache = jedisClient.getCache(signCacheName);
+		if(signCache == null){
+			signCache = new HashMap<String, String>();
+		}
+		signCache.put(entityUUID, sign);
+		jedisClient.setCache(signCacheName, signCache);
+		
+		result.put(entityUUID, sign);
+		result.put("status", "1");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 支付验证签名方式三
+	 * 
+	 * 通过自定义签名方法进行签名验证，通过则获取到签名，否则无法获取
+	 * 
+	 * 参数
+	 * 
+	 * entityUUID 	付款方UUID
+	 * authenCode	验证方法编码(通知实现类的编码，需要在包com.xryb.zhtc.authen中创建一个类，并实现IPayAuthen接口，在authen.properties配置文件中配置)
+	 * payChannel	支付渠道(两个值，"app"代表是移动端，"native"代表是pc端)
+	 */
+	public String transferAuthen(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		String entityUUID = request.getParameter("entityUUID");
+		String authenCode = request.getParameter("authenCode");
+		String payChannel = request.getParameter("payChannel");
+		
+		Map<String, String> result = new HashMap<>();
+		
+		//验证签名参数完整性
+		if(RegExpUtil.isNullOrEmpty(entityUUID) || RegExpUtil.isNullOrEmpty(authenCode) || RegExpUtil.isNullOrEmpty(payChannel)){
+			result.put("status", "-1");
+			result.put("msg", "签名参数不完整");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		VipInfo vip = null;
+		//登录验证
+		if("native".equals(payChannel)){
+			vip = (VipInfo) request.getSession().getAttribute("vipinfo");
+		}else{
+			String openId = request.getParameter("openId");
+			vip = jedisClient.getVipInfo(sourceId, closeConn, openId);
+		}
+		if(vip == null){
+			result.put("status", "-1");
+			result.put("msg", "登录过期");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("entityUUID", entityUUID);
+		Account account = accountService.findByMap(sourceId, closeConn, findMap);
+		if(account == null){
+			result.put("status", "-2");
+			result.put("msg", "没有查询到账户信息！");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		try {
+			String className = ReadProperties.getProperty("/authen.properties", authenCode);
+			IPayAuthen payAuthen = AuthenFactory.genSingleAuthen(className);
+			if(!payAuthen.authen(sourceId, closeConn, entityUUID, vip.getVipUUID())){
+				result.put("status", "-3");
+				result.put("msg", "未通过验证方法！");
+				return JsonUtil.ObjToJson(result);
+			}
+		} catch (Exception e) {
+			result.put("status", "-3");
+			result.put("msg", "未通过验证方法！");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		//生成支付签名
+		String sign = UUID.randomUUID().toString().replace("-", "");
+		String signCacheName = ReadProperties.getProperty("/redis.properties", "signCache");
+		Map<String, String> signCache = jedisClient.getCache(signCacheName);
+		if(signCache == null){
+			signCache = new HashMap<String, String>();
+		}
+		signCache.put(vip.getVipUUID(), sign);
+		//兼容redis
+		jedisClient.setCache(signCacheName, signCache);
+		
+		result.put("status", "1");
+		result.put(vip.getVipUUID(), sign);
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 通过签名修改支付密码
+	 */
+	public String updatePwd(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		String entityUUID = request.getParameter("entityUUID");
+		String payPwd = request.getParameter("payPwd");
+		String sign = request.getParameter("sign");
+		Map<String, String> result = new HashMap<>();
+		if(RegExpUtil.isNullOrEmpty(entityUUID)){
+			result.put("status", "-1");
+			result.put("msg", "实体信息不能为空！");
+			return JsonUtil.ObjToJson(result);
+		}
+		if(RegExpUtil.isNullOrEmpty(payPwd)){
+			result.put("status", "-2");
+			result.put("msg", "新密码不能为空！");
+			return JsonUtil.ObjToJson(result);
+		}
+		if(RegExpUtil.isNullOrEmpty(sign)){
+			result.put("status", "-3");
+			result.put("msg", "签名信息不能为空！");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("entityUUID", entityUUID);
+		Account account = accountService.findByMap(sourceId, closeConn, findMap);
+		if(account == null){
+			result.put("status", "-4");
+			result.put("msg", "没有查询到账户信息！");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		//获取签名并验证，然后移除使用过的签名信息，重置支付密码错误次数为0
+		String signCacheName = ReadProperties.getProperty("/redis.properties", "pwdSignCache");
+		Map<String, String> signCache = jedisClient.getCache(signCacheName);
+		if(signCache == null || !sign.equals(signCache.get(entityUUID))){
+			result.put("status", "-5");
+			result.put("msg", "签名验证失败！");
+			return JsonUtil.ObjToJson(result);
+		}
+		signCache.remove(entityUUID);
+		jedisClient.setCache(signCacheName, signCache);
+		String allowFailCacheName = ReadProperties.getProperty("/redis.properties", "allowFailCache");
+		Map<String, String> allowFailCache = jedisClient.getCache(allowFailCacheName);
+		if(allowFailCache == null){
+			allowFailCache = new HashMap<String, String>();
+		}
+		allowFailCache.put(entityUUID, "0");
+		jedisClient.setCache(allowFailCacheName, allowFailCache);
+			
+		Map<String, String> paramsMap = new HashMap<>();
+		paramsMap.put("payPwd", new MD5().getMD5ofStr(payPwd));
+		if(accountService.updateByMap(sourceId, closeConn, paramsMap, findMap)){
+			result.put("status", "1");
+			result.put("msg", "修改支付密码成功");
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-6");
+		result.put("msg", "当前网络繁忙，请稍后重试！");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 根据entityUUID查询账户信息
+	 */
+	public String findAccount(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception{
+		//验证登录
+		String openId = request.getParameter("openId");
+		VipInfo vip = jedisClient.getVipInfo(sourceId, closeConn, openId);
+		Map<String, Object> result = new HashMap<>();
+		if(vip == null){
+			result.put("status", "-1");
+			result.put("msg", "未授权登录");
+			return JsonUtil.ObjToJson(result);
+		}
+		//获取请求参数并验证
+		String accountType = request.getParameter("accountType");
+		String entityUUID = request.getParameter("entityUUID");
+		String entityName = request.getParameter("entityName");
+		String mobile = request.getParameter("mobile");
+		if(RegExpUtil.isNullOrEmpty(accountType) || RegExpUtil.isNullOrEmpty(entityUUID) || RegExpUtil.isNullOrEmpty(entityName) || RegExpUtil.isNullOrEmpty(mobile)){
+			result.put("status", "-1");
+			result.put("msg", "查询参数不完整");
+			return JsonUtil.ObjToJson(result);
+		}
+		//查询账户信息
+		Account account = jedisClient.getAccount(sourceId, closeConn, entityUUID);
+		if(account == null){
+			account = jedisClient.newAccount(sourceId, closeConn, accountType, entityUUID, entityName, mobile, vip.getVipUUID());
+		}
+		result.put("status", "1");
+		result.put("account", account);
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * pc端根据entityUUID查询账户信息
+	 */
+	public String findAccountByPc(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception{
+		String accountUUID = request.getParameter("accountUUID");
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("accountUUID", accountUUID);
+		Account account = accountService.findByMap(sourceId, closeConn, findMap);
+		return JsonUtil.ObjToJson(account);
+	}
+	/**
+	 * 分页查询账户列表
+	 */
+	public String findAccountPage(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, Account.class);
+		String currentPage = request.getParameter("page");
+		String rows = request.getParameter("rows");
+		Page page = new Page();
+		page.setPage(Long.valueOf(currentPage));
+		page.setPageRecord(Long.valueOf(rows));
+		String order = request.getParameter("order");
+		accountService.findPageByMap(sourceId, closeConn, page , findMap, order);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("total", page.getTotalRecord());
+		List<Account> accountList = (List<Account>) page.getRows();
+		if(accountList != null){
+			result.put("rows", accountList);
+		}else{
+			result.put("rows", new ArrayList<Account>());
+		}
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * pc端分页查询账户明细列表
+	 */
+	public String findAccountDetailPageByPc(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, AccountDetail.class);
+		String currentPage = request.getParameter("page");
+		String rows = request.getParameter("rows");
+		Page page = new Page();
+		page.setPage(Long.valueOf(currentPage));
+		page.setPageRecord(Long.valueOf(rows));
+		String order = "createTime desc";
+		detailService.findPageByMap(sourceId, closeConn, page, findMap, order);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("total", page.getTotalRecord());
+		result.put("totalPage", page.getTotalPage());
+		List<AccountDetail> accountDetailList = (List<AccountDetail>) page.getRows();
+		if(accountDetailList != null){
+			result.put("rows", accountDetailList);
+		}else{
+			result.put("rows", new ArrayList<AccountDetail>());
+		}
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 移动端分页查询账户明细列表
+	 */
+	public String findAccountDetailPage(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		//验证登录
+		String openId = request.getParameter("openId");
+		VipInfo vip = jedisClient.getVipInfo(sourceId, closeConn, openId);
+		Map<String, Object> result = new HashMap<>();
+		if(vip == null){
+			result.put("status", "-1");
+			result.put("msg", "未授权登录");
+			return JsonUtil.ObjToJson(result);
+		}
+		
+		String accountUUID = request.getParameter("accountUUID");
+		Map<String, String> findMap = new HashMap<>();
+		findMap.put("accountUUID", accountUUID);
+		String currentPage = request.getParameter("page");
+		String rows = request.getParameter("rows");
+		Page page = new Page();
+		page.setPage(Long.valueOf(currentPage));
+		page.setPageRecord(Long.valueOf(rows));
+		String order = request.getParameter("order");
+		detailService.findPageByMap(sourceId, closeConn, page, findMap, order);
+		result.put("total", page.getTotalRecord());
+		result.put("totalPage", page.getTotalPage());
+		List<AccountDetail> accountDetailList = (List<AccountDetail>) page.getRows();
+		if(accountDetailList != null){
+			result.put("rows", accountDetailList);
+		}else{
+			result.put("rows", new ArrayList<AccountDetail>());
+		}
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 分页查询账户日志
+	 */
+	public String findAccountLogPage(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, AccountLog.class);
+		String currentPage = request.getParameter("page");
+		String rows = request.getParameter("rows");
+		Page page = new Page();
+		page.setPage(Long.valueOf(currentPage));
+		page.setPageRecord(Long.valueOf(rows));
+		String order = "createTime desc";
+		logService.findPageByMap(sourceId, closeConn, page, findMap, order);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("total", page.getTotalRecord());
+		List<AccountLog> accountLogList = (List<AccountLog>) page.getRows();
+		if(accountLogList != null){
+			result.put("rows", accountLogList);
+		}else{
+			result.put("rows", new ArrayList<AccountLog>());
+		}
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 申请提现
+	 */
+	public String withdrawal(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Withdrawal wit = (Withdrawal) ReqToEntityUtil.reqToEntity(request, Withdrawal.class);
+		
+		//验证支付签名
+		String paySign = request.getParameter("paySign");
+		String entityUUID = wit.getEntityUUID();
+		String signCacheName = ReadProperties.getProperty("/redis.properties", "pwdSignCache");
+		Map<String, String> signCache = jedisClient.getCache(signCacheName);
+		Map<String, String> result = new HashMap<>();
+		if(RegExpUtil.isNullOrEmpty(paySign) || signCache == null || !paySign.equals(signCache.get(entityUUID))){
+			result.put("status", "-1");
+			result.put("msg", "支付签名失败");
+			return JsonUtil.ObjToJson(result);
+		}
+		signCache.remove(entityUUID);
+		jedisClient.setCache(signCacheName, signCache);
+		
+		Lock lock = jedisClient.getEntityLock(entityUUID);
+		lock.lock();
+		try {
+			Account account = jedisClient.getAccount(sourceId, closeConn, entityUUID);
+			String witJson = jedisClient.getWitSetting(sourceId, closeConn);
+			WitSetting witSetting = (WitSetting) JsonUtil.JsonToObj(witJson, WitSetting.class);
+			Integer min = witSetting.getBusMin();
+			Double ratio = witSetting.getBusRatio();
+			String accountType = account.getAccountType();
+			if ("3".equals(accountType)) {
+				min = witSetting.getDisMin();
+				ratio = witSetting.getDisRatio();
+			}
+			if (wit.getPayment() < min) {
+				result.put("status", "-2");
+				result.put("msg", "最低提现金额为" + (min / 100.00) + "元");
+				return JsonUtil.ObjToJson(result);
+			}
+			if (account.getAccountBalance() < wit.getPayment()) {
+				result.put("status", "-3");
+				result.put("msg", "账户余额不足");
+				return JsonUtil.ObjToJson(result);
+			}
+			Integer payment = (int) (wit.getPayment() + Math.ceil(wit.getPayment() * ratio));
+			if (account.getAccountBalance() < payment) {
+				result.put("status", "-4");
+				result.put("msg", "提现手续费为" + (wit.getPayment() * ratio / 100.00));
+				return JsonUtil.ObjToJson(result);
+			}
+			//生成提现方账户明细
+			AccountDetail detail = new AccountDetail();
+			detail.setAccountUUID(account.getAccountUUID());
+			detail.setOrderNo(null);
+			detail.setDetailType("2");//收支类型：1收入，2支出
+			detail.setMoney(-payment);
+			detail.setDetailSource("4");//明细来源：1充值消费，2购物消费，3进货，4提现，5商家退款，6分销商退款，7交易收入，8其他，默认值为2
+			detail.setPayChannel("0");//支付渠道：0余额，1微信
+			detail.setPayerUUID(wit.getPersonUUID());
+			detail.setPayerName(wit.getPersonName());
+			detail.setPayerLogo(wit.getPersonLogo());
+			detailService.saveOrUpdate(sourceId, closeConn, detail);
+			account.setAccountBalance(account.getAccountBalance() - payment);
+			account.setAccountExpend(account.getAccountExpend() + payment);
+			accountService.saveOrUpdate(sourceId, closeConn, account);
+			//生成提现申请
+			wit.setWithdrawalUUID(UUID.randomUUID().toString().replaceAll("-", ""));
+			withdrawalService.saveOrUpdate(sourceId, closeConn, wit);
+		} finally {
+			lock.unlock();
+		}
+		
+		result.put("status", "1");
+		result.put("msg", "提现申请提交成功");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 分页查询提现申请列表
+	 */
+	public String findWithdrawalPage(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response){
+		Map<String, String> findMap = ReqToMapUtil.reqToMap(request, Withdrawal.class);
+		String currentPage = request.getParameter("page");
+		String rows = request.getParameter("rows");
+		Page page = new Page();
+		page.setPage(Long.valueOf(currentPage));
+		page.setPageRecord(Long.valueOf(rows));
+		String order = "createTime desc";
+		withdrawalService.findPageByMap(sourceId, closeConn, page, findMap, order);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("total", page.getTotalRecord());
+		result.put("totalPage", page.getTotalPage());
+		List<Withdrawal> withdrawalList = (List<Withdrawal>) page.getRows();
+		if(withdrawalList != null){
+			result.put("rows", withdrawalList);
+		}else{
+			result.put("rows", new ArrayList<Withdrawal>());
+		}
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 开启提现审核
+	 */
+	public String beginWithdrawal(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		//验证用户登录是否过期
+		Map<String, String> result = new HashMap<String, String>();
+		UserInfo user = (UserInfo) request.getSession().getAttribute("userinfo");
+		if(user == null){
+			result.put("status", "-1");
+			result.put("msg", "未授权登录");
+			return JsonUtil.ObjToJson(result);
+		}
+		//查看审核任务是否被领取
+		Map<String, String> findMap = new HashMap<String, String>();
+		String withdrawalUUID = request.getParameter("withdrawalUUID");
+		findMap.put("withdrawalUUID", withdrawalUUID);
+		Withdrawal withdrawal = withdrawalService.findByMap(sourceId, closeConn, findMap);
+		if(!"1".equals(withdrawal.getAuditStatus()) && !"2".equals(withdrawal.getAuditStatus())){
+			result.put("status", "-2");
+			result.put("msg", "当前状态不是待审核状态，不能领取审核任务！");
+			return JsonUtil.ObjToJson(result);
+		}
+		if("2".equals(withdrawal.getAuditStatus())){
+			if(!user.getUserUUID().equals(withdrawal.getAuditorUUID())){
+				result.put("status", "-3");
+				result.put("msg", "此审核任务已被"+withdrawal.getAuditorName()+"领取！");
+				return JsonUtil.ObjToJson(result);
+			}
+		}
+		//将需要更新的字段封装进paramsMap中
+		Map<String, String> paramsMap = new HashMap<String, String>();
+		paramsMap.put("auditorUUID", user.getUserUUID());
+		paramsMap.put("auditorName", user.getLoginName());
+		paramsMap.put("auditStatus", "2");//审核状态：1待审核，2审核中，3审核通过，4审核不通过
+		paramsMap.put("auditTime", DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));
+		if(withdrawalService.updateByMap(sourceId, closeConn, paramsMap, findMap)){//更新提现信息表
+			result .put("status", "1");
+			result.put("msg", "开启审核成功");
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-4");
+		result.put("msg", "当前网络繁忙，请稍后重试！");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 提交提现审核
+	 */
+	public String commitWithdrawal(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		//验证用户登录是否过期
+		Map<String, String> result = new HashMap<String, String>();
+		UserInfo user = (UserInfo) request.getSession().getAttribute("userinfo");
+		if(user == null){
+			result.put("status", "-410");
+			result.put("msg", "登录过期");
+			return JsonUtil.ObjToJson(result);
+		}
+		//查看审核任务是否被领取
+		Map<String, String> findMap = new HashMap<String, String>();
+		String withdrawalUUID = request.getParameter("withdrawalUUID");
+		findMap.put("withdrawalUUID", withdrawalUUID);
+		Withdrawal withdrawal = withdrawalService.findByMap(sourceId, closeConn, findMap);
+		if(!"2".equals(withdrawal.getAuditStatus())){
+			result.put("status", "-2");
+			result.put("msg", "当前状态不是待审中状态，不能提交审核任务！");
+			return JsonUtil.ObjToJson(result);
+		}
+		if(!user.getUserUUID().equals(withdrawal.getAuditorUUID())){
+			result.put("status", "-3");
+			result.put("msg", "此审核任务已被"+withdrawal.getAuditorName()+"领取！");
+			return JsonUtil.ObjToJson(result);
+		}
+		//将需要更新的字段封装进paramsMap中
+		Map<String, String> paramsMap = new HashMap<>();
+		String auditStatus = request.getParameter("auditStatus");//审核状态：1待审核，2审核中，3审核通过，4审核不通过
+		String auditorOpinion = request.getParameter("auditorOpinion");
+		paramsMap.put("auditStatus", auditStatus);
+		paramsMap.put("auditorOpinion", auditorOpinion);
+		paramsMap.put("auditTime", DateTimeUtil.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"));
+		if(withdrawalService.updateByMap(sourceId, closeConn, paramsMap, findMap)){//更新提现信息表
+			result.put("status", "1");
+			result.put("msg", "审核提交成功");
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-4");
+		result.put("msg", "当前网络繁忙，请稍后重试！");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 放弃提现审核任务
+	 */
+	public String giveupWithdrawal(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) {
+		//验证用户登录是否过期
+		Map<String, String> result = new HashMap<String, String>();
+		UserInfo user = (UserInfo) request.getSession().getAttribute("userinfo");
+		if(user == null){
+			result.put("status", "-410");
+			result.put("msg", "登录过期");
+			return JsonUtil.ObjToJson(result);
+		}
+		//查询当前用户审核任务
+		Map<String, String> findMap = new HashMap<String, String>();
+		findMap.put("auditorUUID", user.getUserUUID());
+		findMap.put("auditStatus", "2");//审核状态：1待审核，2审核中，3审核通过，4审核不通过
+		List<Withdrawal> withdrawals = withdrawalService.findListByMap(sourceId, closeConn, findMap, null);
+		if(withdrawals == null || withdrawals.size() == 0){
+			result.put("status", "-1");
+			result.put("msg", "没有需要放弃的任务！");
+			return JsonUtil.ObjToJson(result);
+		}
+		//将需要更新的字段封装进paramsMap中
+		Map<String, String> paramsMap = new HashMap<String, String>();
+		paramsMap.put("auditStatus", "1");
+		if(withdrawalService.updateByMap(sourceId, closeConn, paramsMap, findMap)){//更新资质认证信息表审核状态
+			result.put("status", "1");
+			result.put("msg", "已放弃所有未审核的任务！");
+			return JsonUtil.ObjToJson(result);
+		}
+		result.put("status", "-2");
+		result.put("msg", "当前网络繁忙，请稍后重试！");
+		return JsonUtil.ObjToJson(result);
+	}
+	/**
+	 * 查询提现设置
+	 */
+	public String findWitSetting(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return jedisClient.getWitSetting(sourceId, closeConn);
+	}
+	/**
+	 * 修改提现设置
+	 */
+	public boolean saveWitSetting(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		WitSetting setting = (WitSetting) ReqToEntityUtil.reqToEntity(request, WitSetting.class);
+		return jedisClient.setWitSetting(sourceId, closeConn, setting);
+	}
+	/**
+	 * 查询分销设置
+	 */
+	public String findDisSetting(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return jedisClient.getDisSetting(sourceId, closeConn);
+	}
+	/**
+	 * 修改分销设置
+	 */
+	public boolean saveDisSetting(String sourceId, boolean closeConn, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		DisSetting setting = (DisSetting) ReqToEntityUtil.reqToEntity(request, DisSetting.class);
+		return jedisClient.setDisSetting(sourceId, closeConn, setting);
+	}
+	
+
+}

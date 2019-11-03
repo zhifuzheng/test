@@ -1,0 +1,26 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ page import="com.xryb.zp.util.Uploader" %>
+<%@page import="com.xryb.zp.util.ReadProperties"%>
+    <%   
+    try{
+    request.setCharacterEncoding("utf-8");
+	response.setCharacterEncoding("utf-8");
+	String folder_url = request.getParameter("folder_url");
+    Uploader up = new Uploader(request);
+    
+    up.setSavePath(folder_url);
+       
+    String[] fileType = {".gif" , ".png" , ".jpg" , ".jpeg" , ".bmp"};
+    up.setAllowFiles(fileType);
+    up.setMaxSize(10000); //单位KB
+    up.upload();
+    String url = up.getUrl();
+    
+    url = ReadProperties.getValue("serverAccessIP") + ReadProperties.getValue("imgVisitPath") + url;//文件访问路径
+    
+    response.getWriter().print("{'original':'"+up.getOriginalName()+"','url':'"+url+"','title':'"+up.getTitle()+"','state':'"+up.getState()+"'}");
+    System.out.println("{'original':'"+up.getOriginalName()+"','url':'"+url+"','title':'"+up.getTitle()+"','state':'"+up.getState()+"'}");
+    } catch(Exception e) {
+    	e.printStackTrace();
+    }
+    %>

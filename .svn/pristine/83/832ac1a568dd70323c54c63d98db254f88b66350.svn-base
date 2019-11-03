@@ -1,0 +1,83 @@
+package com.xryb.zhtc.dto;
+
+import java.io.Serializable;
+
+/**
+ * 提现协议数据传输对象
+ * @author wf
+ */
+public class WithdrawalDto implements Serializable {
+	
+	private static final long serialVersionUID = 1865799157379508161L;
+
+	private String entityUUID;//提现方UUID
+	
+	private String entityName;//提现方名称
+	
+	private Integer payment;//提现金额(单位为分的正整数)
+	
+	private String payPwd;//支付密码  
+	
+	private String bankcardNumber;//提现银行卡号
+	
+	private String payChannel;//提现渠道，"app"代表是移动端，"native"代表是pc端
+	
+	private String sign;//支付签名
+
+	public String getEntityUUID() {
+		return entityUUID;
+	}
+
+	public void setEntityUUID(String entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public Integer getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Integer payment) {
+		this.payment = payment;
+	}
+
+	public String getPayPwd() {
+		return payPwd;
+	}
+
+	public void setPayPwd(String payPwd) {
+		this.payPwd = payPwd;
+	}
+
+	public String getBankcardNumber() {
+		return bankcardNumber;
+	}
+
+	public void setBankcardNumber(String bankcardNumber) {
+		this.bankcardNumber = bankcardNumber;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+}
